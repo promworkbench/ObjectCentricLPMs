@@ -1,5 +1,5 @@
 <ivy-module version="2.0">
-    <info organisation="prom" module="GettingStarted" revision="latest">
+    <info organisation="prom" module="OCLPMs" revision="latest">
     	<description>
     		Version VERSION
     	</description>
