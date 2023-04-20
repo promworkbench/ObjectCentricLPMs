@@ -1,8 +1,11 @@
+
 # ProM package for the discovery of OCLPMs
+
 Master thesis by Marvin Porsil\
 OCLMPs = object-centric local process models
 
 ## Initial thesis description
+
 Discovery of Object-Centric Local Process Models (M.Sc.)
 Supervisor: Viki Peeva (peeva@pads.rwth-aachen.de)
 
@@ -13,10 +16,20 @@ Concurrently the idea of object-centric event logs emerged, where instead of con
 Although multiple approaches exist for discovering local process models from event logs, none can build local process models from object-centric event logs. The goal of this thesis is to create an algorithm that, given an object-centric event log, will discover and return object-centric local process models. In addition to the algorithm, a user friendly and fully functional UI is required.
 
 ## Concept
+
 TODO
 
 ## How to use
+
 ### Setup
-TODO
+
+1. Clone this git repository
+2. Import it as a java project with the name "**OCLPMs**"
+3. Set the JRE System Library to jdk 8
+4. Set the Java compiler compliance level to 1.8
+5. If necessary, install ivy extension and let it resolve ivy dependencies
+6. Run ProM using the *ProM with UITopia (OCLPMs).launch* file
+
 ### Usage of this package itself
+
 TODO
