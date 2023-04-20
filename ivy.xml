@@ -15,6 +15,7 @@
     	<dependency org="prom" name="ProM-Plugins" rev="latest" changing="true" transitive="true" />
     	<!-- ProM packages. -->
     	<!--dependency org="prom" name="BasicUtils" rev="latest" changing="true" transitive="true" /-->
+    	<dependency org="prom" name="OCELStandard" rev="latest" changing="true" transitive="true" />
     	<!-- Third party libraries. These may span multiple lines. -->
     	<!-- Please uncomment the second line in the resolve target in your build.xml file
     	     if you have any third party libraries. -->

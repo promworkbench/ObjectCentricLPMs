@@ -28,7 +28,7 @@ public class HelloWorld10 {
 	}
 
 	@PluginVariant(variantLabel = "My original hello world", requiredParameterLabels = {})
-	@UITopiaVariant(uiLabel = "My original hello world", affiliation = "My company", author = "Marvin Porsil", email = "My e-mail address")
+	@UITopiaVariant(uiLabel = "My original hello world", affiliation = "My company", author = "My name", email = "My e-mail address")
 	public String helloWorld(PluginContext context) {
 		return "Hello World";
 	}
