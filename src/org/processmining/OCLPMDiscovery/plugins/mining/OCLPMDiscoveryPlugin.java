@@ -1,14 +1,20 @@
 package org.processmining.OCLPMDiscovery.plugins.mining;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.deckfour.xes.model.XLog;
 import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
+import org.processmining.OCLPMDiscovery.plugins.mining.wizards.OCLPMDiscoveryWizard;
+import org.processmining.OCLPMDiscovery.plugins.mining.wizards.steps.OCLPMDiscoverySettingsStep;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
+import org.processmining.framework.util.ui.wizard.ProMWizardDisplay;
+import org.processmining.framework.util.ui.wizard.ProMWizardStep;
 import org.processmining.ocel.flattening.Flattening;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
 
@@ -60,6 +66,8 @@ public class OCLPMDiscoveryPlugin {
 			requiredParameterLabels = {0}
 	)
 	public static OCLPMResult mineOCLPMs(PluginContext context, OcelEventLog ocel) {
+		Main.setUp(context);
+		
 		// get object types
 		Set<String> objectTypes = ocel.getObjectTypes();
 		
@@ -67,6 +75,17 @@ public class OCLPMDiscoveryPlugin {
 		Set<String> selectedObjectTypes = objectTypes;
 		
 		// let user select object types to use as leading types for process executions
+		
+		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters();
+
+		// show wizard
+		Map<String, ProMWizardStep<OCLPMDiscoveryParameters>> stepMap = new HashMap<>();
+		stepMap.put(OCLPMDiscoveryWizard.INITIAL_KEY, new OCLPMDiscoverySettingsStep());
+		OCLPMDiscoveryWizard wizard = new OCLPMDiscoveryWizard(stepMap, true);
+		parameters = ProMWizardDisplay.show(context, wizard, parameters);
+
+		if (parameters == null)
+			return null;
 		
 		// let user select parameters for LPM discovery
 		
