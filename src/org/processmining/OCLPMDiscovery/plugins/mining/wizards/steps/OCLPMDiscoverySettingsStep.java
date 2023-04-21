@@ -1,7 +1,8 @@
 package org.processmining.OCLPMDiscovery.plugins.mining.wizards.steps;
 
+import java.util.HashSet;
+
 import javax.swing.DefaultListModel;
-import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 
 import org.processmining.OCLPMDiscovery.plugins.mining.OCLPMDiscoveryParameters;
@@ -14,19 +15,28 @@ public class OCLPMDiscoverySettingsStep extends ProMPropertiesPanel implements P
 	private static final String TITLE = "OCLPM Discovery Settings";
 	
 	ProMList<String> list_TypesPlaceNets;
+	ProMList<String> list_LeadingTypes;
 	DefaultListModel<String> objectTypesList = new DefaultListModel<String>();
-	JCheckBox testCheckBox;
 
-    public OCLPMDiscoverySettingsStep() {
+    public OCLPMDiscoverySettingsStep(OCLPMDiscoveryParameters parameters) {
         super(TITLE);
         
-        //TODO scrollable list with all object types where each can be ticked off or on
-        
-        objectTypesList.addElement("Testety test test");
+        // list all object types
+        for (String curType : parameters.getObjectTypesAll()) {
+        	objectTypesList.addElement(curType);
+        }        
 		
-        this.list_TypesPlaceNets = addProperty("Object Types for Place Nets", new ProMList<String>("",objectTypesList));
+        // scrollable list with all object types where each can be ticked off or on
+        this.list_TypesPlaceNets = addProperty("Place Nets", new ProMList<String>("Select Object Types for Place Net Discovery",objectTypesList));
+        this.list_LeadingTypes = addProperty("Process Executions", new ProMList<String>("Select Object Types used as Leading Types",objectTypesList));
         
-        this.testCheckBox = addCheckBox("Testbox");
+        // set initial state to be all selected
+        int start = 0;
+        int end = this.list_TypesPlaceNets.getList().getModel().getSize() - 1;
+        if (end >= 0) {
+        	this.list_TypesPlaceNets.getList().setSelectionInterval(start, end);
+        	this.list_LeadingTypes.getList().setSelectionInterval(start, end);
+        }
     }
 
     @Override
@@ -34,7 +44,8 @@ public class OCLPMDiscoverySettingsStep extends ProMPropertiesPanel implements P
         if (!canApply(parameters, jComponent)) {
             return parameters;
         }
-        
+        parameters.setObjectTypesPlaceNets(new HashSet<String>(list_TypesPlaceNets.getSelectedValuesList()));
+        parameters.setObjectTypesLeadingTypes(new HashSet<String>(list_LeadingTypes.getSelectedValuesList()));
         return parameters;
     }
 

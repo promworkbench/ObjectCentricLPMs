@@ -80,7 +80,7 @@ public class OCLPMDiscoveryPlugin {
 
 		// show wizard
 		Map<String, ProMWizardStep<OCLPMDiscoveryParameters>> stepMap = new HashMap<>();
-		stepMap.put(OCLPMDiscoveryWizard.INITIAL_KEY, new OCLPMDiscoverySettingsStep());
+		stepMap.put(OCLPMDiscoveryWizard.INITIAL_KEY, new OCLPMDiscoverySettingsStep(parameters));
 		OCLPMDiscoveryWizard wizard = new OCLPMDiscoveryWizard(stepMap, true);
 		parameters = ProMWizardDisplay.show(context, wizard, parameters);
 
@@ -89,8 +89,8 @@ public class OCLPMDiscoveryPlugin {
 		
 		// let user select parameters for LPM discovery
 		
-		// for each object type
-		for (String currentType : selectedObjectTypes) {
+		// place net discovery
+		for (String currentType : parameters.getObjectTypesPlaceNets()) {
 			// flatten ocel
 			XLog flatLog = Flattening.flatten(ocel, currentType);
 			System.out.println("Flattened ocel for type "+currentType);
