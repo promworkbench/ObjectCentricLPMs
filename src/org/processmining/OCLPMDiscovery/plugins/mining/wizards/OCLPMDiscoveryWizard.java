@@ -1,13 +1,14 @@
 package org.processmining.OCLPMDiscovery.plugins.mining.wizards;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import org.processmining.OCLPMDiscovery.plugins.mining.OCLPMDiscoveryParameters;
 import org.processmining.framework.util.ui.wizard.MapWizard;
 import org.processmining.framework.util.ui.wizard.ProMWizardStep;
 
-public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, String>{
+public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, String> {
 
 	public static final String INITIAL_KEY = "OCLPMDiscoveryParameters";
 	
@@ -21,19 +22,19 @@ public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, St
 	@Override
 	public Collection<String> getFinalKeys(MapModel<OCLPMDiscoveryParameters, String> currentWizardModel) {
 		// TODO Auto-generated method stub
-		return null;
+		return Collections.singletonList(OCLPMDiscoveryWizard.INITIAL_KEY);
 	}
 
 	@Override
 	public String getInitialKey(OCLPMDiscoveryParameters settings) {
 		// TODO Auto-generated method stub
-		return null;
+		return OCLPMDiscoveryWizard.INITIAL_KEY;
 	}
 
 	@Override
 	public String getNextKey(MapModel<OCLPMDiscoveryParameters, String> currentWizardModel) {
 		// TODO Auto-generated method stub
-		return null;
+		return OCLPMDiscoveryWizard.INITIAL_KEY;
 	}
 
 }

@@ -9,6 +9,7 @@ import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.plugins.mining.wizards.OCLPMDiscoveryWizard;
 import org.processmining.OCLPMDiscovery.plugins.mining.wizards.steps.OCLPMDiscoverySettingsStep;
+import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.annotations.Plugin;
@@ -65,18 +66,17 @@ public class OCLPMDiscoveryPlugin {
 			variantLabel = "Object-Centric Local Process Model Discovery",
 			requiredParameterLabels = {0}
 	)
-	public static OCLPMResult mineOCLPMs(PluginContext context, OcelEventLog ocel) {
+	public static OCLPMResult mineOCLPMs(UIPluginContext context, OcelEventLog ocel) {
 		Main.setUp(context);
 		
 		// get object types
 		Set<String> objectTypes = ocel.getObjectTypes();
+		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(objectTypes);
 		
 		// let user select object types for which to discover place nets
 		Set<String> selectedObjectTypes = objectTypes;
 		
-		// let user select object types to use as leading types for process executions
-		
-		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters();
+		// let user select object types to use as leading types for process executions		
 
 		// show wizard
 		Map<String, ProMWizardStep<OCLPMDiscoveryParameters>> stepMap = new HashMap<>();
