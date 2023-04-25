@@ -98,11 +98,12 @@ public class OCLPMDiscoveryPlugin {
 			// flatten ocel
 			XLog flatLog = Flattening.flatten(ocel, currentType);
 			System.out.println("Flattened ocel for type "+currentType);
-			// TODO discover petri net using est-miner (use specpp)
 			
-			// TODO split petri net into place nets
-			
-			// TODO tag places with current object type
+			// discover petri net using est-miner (use specpp)
+			// split petri net into place nets
+			// tag places with current object type
+//			FlatLogProcessing.processFlatLog(context, flatLog, currentType, parameters); //TODO
+			FlatLogProcessing.discoverPetriNet(context, flatLog, parameters); // current workaround
 		}
 		
 		// TODO unite place nets
@@ -130,4 +131,6 @@ public class OCLPMDiscoveryPlugin {
 	
 	// variant skipping the place net discovery and process execution computation
 	//TODO: variant with input (ocel, set(set(place net),object type), (log,set(column names)))
+	
+	// TODO all variants without UI
 }
