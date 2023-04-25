@@ -7,8 +7,9 @@ import java.util.Set;
 import org.deckfour.xes.model.XLog;
 import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
-import org.processmining.OCLPMDiscovery.plugins.mining.wizards.OCLPMDiscoveryWizard;
-import org.processmining.OCLPMDiscovery.plugins.mining.wizards.steps.OCLPMDiscoverySettingsStep;
+import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
+import org.processmining.OCLPMDiscovery.wizards.OCLPMDiscoveryWizard;
+import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoverySettingsStep;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.plugin.PluginContext;
@@ -73,47 +74,55 @@ public class OCLPMDiscoveryPlugin {
 		Set<String> objectTypes = ocel.getObjectTypes();
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(objectTypes);
 		
-		// let user select object types for which to discover place nets
-		Set<String> selectedObjectTypes = objectTypes;
-		
-		// let user select object types to use as leading types for process executions		
 
-		// show wizard
 		Map<String, ProMWizardStep<OCLPMDiscoveryParameters>> stepMap = new HashMap<>();
+		
+		// let user select object types for which to discover place nets
+		// let user select object types to use as leading types for process executions		
 		stepMap.put(OCLPMDiscoveryWizard.INITIAL_KEY, new OCLPMDiscoverySettingsStep(parameters));
+		
+		// TODO let user select parameters for Place Net discovery
+		
+		// TODO let user select parameters for LPM discovery
+		
 		OCLPMDiscoveryWizard wizard = new OCLPMDiscoveryWizard(stepMap, true);
+		
+		// show wizard
 		parameters = ProMWizardDisplay.show(context, wizard, parameters);
 
 		if (parameters == null)
-			return null;
-		
-		// let user select parameters for LPM discovery
+			return null;		
 		
 		// place net discovery
 		for (String currentType : parameters.getObjectTypesPlaceNets()) {
 			// flatten ocel
 			XLog flatLog = Flattening.flatten(ocel, currentType);
 			System.out.println("Flattened ocel for type "+currentType);
-			// discover place nets
+			// TODO discover petri net using est-miner (use specpp)
 			
-			// tag places with current object type
+			// TODO split petri net into place nets
+			
+			// TODO tag places with current object type
 		}
 		
-		// unite place nets
+		// TODO unite place nets
 		
-		// enhance log by process executions as case notions
+		// TODO enhance log by process executions as case notions
 		
 		// for each new case notion
+		for (String currentType : parameters.getObjectTypesLeadingTypes()) {
 		
-			// flatten ocel
+			// TODO flatten ocel
 		
-			// discover LPMs
+			// TODO discover LPMs
 		
-		// assign places to objects
+		}
 		
-		// identify variable arcs
+		// TODO assign places to objects
 		
-		return (OCLPMResult) Main.run()[0];
+		// TODO identify variable arcs
+		
+		return (OCLPMResult) Main.run()[0];// TODO restructure such that this makes sense 
 	}
 	
 	// variant skipping the place net discovery

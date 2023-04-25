@@ -1,4 +1,4 @@
-package org.processmining.OCLPMDiscovery.plugins.mining;
+package org.processmining.OCLPMDiscovery.parameters;
 
 import java.util.Set;
 
@@ -6,11 +6,14 @@ public class OCLPMDiscoveryParameters {
 	private Set<String> objectTypesAll;
 	private Set<String> objectTypesPlaceNets; // object types for which the log is flattened and place nets are discovered
 	private Set<String> objectTypesLeadingTypes; // object types which are used as leading types for discovering process executions
+	private Miner placeDiscoveryAlgorithm; 
+	private SPECppParameters specppParameters;
 	
 	public OCLPMDiscoveryParameters(Set<String> objectTypes) {
 		this.objectTypesAll = objectTypes;
 		this.setObjectTypesPlaceNets(objectTypes);
 		this.setObjectTypesLeadingTypes(objectTypes);
+		this.setPlaceDiscoveryAlgorithm(Miner.ILP);
 	}
 
 	@Override
@@ -49,5 +52,21 @@ public class OCLPMDiscoveryParameters {
 
 	public void setObjectTypesLeadingTypes(Set<String> objectTypesLeadingTypes) {
 		this.objectTypesLeadingTypes = objectTypesLeadingTypes;
+	}
+
+	public SPECppParameters getSpecppParameters() {
+		return specppParameters;
+	}
+
+	public void setSpecppParameters(SPECppParameters specppParameters) {
+		this.specppParameters = specppParameters;
+	}
+
+	public Miner getPlaceDiscoveryAlgorithm() {
+		return placeDiscoveryAlgorithm;
+	}
+
+	public void setPlaceDiscoveryAlgorithm(Miner placeDiscoveryAlgorithm) {
+		this.placeDiscoveryAlgorithm = placeDiscoveryAlgorithm;
 	}
 }

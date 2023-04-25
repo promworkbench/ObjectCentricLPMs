@@ -1,10 +1,10 @@
-package org.processmining.OCLPMDiscovery.plugins.mining.wizards;
+package org.processmining.OCLPMDiscovery.wizards;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import org.processmining.OCLPMDiscovery.plugins.mining.OCLPMDiscoveryParameters;
+import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.framework.util.ui.wizard.MapWizard;
 import org.processmining.framework.util.ui.wizard.ProMWizardStep;
 

@@ -1,11 +1,11 @@
-package org.processmining.OCLPMDiscovery.plugins.mining.wizards.steps;
+package org.processmining.OCLPMDiscovery.wizards.steps;
 
 import java.util.HashSet;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
 
-import org.processmining.OCLPMDiscovery.plugins.mining.OCLPMDiscoveryParameters;
+import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.framework.util.ui.widgets.ProMList;
 import org.processmining.framework.util.ui.widgets.ProMPropertiesPanel;
 import org.processmining.framework.util.ui.wizard.ProMWizardStep;
