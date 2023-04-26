@@ -9,7 +9,6 @@ import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.wizards.OCLPMDiscoveryWizard;
-import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryILPStep;
 import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoverySettingsStep;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
@@ -18,6 +17,7 @@ import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.framework.util.ui.wizard.ProMWizardDisplay;
 import org.processmining.framework.util.ui.wizard.ProMWizardStep;
+import org.processmining.hybridilpminer.parameters.XLogHybridILPMinerParametersImpl;
 import org.processmining.ocel.flattening.Flattening;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
 
@@ -83,7 +83,7 @@ public class OCLPMDiscoveryPlugin {
 		stepMap.put(OCLPMDiscoveryWizard.INITIAL_KEY, new OCLPMDiscoverySettingsStep(parameters));
 		
 		// TODO let user select parameters for Place Net discovery
-		stepMap.put(OCLPMDiscoveryWizard.PD_ILP, new OCLPMDiscoveryILPStep(parameters));
+//		stepMap.put(OCLPMDiscoveryWizard.PD_ILP, new OCLPMDiscoveryILPStep(parameters));
 		
 		
 		// TODO let user select parameters for LPM discovery
@@ -96,6 +96,15 @@ public class OCLPMDiscoveryPlugin {
 		if (parameters == null)
 			return null;		
 		
+		// open external wizards for place discovery
+		switch (parameters.getPlaceDiscoveryAlgorithm()) {
+			case ILP:
+				XLogHybridILPMinerParametersImpl ilpParameters = ILPMiner.startILPWizard(context, parameters, ocel);
+				parameters.setIlpParameters(ilpParameters);
+				break;
+			default:
+		}
+		
 		// place net discovery
 		for (String currentType : parameters.getObjectTypesPlaceNets()) {
 			// flatten ocel
@@ -107,6 +116,7 @@ public class OCLPMDiscoveryPlugin {
 			// tag places with current object type
 //			FlatLogProcessing.processFlatLog(context, flatLog, currentType, parameters); //TODO
 			FlatLogProcessing.discoverPetriNet(context, flatLog, parameters); // current workaround
+			System.out.println("Finished discovery of place nets for object type "+currentType);
 		}
 		
 		// TODO unite place nets
