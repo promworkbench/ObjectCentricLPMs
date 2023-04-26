@@ -10,7 +10,8 @@ import org.processmining.framework.util.ui.wizard.ProMWizardStep;
 
 public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, String> {
 
-	public static final String INITIAL_KEY = "OCLPMDiscoveryParameters";
+	public static final String INITIAL_KEY = "OCLPMDiscoverySettings";
+	public static final String PD_ILP = "OCLPMDiscoveryILP";
 	
 	private final boolean discoverPlaces;
 	
@@ -27,14 +28,18 @@ public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, St
 
 	@Override
 	public String getInitialKey(OCLPMDiscoveryParameters settings) {
-		// TODO Auto-generated method stub
 		return OCLPMDiscoveryWizard.INITIAL_KEY;
 	}
 
 	@Override
-	public String getNextKey(MapModel<OCLPMDiscoveryParameters, String> currentWizardModel) {
-		// TODO Auto-generated method stub
-		return OCLPMDiscoveryWizard.INITIAL_KEY;
+	public String getNextKey(MapModel<OCLPMDiscoveryParameters, String> wizard) {
+		
+		switch (wizard.getModel().getPlaceDiscoveryAlgorithm()){
+			case ILP:
+				return PD_ILP;
+			default:
+				return PD_ILP;
+		}
 	}
 
 }

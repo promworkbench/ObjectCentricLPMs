@@ -9,6 +9,7 @@ import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.wizards.OCLPMDiscoveryWizard;
+import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryILPStep;
 import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoverySettingsStep;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
@@ -82,6 +83,8 @@ public class OCLPMDiscoveryPlugin {
 		stepMap.put(OCLPMDiscoveryWizard.INITIAL_KEY, new OCLPMDiscoverySettingsStep(parameters));
 		
 		// TODO let user select parameters for Place Net discovery
+		stepMap.put(OCLPMDiscoveryWizard.PD_ILP, new OCLPMDiscoveryILPStep(parameters));
+		
 		
 		// TODO let user select parameters for LPM discovery
 		

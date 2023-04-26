@@ -44,7 +44,7 @@ public class OCLPMDiscoverySettingsStep extends ProMPropertiesPanel implements P
         	this.list_TypesPlaceNets.getList().setSelectionInterval(start, end);
         	this.list_LeadingTypes.getList().setSelectionInterval(start, end);
         }
-        System.out.println("Finished setting up ProMLists.");
+//        System.out.println("Finished setting up ProMLists.");
 
         // selection of miner for place nets discovery
         this.minersListEnums = Arrays.asList(Miner.values());
@@ -55,7 +55,7 @@ public class OCLPMDiscoverySettingsStep extends ProMPropertiesPanel implements P
         // set default selection
         this.box_placeDiscoveryMiner.setSelectedItem(parameters.getPlaceDiscoveryAlgorithm().getName());
         
-        System.out.println("Finished OCLPMDiscoverySettingsStep constructor.");
+//        System.out.println("Finished OCLPMDiscoverySettingsStep constructor.");
     }
 
     @Override
