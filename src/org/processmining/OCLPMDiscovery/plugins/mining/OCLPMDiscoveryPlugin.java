@@ -1,6 +1,7 @@
 package org.processmining.OCLPMDiscovery.plugins.mining;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,6 +21,8 @@ import org.processmining.framework.util.ui.wizard.ProMWizardStep;
 import org.processmining.hybridilpminer.parameters.XLogHybridILPMinerParametersImpl;
 import org.processmining.ocel.flattening.Flattening;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
+import org.processmining.placebasedlpmdiscovery.model.Place;
+import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 
 @Plugin(
 		name = "Discovery of Object-Centric Local Process Models", // not shown anywhere anymore because overwritten by uiLabel?
@@ -104,7 +107,7 @@ public class OCLPMDiscoveryPlugin {
 				break;
 			default:
 		}
-		
+		Set<Place> placeNetsUnion = new HashSet<>();
 		// place net discovery
 		for (String currentType : parameters.getObjectTypesPlaceNets()) {
 			// flatten ocel
@@ -114,16 +117,19 @@ public class OCLPMDiscoveryPlugin {
 			// discover petri net using est-miner (use specpp)
 			// split petri net into place nets
 			// tag places with current object type
-//			FlatLogProcessing.processFlatLog(context, flatLog, currentType, parameters); //TODO
-			FlatLogProcessing.discoverPetriNet(context, flatLog, parameters); // current workaround
+			Set<Place> placeNets = FlatLogProcessing.processFlatLog(context, flatLog, currentType, parameters);
 			System.out.println("Finished discovery of place nets for object type "+currentType);
+
+			// unite place nets
+			placeNetsUnion.addAll(placeNets);
 		}
 		
-		// TODO unite place nets
-		
+		// convert set of places to PlaceSet
+		PlaceSet placeSet = new PlaceSet(placeNetsUnion);
+				
 		// TODO enhance log by process executions as case notions
 		
-		// for each new case notion
+		// LPM discovery for each new case notion
 		for (String currentType : parameters.getObjectTypesLeadingTypes()) {
 		
 			// TODO flatten ocel
