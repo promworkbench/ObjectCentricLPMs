@@ -14,16 +14,30 @@ public class OCELUtils {
 	 * @return OCEL including the dummy object type
 	 */
 	public static OcelEventLog addDummyCaseNotion(OcelEventLog ocel, String typeName, String objectID) {
-		OcelEventLog modifiedOcel = ocel; //TODO do a deep copy?
+//		OcelEventLog modifiedOcel = ocel;
 		
-//		// Trying a deep copy:
-//		OcelEventLog modifiedOcel = ocel.cloneEmpty(); // sets the "global" stuff
-//		// copy all events (also calls clone object())
-//		for (OcelEvent eve : ocel.events.values()) {
-//			modifiedOcel.cloneEvent(eve);
-//		}
-//		modifiedOcel.register();
-
+		// Trying a deep copy:
+		OcelEventLog modifiedOcel = ocel.cloneEmpty(); // sets the "global" stuff
+		// copy all events (also calls clone object())
+		for (OcelEvent eve : ocel.events.values()) {
+			modifiedOcel.cloneEvent(eve);
+		} 		
+		
+		/* Why does cloning all events to the new log lead to a Nullpointer exception?
+			* Cloning an event sets the log of the events to the old log, not the new one. 
+			* Is that a problem? 
+			* Yes, if a new object is added to the modified log the ocel.register calls 
+			* event.register for each event and then the event fetches the old log, 
+			* which doesn't have the new object, resulting in a nullpointer exception
+		*/
+		
+		// workaround: manually set the event.log to the correct one
+		for (OcelEvent eve : modifiedOcel.events.values()) {
+			eve.eventLog = modifiedOcel;
+		}
+				
+		modifiedOcel.register();
+		
 		// prepare new type and object
 		OcelObjectType dummyType = new OcelObjectType(modifiedOcel, typeName);
 		OcelObject dummyObject = new OcelObject(modifiedOcel);
