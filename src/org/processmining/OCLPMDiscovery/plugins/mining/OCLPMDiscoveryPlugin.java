@@ -134,7 +134,7 @@ public class OCLPMDiscoveryPlugin {
 		
 			// TODO flatten ocel
 		
-			// TODO discover LPMs
+			// TODO discover LPMs (name of the currentType column needs concept:name, which the flattening does)
 		
 		}
 		
