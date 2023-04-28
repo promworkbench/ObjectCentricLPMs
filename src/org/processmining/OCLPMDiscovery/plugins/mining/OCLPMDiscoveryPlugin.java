@@ -10,6 +10,8 @@ import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.wizards.OCLPMDiscoveryWizard;
+import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryDummyFinishStep;
+import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryLPMStep;
 import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoverySettingsStep;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
@@ -51,20 +53,6 @@ public class OCLPMDiscoveryPlugin {
 			affiliation = "RWTH - PADS",
 			author = "Marvin Porsil",
 			email = "marvin.porsil@rwth-aachen.de",
-			uiLabel = "OCLPM flatten ocel for all object-types."
-	)
-	@PluginVariant(
-			variantLabel = "OCLPM flatten ocel for all object-types.",
-			requiredParameterLabels = {0}
-	)
-	public static String flattenAll(PluginContext context, OcelEventLog ocel) {
-		return (String) Main.run()[0];
-	}
-	
-	@UITopiaVariant(
-			affiliation = "RWTH - PADS",
-			author = "Marvin Porsil",
-			email = "marvin.porsil@rwth-aachen.de",
 			uiLabel = "Object-Centric Local Process Model Discovery given OCEL"
 	)
 	@PluginVariant(
@@ -90,7 +78,9 @@ public class OCLPMDiscoveryPlugin {
 		
 		
 		// TODO let user select parameters for LPM discovery
+		stepMap.put(OCLPMDiscoveryWizard.LPM, new OCLPMDiscoveryLPMStep(parameters));
 		
+		stepMap.put(OCLPMDiscoveryWizard.FINISH, new OCLPMDiscoveryDummyFinishStep(parameters));
 		OCLPMDiscoveryWizard wizard = new OCLPMDiscoveryWizard(stepMap, true);
 		
 		// show wizard

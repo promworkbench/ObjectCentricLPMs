@@ -5,9 +5,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
 
+import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.Miner;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.framework.util.ui.widgets.ProMComboBox;
@@ -20,29 +20,22 @@ public class OCLPMDiscoverySettingsStep extends ProMPropertiesPanel implements P
 	private static final String TITLE = "OCLPM Discovery Settings";
 	
 	ProMList<String> list_TypesPlaceNets;
-	ProMList<String> list_LeadingTypes;
-	DefaultListModel<String> objectTypesList = new DefaultListModel<String>();
 	ProMComboBox<String> box_placeDiscoveryMiner;
+	ProMComboBox<String> box_LPMDiscoveryCaseNotionStrategy;
 	List<Miner> minersListEnums;
+	List<CaseNotionStrategy> caseNotionListEnums;
 
     public OCLPMDiscoverySettingsStep(OCLPMDiscoveryParameters parameters) {
-        super(TITLE);
-        
-        // list all object types
-        for (String curType : parameters.getObjectTypesAll()) {
-        	objectTypesList.addElement(curType);
-        }        
+        super(TITLE);        
 		
         // scrollable list with all object types where each can be ticked off or on
-        this.list_TypesPlaceNets = addProperty("Place Nets", new ProMList<String>("Select Object Types for Place Net Discovery",objectTypesList));
-        this.list_LeadingTypes = addProperty("Process Executions", new ProMList<String>("Select Object Types used as Leading Types",objectTypesList));
+        this.list_TypesPlaceNets = addProperty("Place Nets", new ProMList<String>("Select Object Types for Place Net Discovery",parameters.getObjectTypesList()));
         
         // set initial state to be all selected
         int start = 0;
         int end = this.list_TypesPlaceNets.getList().getModel().getSize() - 1;
         if (end >= 0) {
         	this.list_TypesPlaceNets.getList().setSelectionInterval(start, end);
-        	this.list_LeadingTypes.getList().setSelectionInterval(start, end);
         }
 //        System.out.println("Finished setting up ProMLists.");
 
@@ -50,10 +43,17 @@ public class OCLPMDiscoverySettingsStep extends ProMPropertiesPanel implements P
         this.minersListEnums = Arrays.asList(Miner.values());
         ArrayList<String> minersListStrings = new ArrayList<String>();
         this.minersListEnums.forEach(curMiner -> minersListStrings.add(curMiner.getName()));
-        System.out.println("MinersList[0]: "+minersListStrings.get(0));
         this.box_placeDiscoveryMiner = addComboBox("Place Nets Miner", minersListStrings);
         // set default selection
         this.box_placeDiscoveryMiner.setSelectedItem(parameters.getPlaceDiscoveryAlgorithm().getName());
+        
+        // selection of strategy for artificial case notion
+        this.caseNotionListEnums = Arrays.asList(CaseNotionStrategy.values());
+        ArrayList<String> caseNotionListStrings = new ArrayList<String>();
+        this.caseNotionListEnums.forEach(cur -> caseNotionListStrings.add(cur.getName()));
+        this.box_LPMDiscoveryCaseNotionStrategy = addComboBox("LPM Case Notion", caseNotionListStrings);//TODO Add some description when hovering over the box?
+        // set default selection
+        this.box_LPMDiscoveryCaseNotionStrategy.setSelectedItem(parameters.getCaseNotionStrategy().getName());
         
 //        System.out.println("Finished OCLPMDiscoverySettingsStep constructor.");
     }
@@ -64,8 +64,8 @@ public class OCLPMDiscoverySettingsStep extends ProMPropertiesPanel implements P
             return parameters;
         }
         parameters.setObjectTypesPlaceNets(new HashSet<String>(list_TypesPlaceNets.getSelectedValuesList()));
-        parameters.setObjectTypesLeadingTypes(new HashSet<String>(list_LeadingTypes.getSelectedValuesList()));
         parameters.setPlaceDiscoveryAlgorithm(this.minersListEnums.get(box_placeDiscoveryMiner.getSelectedIndex()));
+        parameters.setCaseNotionStrategy(this.caseNotionListEnums.get(box_LPMDiscoveryCaseNotionStrategy.getSelectedIndex()));
         return parameters;
     }
 

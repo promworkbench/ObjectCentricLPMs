@@ -1,9 +1,10 @@
 package org.processmining.OCLPMDiscovery.wizards;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 
+import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.framework.util.ui.wizard.MapWizard;
 import org.processmining.framework.util.ui.wizard.ProMWizardStep;
@@ -12,6 +13,9 @@ public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, St
 
 	public static final String INITIAL_KEY = "OCLPMDiscoverySettings";
 	public static final String PD_ILP = "OCLPMDiscoveryILP";
+	public static final String LPM = "OCLPMDiscoveryLPM";
+	public static final String FINISH = "OCLPMDiscoveryDummyFinish"; // because I failed to make it work without it 
+	public static final String[] FINALS = {FINISH};
 	
 	private final boolean discoverPlaces;
 	
@@ -22,8 +26,7 @@ public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, St
 	
 	@Override
 	public Collection<String> getFinalKeys(MapModel<OCLPMDiscoveryParameters, String> currentWizardModel) {
-		// TODO Auto-generated method stub
-		return Collections.singletonList(OCLPMDiscoveryWizard.INITIAL_KEY);
+		return Arrays.asList(FINALS);
 	}
 
 	@Override
@@ -33,13 +36,24 @@ public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, St
 
 	@Override
 	public String getNextKey(MapModel<OCLPMDiscoveryParameters, String> wizard) {
-		
-		switch (wizard.getModel().getPlaceDiscoveryAlgorithm()){
-			case ILP:
-				return PD_ILP;
-			default:
-				return PD_ILP;
+
+		// check if currently at beginning and selected place discovery has wizard step 
+		if (wizard.getCurrent().equals(INITIAL_KEY)) {
+			switch (wizard.getModel().getPlaceDiscoveryAlgorithm()){
+				case ILP:
+					break; // currently using external wizard from ILP
+				default:
+					break;
+			}
 		}
+		
+		// check if LPM case notion discovery needs a wizard step
+		if (wizard.getModel().getCaseNotionStrategy().equals(CaseNotionStrategy.PE_LEADING)
+				&& !wizard.getCurrent().equals(LPM)){
+			return LPM;
+		}
+		
+		return FINISH;
 	}
 
 }

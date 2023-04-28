@@ -2,21 +2,30 @@ package org.processmining.OCLPMDiscovery.parameters;
 
 import java.util.Set;
 
+import javax.swing.DefaultListModel;
+
 import org.processmining.hybridilpminer.parameters.XLogHybridILPMinerParametersImpl;
 
 public class OCLPMDiscoveryParameters {
 	private Set<String> objectTypesAll;
 	private Set<String> objectTypesPlaceNets; // object types for which the log is flattened and place nets are discovered
 	private Set<String> objectTypesLeadingTypes; // object types which are used as leading types for discovering process executions
-	private Miner placeDiscoveryAlgorithm; 
 	private SPECppParameters specppParameters;
 	private XLogHybridILPMinerParametersImpl ilpParameters;
+	private DefaultListModel<String> objectTypesList = new DefaultListModel<String>();
+	
+	//TODO set default when the real strategies work
+	private Miner placeDiscoveryAlgorithm 			= Miner.ILP;
+	private CaseNotionStrategy caseNotionStrategy 	= CaseNotionStrategy.DUMMY;
 	
 	public OCLPMDiscoveryParameters(Set<String> objectTypes) {
 		this.objectTypesAll = objectTypes;
 		this.setObjectTypesPlaceNets(objectTypes);
 		this.setObjectTypesLeadingTypes(objectTypes);
-		this.setPlaceDiscoveryAlgorithm(Miner.ILP);
+		// list all object types
+        for (String curType : this.objectTypesAll) {
+        	objectTypesList.addElement(curType);
+        }
 	}
 
 	@Override
@@ -34,7 +43,10 @@ public class OCLPMDiscoveryParameters {
     
 	@Override
     public String toString() {
-        return "Hi"; //TODO
+        return "OCLPM Discovery parameters:\n"
+        		+ "Place Discovery Algorithm: "+this.getPlaceDiscoveryAlgorithm().getName()+"\n"
+        		+ "Case Notion Strategy: "+this.getCaseNotionStrategy(); 
+        //TODO Add the other parameters
     }
 
 	public Set<String> getObjectTypesAll() {
@@ -79,5 +91,17 @@ public class OCLPMDiscoveryParameters {
 
 	public void setIlpParameters(XLogHybridILPMinerParametersImpl ilpParameters) {
 		this.ilpParameters = ilpParameters;
+	}
+
+	public CaseNotionStrategy getCaseNotionStrategy() {
+		return caseNotionStrategy;
+	}
+
+	public void setCaseNotionStrategy(CaseNotionStrategy caseNotionStrategy) {
+		this.caseNotionStrategy = caseNotionStrategy;
+	}
+	
+	public DefaultListModel<String> getObjectTypesList() {
+		return this.objectTypesList;
 	}
 }
