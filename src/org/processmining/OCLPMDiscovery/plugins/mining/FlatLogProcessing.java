@@ -33,13 +33,13 @@ public class FlatLogProcessing {
 		Petrinet petrinet;
 		switch(parameters.getPlaceDiscoveryAlgorithm()) {
 			case ILP:
-				petrinet = ILPMiner.minePetrinet(context, log, parameters);
+				petrinet = ILPMiner.minePetrinet(context, log, parameters.getIlpParameters());
 				break;
-			case SPECPP: //! not functional
-				petrinet = SPECppMiner.minePetrinet(context, log);
+			case SPECPP: //TODO not functional!
+				petrinet = SPECppMiner.minePetrinet(context, log, parameters.getSpecppParameters());
 				break;
 			default:
-				petrinet = ILPMiner.minePetrinet(context, log, parameters);
+				petrinet = ILPMiner.minePetrinet(context, log, parameters.getIlpParameters());
 		}
 		
 		

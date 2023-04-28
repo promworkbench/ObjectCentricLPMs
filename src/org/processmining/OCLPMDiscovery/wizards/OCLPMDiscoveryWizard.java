@@ -13,6 +13,7 @@ public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, St
 
 	public static final String INITIAL_KEY = "OCLPMDiscoverySettings";
 	public static final String PD_ILP = "OCLPMDiscoveryILP";
+	public static final String PD_SPECPP = "OCLPMDiscoverySPECpp";
 	public static final String LPM = "OCLPMDiscoveryLPM";
 	public static final String FINISH = "OCLPMDiscoveryDummyFinish"; // because I failed to make it work without it 
 	public static final String[] FINALS = {FINISH};
@@ -42,6 +43,9 @@ public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, St
 			switch (wizard.getModel().getPlaceDiscoveryAlgorithm()){
 				case ILP:
 					break; // currently using external wizard from ILP
+//					return PD_ILP;
+				case SPECPP:
+					return PD_SPECPP;
 				default:
 					break;
 			}

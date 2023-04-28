@@ -23,9 +23,9 @@ import org.processmining.widgets.wizard.WizardResult;
 
 public class ILPMiner {
 //	public static Petrinet minePetrinet(XLog log, OCLPMDiscoveryParameters parameters) {
-	public static Petrinet minePetrinet(PluginContext context, XLog log, OCLPMDiscoveryParameters parameters) {
+	public static Petrinet minePetrinet(PluginContext context, XLog log, XLogHybridILPMinerParametersImpl ilpParametersOriginal) {
 		// clone ilp parameters because the log is fetched from here
-		XLogHybridILPMinerParametersImpl ilpParameters = deepCopyILPParameters (parameters.getIlpParameters());
+		XLogHybridILPMinerParametersImpl ilpParameters = deepCopyILPParameters (ilpParametersOriginal);
 		
 		// artificial start and end
 		final String startLabel = "ArtificialStart";
