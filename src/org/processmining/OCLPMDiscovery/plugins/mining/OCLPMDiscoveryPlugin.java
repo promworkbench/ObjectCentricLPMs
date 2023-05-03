@@ -9,9 +9,12 @@ import org.deckfour.xes.model.XLog;
 import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
+import org.processmining.OCLPMDiscovery.utils.OCELUtils;
 import org.processmining.OCLPMDiscovery.wizards.OCLPMDiscoveryWizard;
+import org.processmining.OCLPMDiscovery.wizards.steps.LPMDiscoveryWizardStep;
 import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryDummyFinishStep;
 import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryLPMStep;
+import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoverySPECppStep;
 import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoverySettingsStep;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
@@ -25,6 +28,7 @@ import org.processmining.ocel.flattening.Flattening;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
 import org.processmining.placebasedlpmdiscovery.model.Place;
 import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
+import org.processmining.placebasedlpmdiscovery.plugins.mining.PlaceBasedLPMDiscoveryPlugin;
 
 @Plugin(
 		name = "Discovery of Object-Centric Local Process Models", // not shown anywhere anymore because overwritten by uiLabel?
@@ -62,10 +66,7 @@ public class OCLPMDiscoveryPlugin {
 	public static OCLPMResult mineOCLPMs(UIPluginContext context, OcelEventLog ocel) {
 		Main.setUp(context);
 		
-		// get object types
-		Set<String> objectTypes = ocel.getObjectTypes();
-		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(objectTypes);
-		
+		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
 
 		Map<String, ProMWizardStep<OCLPMDiscoveryParameters>> stepMap = new HashMap<>();
 		
@@ -75,10 +76,12 @@ public class OCLPMDiscoveryPlugin {
 		
 		// TODO let user select parameters for Place Net discovery
 //		stepMap.put(OCLPMDiscoveryWizard.PD_ILP, new OCLPMDiscoveryILPStep(parameters));
+		stepMap.put(OCLPMDiscoveryWizard.PD_SPECPP, new OCLPMDiscoverySPECppStep(parameters));
 		
 		
 		// TODO let user select parameters for LPM discovery
-		stepMap.put(OCLPMDiscoveryWizard.LPM, new OCLPMDiscoveryLPMStep(parameters));
+		stepMap.put(OCLPMDiscoveryWizard.LPM_NOTION, new OCLPMDiscoveryLPMStep(parameters));
+		stepMap.put(OCLPMDiscoveryWizard.LPM_CONFIG, new LPMDiscoveryWizardStep(parameters));
 		
 		stepMap.put(OCLPMDiscoveryWizard.FINISH, new OCLPMDiscoveryDummyFinishStep(parameters));
 		OCLPMDiscoveryWizard wizard = new OCLPMDiscoveryWizard(stepMap, true);
@@ -116,17 +119,35 @@ public class OCLPMDiscoveryPlugin {
 		
 		// convert set of places to PlaceSet
 		PlaceSet placeSet = new PlaceSet(placeNetsUnion);
+		
+		//TODO initialize LPMResult				
+		
+		switch (parameters.getCaseNotionStrategy()) {
+		
+			case PE_LEADING:
+				// TODO enhance log by process executions as case notions
+				// LPM discovery for each new case notion
+				for (String currentType : parameters.getObjectTypesLeadingTypes()) {
 				
-		// TODO enhance log by process executions as case notions
-		
-		// LPM discovery for each new case notion
-		for (String currentType : parameters.getObjectTypesLeadingTypes()) {
-		
-			// TODO flatten ocel
-		
-			// TODO discover LPMs (name of the currentType column needs concept:name, which the flattening does)
-		
+					// TODO flatten ocel
+				
+					// TODO discover LPMs (name of the currentType column needs concept:name, which the flattening does)
+				
+				}
+				break;
+				
+			case PE_CONNECTED:
+				break;
+				
+			case DUMMY:
+			default:
+				String dummyType = "DummyType";
+				OcelEventLog dummyOcel = OCELUtils.addDummyCaseNotion(ocel,"DummyType","42");
+				XLog log = Flattening.flatten(dummyOcel,dummyType);
+				Object[] lpmResults = PlaceBasedLPMDiscoveryPlugin.mineLPMs(context, log, placeSet, parameters.getPBLPMDiscoveryParameters());
 		}
+		
+		//TODO make OCLPMResult object
 		
 		// TODO assign places to objects
 		

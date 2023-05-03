@@ -1,5 +1,6 @@
 package org.processmining.OCLPMDiscovery.utils;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.processmining.ocel.ocelobjects.OcelEvent;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
@@ -74,5 +75,13 @@ public class OCELUtils {
 		// - enter object type into ocel
 		
 		return modifiedOcel;
+	}
+	
+	public static Set<String> getActivities(OcelEventLog ocel) {
+		Set<String> activities = new HashSet<String>();
+		for (OcelEvent eve : ocel.events.values()) {
+			activities.add(eve.activity);
+		}
+		return activities;
 	}
 }

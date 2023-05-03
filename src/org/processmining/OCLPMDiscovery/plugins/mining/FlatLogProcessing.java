@@ -35,8 +35,8 @@ public class FlatLogProcessing {
 			case ILP:
 				petrinet = ILPMiner.minePetrinet(context, log, parameters.getIlpParameters());
 				break;
-			case SPECPP: //TODO not functional!
-				petrinet = SPECppMiner.minePetrinet(context, log, parameters.getSpecppParameters());
+			case SPECPP:
+				petrinet = SPECppMiner.minePetrinet(log, parameters.getSpecppParameters());
 				break;
 			default:
 				petrinet = ILPMiner.minePetrinet(context, log, parameters.getIlpParameters());

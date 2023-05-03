@@ -14,6 +14,7 @@ import org.processmining.specpp.datastructures.petri.CollectionOfPlaces;
 import org.processmining.specpp.datastructures.petri.Place;
 import org.processmining.specpp.datastructures.petri.ProMPetrinetWrapper;
 import org.processmining.specpp.orchestra.ExecutionEnvironment;
+import org.processmining.specpp.preprocessing.InputDataBundle;
 
 @Plugin(
 		name = "SPECpp miner", // not shown anywhere anymore because overwritten by uiLabel?
@@ -48,16 +49,13 @@ public class SPECppMiner { //! not functional
 //	}
 	
 	// from specpp ProMLessSPECpp.java
-	public static Petrinet minePetrinet(UIPluginContext context, XLog log, SPECppParameters specppParameters) {
-		SPECpp<Place, BasePlaceComposition, CollectionOfPlaces, ProMPetrinetWrapper> specpp = SPECpp.build(specppParameters.getCfg(), specppParameters.getData());
-		// fails here at specpp.build because: "Data - DataRequirement("lp_based_implicitness_calculator", SimpleBuilder) - not fulfilled"
+	public static Petrinet minePetrinet(XLog log, SPECppParameters specppParameters) {
+		InputDataBundle data = InputDataBundle.process(log, specppParameters.getCfg().getInputProcessingConfig());
+		SPECpp<Place, BasePlaceComposition, CollectionOfPlaces, ProMPetrinetWrapper> specpp = SPECpp.build(specppParameters.getCfg(), data);
 
         ExecutionEnvironment.SPECppExecution<Place, BasePlaceComposition, CollectionOfPlaces, ProMPetrinetWrapper> execution;
         try (ExecutionEnvironment ee = new ExecutionEnvironment(Runtime.getRuntime().availableProcessors())) {
             execution = ee.execute(specpp, ExecutionParameters.noTimeouts());
-            ee.addCompletionCallback(execution, ex -> {
-                ProMPetrinetWrapper petrinetWrapper = ex.getSPECpp().getPostProcessedResult();
-            });
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -110,7 +108,10 @@ public class SPECppMiner { //! not functional
 			requiredParameterLabels = {0}
 	)
 	public static Petrinet minePetrinetPlugin(UIPluginContext context, XLog log) {
-		SPECppParameters specppParameters = new SPECppParameters(log);
-		return minePetrinet(context, log, specppParameters);
+		SPECppParameters specppParameters = new SPECppParameters();
+		specppParameters.setTau(0.9);
+//		specppParameters.set
+		specppParameters.registerParameters();
+		return minePetrinet(log, specppParameters);
 	}
 }

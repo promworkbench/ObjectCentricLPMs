@@ -14,7 +14,8 @@ public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, St
 	public static final String INITIAL_KEY = "OCLPMDiscoverySettings";
 	public static final String PD_ILP = "OCLPMDiscoveryILP";
 	public static final String PD_SPECPP = "OCLPMDiscoverySPECpp";
-	public static final String LPM = "OCLPMDiscoveryLPM";
+	public static final String LPM_NOTION = "OCLPMDiscoveryLPMCaseNotion";
+	public static final String LPM_CONFIG = "OCLPMDiscoveryLPMDiscoveryConfig";
 	public static final String FINISH = "OCLPMDiscoveryDummyFinish"; // because I failed to make it work without it 
 	public static final String[] FINALS = {FINISH};
 	
@@ -53,8 +54,15 @@ public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, St
 		
 		// check if LPM case notion discovery needs a wizard step
 		if (wizard.getModel().getCaseNotionStrategy().equals(CaseNotionStrategy.PE_LEADING)
-				&& !wizard.getCurrent().equals(LPM)){
-			return LPM;
+				&& !wizard.getCurrent().equals(LPM_NOTION)
+				&& !wizard.getCurrent().equals(LPM_CONFIG)
+				){
+			return LPM_NOTION;
+		}
+		
+		// do LPM discovery config if not already done
+		if (!wizard.getCurrent().equals(LPM_CONFIG)){
+			return LPM_CONFIG;
 		}
 		
 		return FINISH;

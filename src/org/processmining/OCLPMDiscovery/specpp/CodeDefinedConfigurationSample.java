@@ -40,12 +40,11 @@ import org.processmining.specpp.datastructures.tree.nodegen.PlaceState;
 import org.processmining.specpp.evaluation.fitness.AbsolutelyNoFrillsFitnessEvaluator;
 import org.processmining.specpp.evaluation.heuristics.DirectlyFollowsHeuristic;
 import org.processmining.specpp.evaluation.heuristics.EventuallyFollowsTreeHeuristic;
+import org.processmining.specpp.evaluation.implicitness.LPBasedImplicitnessCalculator;
 import org.processmining.specpp.evaluation.markings.LogHistoryMaker;
 import org.processmining.specpp.orchestra.ExecutionEnvironment;
-import org.processmining.specpp.postprocessing.LPBasedImplicitnessPostProcessing;
 import org.processmining.specpp.postprocessing.NaiveUniwiredSelfLoopAdditionPostProcessing;
 import org.processmining.specpp.postprocessing.ProMConverter;
-import org.processmining.specpp.postprocessing.SelfLoopPlaceMerger;
 import org.processmining.specpp.preprocessing.InputDataBundle;
 import org.processmining.specpp.preprocessing.orderings.Lexicographic;
 import org.processmining.specpp.proposal.ConstrainablePlaceProposer;
@@ -90,6 +89,7 @@ public class CodeDefinedConfigurationSample {
 
         EvaluatorConfiguration.Configurator evConfig = Configurators.evaluators()
                                                                     .addEvaluatorProvider(new AbsolutelyNoFrillsFitnessEvaluator.Builder())
+                                                                    .addEvaluatorProvider(new LPBasedImplicitnessCalculator.Builder())
                                                                     .addEvaluatorProvider(new LogHistoryMaker.Builder());
         // delta adaptation function
         // evConfig.addEvaluatorProvider(new SigmoidDelta.Builder());
@@ -122,8 +122,8 @@ public class CodeDefinedConfigurationSample {
         PostProcessingConfiguration.Configurator<CollectionOfPlaces, CollectionOfPlaces> temp_ppConfig = Configurators.postProcessing();
         temp_ppConfig.addPostProcessor(new NaiveUniwiredSelfLoopAdditionPostProcessing.Builder());
         // ppConfig.processor(SelfLoopPlaceMerger::new);
-        temp_ppConfig.addPostProcessor(new LPBasedImplicitnessPostProcessing.Builder())
-                     .addPostProcessor(SelfLoopPlaceMerger::new);
+//        temp_ppConfig.addPostProcessor(new LPBasedImplicitnessPostProcessing.Builder())
+//                     .addPostProcessor(SelfLoopPlaceMerger::new);
         PostProcessingConfiguration.Configurator<CollectionOfPlaces, ProMPetrinetWrapper> ppConfig = temp_ppConfig.addPostProcessor(ProMConverter::new);
 
         // ** Parameters ** //
