@@ -6,13 +6,13 @@ import java.util.function.Function;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 
+import org.processmining.OCLPMDiscovery.gui.ActivatableTextBasedInputField;
+import org.processmining.OCLPMDiscovery.gui.ProMCheckBoxWithTextField;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.parameters.SPECppParameters;
 import org.processmining.framework.util.ui.widgets.ProMPropertiesPanel;
 import org.processmining.framework.util.ui.widgets.ProMTextField;
 import org.processmining.framework.util.ui.wizard.ProMWizardStep;
-import org.processmining.specpp.prom.mvc.swing.ActivatableTextBasedInputField;
-import org.processmining.specpp.prom.mvc.swing.SwingFactory;
 
 public class OCLPMDiscoverySPECppStep extends ProMPropertiesPanel implements ProMWizardStep<OCLPMDiscoveryParameters>{
 	
@@ -20,7 +20,8 @@ public class OCLPMDiscoverySPECppStep extends ProMPropertiesPanel implements Pro
 	
 	//TODO ui
 	private ActivatableTextBasedInputField<Duration> discoveryTimeLimitInput;
-    private ActivatableTextBasedInputField<Duration> totalTimeLimitInput;
+//    private ActivatableTextBasedInputField<Duration> totalTimeLimitInput;
+    private ProMCheckBoxWithTextField totalTimeLimitInput;
     private JCheckBox permitNegativeMarkingsDuringReplayBox;
     private ProMTextField tauTextField;
 
@@ -30,15 +31,18 @@ public class OCLPMDiscoverySPECppStep extends ProMPropertiesPanel implements Pro
         
         //TODO Make UI elements more beautiful
         // create UI elements
-        totalTimeLimitInput = SwingFactory.activatableTextBasedInputField("activate", false, durationFunc, 25);
+        totalTimeLimitInput = new ProMCheckBoxWithTextField(true,true,"3"); //TODO change default parameters
+//        totalTimeLimitInput.getPanel()
+        
+//        totalTimeLimitInput = new ActivatableTextBasedInputField<Duration>("activate", durationFunc, false, 25);
         totalTimeLimitInput.getCheckBox()
                            .setToolTipText("Real time limit over entire computation (discovery + post processing). Stops abruptly.");
-        totalTimeLimitInput.getTextField()
-                           .setToolTipText("<html>ISO-8601 format: P<it>x</it>DT<it>x</it>H<it>x</it>M<it>x</it>.<it>x</it>S</html>");
+//        totalTimeLimitInput.getTextField()
+//                           .setToolTipText("<html>ISO-8601 format: P<it>x</it>DT<it>x</it>H<it>x</it>M<it>x</it>.<it>x</it>S</html>");
 //        totalTimeLimitInput.addVerificationStatusListener(listener);
         this.totalTimeLimitInput = addProperty("total time limit",this.totalTimeLimitInput);
         
-        discoveryTimeLimitInput = SwingFactory.activatableTextBasedInputField("activate", false, durationFunc, 25);
+        discoveryTimeLimitInput = new ActivatableTextBasedInputField<Duration>("activate", durationFunc, false, 25);
         discoveryTimeLimitInput.getCheckBox()
                                .setToolTipText("Real time limit for place discovery. Gracefully continues to post processing with intermediate result.");
         discoveryTimeLimitInput.getTextField()
@@ -48,15 +52,18 @@ public class OCLPMDiscoverySPECppStep extends ProMPropertiesPanel implements Pro
         
         this.permitNegativeMarkingsDuringReplayBox = addCheckBox("Permit negative markings during replay");
         
-        this.tauTextField = addTextField("Tau",String.valueOf(parameters.getSpecppParameters().getTau()));
-        this.tauTextField.setToolTipText("Threshold value in [0,1] for the eST-Miner.");
+        tauTextField = new ProMTextField(String.valueOf(parameters.getSpecppParameters().getTau()));
+        String hint = "Threshold value in [0,1] for the eST-Miner.";
+        tauTextField.setHint(hint); // doesn't show up
+        tauTextField.getTextField().setToolTipText(hint);
+        addProperty("tau",tauTextField);
         
         
         // set default selections
         if (parameters.getSpecppParameters().getTotalTimeLimit() != null) {
             totalTimeLimitInput.setText(parameters.getSpecppParameters().getTotalTimeLimit().toString());
-            totalTimeLimitInput.activate();
-        } else totalTimeLimitInput.deactivate();
+            totalTimeLimitInput.setSelected(true);
+        } else totalTimeLimitInput.setSelected(false);
         
         if (parameters.getSpecppParameters().getDiscoveryTimeLimit() != null) {
             discoveryTimeLimitInput.setText(parameters.getSpecppParameters().getDiscoveryTimeLimit().toString());
@@ -73,7 +80,7 @@ public class OCLPMDiscoverySPECppStep extends ProMPropertiesPanel implements Pro
             return parameters;
         }
         parameters.getSpecppParameters().setDiscoveryTimeLimit(this.discoveryTimeLimitInput.getInput());
-        parameters.getSpecppParameters().setTotalTimeLimit(this.totalTimeLimitInput.getInput());
+//        parameters.getSpecppParameters().setTotalTimeLimit(this.totalTimeLimitInput.getInput()); //TODO reactivate
         parameters.getSpecppParameters().setPermitNegativeMarkingsDuringReplay(this.permitNegativeMarkingsDuringReplayBox.isSelected());
         double tau = Double.parseDouble(this.tauTextField.getText());
         if (0 <= tau && tau <= 1)

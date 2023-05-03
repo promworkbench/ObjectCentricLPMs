@@ -23,30 +23,7 @@ import org.processmining.specpp.preprocessing.InputDataBundle;
 		returnTypes = { Petrinet.class },
 		help = "OCEL helper methods from the OCLPMs package."
 )
-public class SPECppMiner { //! not functional
-//	public static Petrinet minePetrinet(UIPluginContext context, XLog log, SPECppParameters specppParameters) {
-//		// configs
-//		// TODO add artificial start and end transitions?
-//		PreProcessingParameters preProcessingParameters = new PreProcessingParameters(new XEventNameClassifier(),false);
-//		DataExtractionParameters dataExtractionParameters = DataExtractionParameters.getDefault();
-//		InputProcessingConfig inputProcessingConfig = ConfigFactory.create(preProcessingParameters, dataExtractionParameters);
-//		ProMConfig proMConfig = ProMConfig.getLightweight(); // TODO make own config
-//		ProMSPECppConfig promSpecppConfig = new ProMSPECppConfig(inputProcessingConfig, proMConfig);
-//		
-//		// setup controllers
-//		ConfiguredSPECppSession configuredSpecppSession = new ConfiguredSPECppSession(log, promSpecppConfig);
-//		System.out.println("Created SPECppSession");
-//		SpecppControllerNoUI specppController = new SpecppControllerNoUI(context, configuredSpecppSession);
-//		System.out.println("Created SPECppController");
-//		DiscoveryController discoveryController = new DiscoveryController(specppController);
-//		System.out.println("Created DiscoveryController");
-//		
-//		// get result
-//		Petrinet petrinet = discoveryController.getSpecpp().getPostProcessedResult().getNet();
-//		System.out.println("Finished");
-//		
-//		return petrinet;
-//	}
+public class SPECppMiner {
 	
 	// from specpp ProMLessSPECpp.java
 	public static Petrinet minePetrinet(XLog log, SPECppParameters specppParameters) {
@@ -62,40 +39,6 @@ public class SPECppMiner { //! not functional
 		
 		return execution.getSPECpp().getPostProcessedResult().getNet();
 	}
-//	
-	// from specpp BasicSupervisedSPECpp.java
-//	public static Petrinet minePetrinet(UIPluginContext context, XLog log, SPECppParameters specppParameters) {
-//
-//        SPECppConfigBundle cfg = specppParameters.getCfg();
-//        InputDataBundle data = specppParameters.getData();
-//        SPECpp<Place, BasePlaceComposition, CollectionOfPlaces, ProMPetrinetWrapper> specpp = null;
-//        try (ExecutionEnvironment ee = new ExecutionEnvironment()) {
-//            SPECppOutputtingUtils.preSetup(cfg, data, true);
-//            specpp = SPECpp.build(cfg, data);
-//            SPECppOutputtingUtils.postSetup(specpp, true);
-//            ee.execute(specpp, ExecutionParameters.noTimeouts());
-//            SPECppOutputtingUtils.duringExecution(specpp, true);
-//        } catch (InterruptedException ignored) {
-//        }
-//        SPECppOutputtingUtils.postExecution(specpp, true, true, true);
-//		
-//		return specpp.getPostProcessedResult().getNet();
-//	}
-	
-//	// from specpp CodeDefinedConfigurationSample.java
-//	public static Petrinet minePetrinet(UIPluginContext context, XLog log, SPECppParameters specppParameters) {
-//      SPECppConfigBundle cfg = specppParameters.getCfg();
-//      InputDataBundle data = specppParameters.getData();
-//	    try (ExecutionEnvironment ee = new ExecutionEnvironment()) {
-//	        ExecutionEnvironment.SPECppExecution<Place, BasePlaceComposition, CollectionOfPlaces, ProMPetrinetWrapper> execution = ee.execute(SPECpp.build(cfg, data), ExecutionParameters.noTimeouts());
-//	        ee.addCompletionCallback(execution, ex -> {
-//	            ProMPetrinetWrapper petrinetWrapper = execution.getSPECpp().getPostProcessedResult();
-//	            VizUtils.showVisualization(PetrinetVisualization.of(petrinetWrapper));
-//	        });
-//	    } catch (InterruptedException ignored) {
-//	    }
-//	    return null;
-//	}
 	
 	@UITopiaVariant(
 			affiliation = "RWTH - PADS",
@@ -110,7 +53,6 @@ public class SPECppMiner { //! not functional
 	public static Petrinet minePetrinetPlugin(UIPluginContext context, XLog log) {
 		SPECppParameters specppParameters = new SPECppParameters();
 		specppParameters.setTau(0.9);
-//		specppParameters.set
 		specppParameters.registerParameters();
 		return minePetrinet(log, specppParameters);
 	}
