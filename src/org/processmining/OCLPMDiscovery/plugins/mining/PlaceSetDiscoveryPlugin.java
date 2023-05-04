@@ -2,9 +2,9 @@ package org.processmining.OCLPMDiscovery.plugins.mining;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.processmining.OCLPMDiscovery.Main;
-import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.wizards.OCLPMDiscoveryWizard;
 import org.processmining.OCLPMDiscovery.wizards.steps.LPMDiscoveryWizardStep;
@@ -14,48 +14,35 @@ import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoverySPECppStep;
 import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoverySettingsStep;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
-import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.framework.util.ui.wizard.ProMWizardDisplay;
 import org.processmining.framework.util.ui.wizard.ProMWizardStep;
 import org.processmining.hybridilpminer.parameters.XLogHybridILPMinerParametersImpl;
+import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
+import org.processmining.placebasedlpmdiscovery.model.Place;
+import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 
 @Plugin(
-		name = "Discovery of Object-Centric Local Process Models", // not shown anywhere anymore because overwritten by uiLabel?
-		parameterLabels = {"Log", "Set of Places", "Petri Net", "Parameters"},
-		returnLabels = { "OCLPM set" },
-		returnTypes = { OCLPMResult.class },
-		help = "Discovers Object-Centric Local Process Models on an object-centric event log (OCEL standard)."
+		name = "Discovery of Place Set on OCEL", // not shown anywhere anymore because overwritten by uiLabel?
+		parameterLabels = {"OCEL", "Parameters", "Petri Net"},
+		returnLabels = { "Place Set" },
+		returnTypes = { PlaceSet.class },
+		help = "Discovers a Place Set from an object-centric event log (OCEL standard)."
 )
-public class OCLPMDiscoveryPlugin {
-		
+public class PlaceSetDiscoveryPlugin {
 	@UITopiaVariant(
 			affiliation = "RWTH - PADS",
 			author = "Marvin Porsil",
 			email = "marvin.porsil@rwth-aachen.de",
-			uiLabel = "OCLPM test uiLabel" // name shown in ProM
+			uiLabel = "Discovery of Place Set on OCEL"
 	)
 	@PluginVariant(
-			variantLabel = "OCLPM test variantLabel", // this isn't shown anywhere?
-			requiredParameterLabels = {}
-	)
-	public static String helloWorld(PluginContext context) {
-		return "Hello World";
-	}
-	
-	@UITopiaVariant(
-			affiliation = "RWTH - PADS",
-			author = "Marvin Porsil",
-			email = "marvin.porsil@rwth-aachen.de",
-			uiLabel = "Object-Centric Local Process Model Discovery given OCEL"
-	)
-	@PluginVariant(
-			variantLabel = "Object-Centric Local Process Model Discovery",
+			variantLabel = "Discovery of Place Set on OCEL",
 			requiredParameterLabels = {0}
 	)
-	public static OCLPMResult mineOCLPMs(UIPluginContext context, OcelEventLog ocel) {
+	public static PlaceSet minePlaceSet (UIPluginContext context, OcelEventLog ocel) {
 		Main.setUp(context);
 		
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
@@ -94,15 +81,25 @@ public class OCLPMDiscoveryPlugin {
 				break;
 			default:
 		}
-		
-		return (OCLPMResult) Main.run(ocel, parameters)[0];
+		return Main.discoverPlaceSet(ocel, parameters);
 	}
 	
-	// variant skipping the place net discovery
-	//TODO: variant with input (ocel, set(set(place net),object type))
-	
-	// variant skipping the place net discovery and process execution computation
-	//TODO: variant with input (ocel, set(set(place net),object type), (log,set(column names)))
-	
-	// TODO all variants without UI
+	@UITopiaVariant(
+			affiliation = "RWTH - PADS",
+			author = "Marvin Porsil",
+			email = "marvin.porsil@rwth-aachen.de",
+			uiLabel = "Convert Petri Net into Place Set"
+	)
+	@PluginVariant(
+			variantLabel = "Convert Petri Net into Place Set",
+			requiredParameterLabels = {2}
+	)
+	public static PlaceSet convertToPlaceSet (UIPluginContext context, Petrinet petriNet) {
+		Main.setUp(context);
+		
+		Set<Place> places = FlatLogProcessing.convertPetriNetToPlaceNets(context, petriNet, "");
+		PlaceSet placeSet = new PlaceSet(places);
+
+		return placeSet;
+	}
 }

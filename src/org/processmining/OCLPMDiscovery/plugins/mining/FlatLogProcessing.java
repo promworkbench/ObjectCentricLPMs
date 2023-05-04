@@ -10,7 +10,6 @@ import org.processmining.OCLPMDiscovery.model.TaggedPlace;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.acceptingpetrinet.models.impl.AcceptingPetriNetImpl;
-import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.framework.connections.ConnectionCannotBeObtained;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.models.connections.petrinets.behavioral.FinalMarkingConnection;
@@ -22,14 +21,14 @@ import org.processmining.placebasedlpmdiscovery.model.Place;
 public class FlatLogProcessing {
 	
 	// Discover Petri net, convert to place nets and tag them
-	public static Set<Place> processFlatLog (UIPluginContext context, XLog log, String objectType, OCLPMDiscoveryParameters parameters){
+	public static Set<Place> processFlatLog (PluginContext context, XLog log, String objectType, OCLPMDiscoveryParameters parameters){
 		Petrinet petrinet = discoverPetriNet (context, log, parameters);
 		Set<Place> placeNets = convertPetriNetToPlaceNets (context, petrinet, objectType);
 //		Set<TaggedPlace> taggedPlaceNets = tagPlaceNets (placeNets, objectType);
 		return placeNets;
 	}
 
-	public static Petrinet discoverPetriNet (UIPluginContext context, XLog log, OCLPMDiscoveryParameters parameters) {
+	public static Petrinet discoverPetriNet (PluginContext context, XLog log, OCLPMDiscoveryParameters parameters) {
 		Petrinet petrinet;
 		switch(parameters.getPlaceDiscoveryAlgorithm()) {
 			case ILP:
@@ -59,7 +58,7 @@ public class FlatLogProcessing {
 					.map(c -> (Marking) c.getObjectWithRole(FinalMarkingConnection.MARKING))
 					.collect(Collectors.toList());
 		} catch (ConnectionCannotBeObtained cannotBeObtained) {
-			cannotBeObtained.printStackTrace();
+			cannotBeObtained.printStackTrace(); //TODO always occurs, is this a problem?
 		}
 		AcceptingPetriNet acceptingPetriNet = new AcceptingPetriNetImpl(petrinet);
 		PetriNetTaggedPlaceConverter converter = new PetriNetTaggedPlaceConverter(objectType);
