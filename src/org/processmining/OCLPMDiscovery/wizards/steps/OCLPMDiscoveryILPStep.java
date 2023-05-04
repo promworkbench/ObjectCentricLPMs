@@ -5,15 +5,15 @@ import java.util.List;
 import javax.swing.JComponent;
 
 import org.deckfour.xes.classification.XEventNameClassifier;
+import org.processmining.OCLPMDiscovery.gui.OCLPMPropertiesPanel;
 import org.processmining.OCLPMDiscovery.parameters.Miner;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.util.ui.widgets.ProMComboBox;
-import org.processmining.framework.util.ui.widgets.ProMPropertiesPanel;
 import org.processmining.framework.util.ui.wizard.ProMWizardStep;
 import org.processmining.hybridilpminer.parameters.XLogHybridILPMinerParametersImpl;
 
-public class OCLPMDiscoveryILPStep extends ProMPropertiesPanel implements ProMWizardStep<OCLPMDiscoveryParameters>{
+public class OCLPMDiscoveryILPStep extends OCLPMPropertiesPanel implements ProMWizardStep<OCLPMDiscoveryParameters>{
 	
 	private static final String TITLE = "Hybrid ILP Miner Settings";
 	

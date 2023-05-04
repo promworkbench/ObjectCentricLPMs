@@ -33,14 +33,14 @@ public class OCLPMDiscoverySPECppStep extends OCLPMPropertiesPanel implements Pr
         // create UI elements
         int nameLabelSize = 250;
         
-        totalTimeLimitInput = new OCLPMCheckBoxWithTextField(true,true,"",true,nameLabelSize); //TODO change default parameters
+        totalTimeLimitInput = new OCLPMCheckBoxWithTextField(true,true,"",true,nameLabelSize);
         totalTimeLimitInput.getCheckBox()
                            .setToolTipText("Real time limit over entire computation (discovery + post processing). Stops abruptly.");
         totalTimeLimitInput.getTextField()
                            .setToolTipText("Time in Minutes (double values possible)");
         addProperty("total time limit [minutes]",this.totalTimeLimitInput,nameLabelSize);
         
-        discoveryTimeLimitInput = new OCLPMCheckBoxWithTextField(true,true,"",true,nameLabelSize); //TODO change default parameters
+        discoveryTimeLimitInput = new OCLPMCheckBoxWithTextField(true,true,"",true,nameLabelSize);
         discoveryTimeLimitInput.getCheckBox()
                                .setToolTipText("Real time limit for place discovery. Gracefully continues to post processing with intermediate result.");
         discoveryTimeLimitInput.getTextField()

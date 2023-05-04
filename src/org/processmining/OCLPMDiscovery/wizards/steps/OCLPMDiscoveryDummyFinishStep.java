@@ -2,22 +2,23 @@ package org.processmining.OCLPMDiscovery.wizards.steps;
 
 import javax.swing.JComponent;
 
+import org.processmining.OCLPMDiscovery.gui.OCLPMPropertiesPanel;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
-import org.processmining.framework.util.ui.widgets.ProMPropertiesPanel;
 import org.processmining.framework.util.ui.widgets.ProMTextArea;
 import org.processmining.framework.util.ui.wizard.ProMWizardStep;
 
-public class OCLPMDiscoveryDummyFinishStep extends ProMPropertiesPanel implements ProMWizardStep<OCLPMDiscoveryParameters>{
+public class OCLPMDiscoveryDummyFinishStep extends OCLPMPropertiesPanel implements ProMWizardStep<OCLPMDiscoveryParameters>{
 	
 	private static final String TITLE = "Finished Configuration";
 
     public OCLPMDiscoveryDummyFinishStep(OCLPMDiscoveryParameters parameters) {
         super(TITLE);
-        //TODO maybe print the selected settings here
+        //TODO print more selected parameters
         ProMTextArea textArea = new ProMTextArea();
         textArea.setEditable(false);
         textArea.append(parameters.toString());
-        addProperty("",textArea); //TODO add the text area without the name on the left
+        textArea.append("\n Yes, this currently only shows the default values, not the selected parameters..."); //TODO fix that
+        addProperty("",textArea,0); //TODO add the text area without the name on the left
     }
 
     @Override

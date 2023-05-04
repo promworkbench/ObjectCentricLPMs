@@ -4,12 +4,12 @@ import java.util.HashSet;
 
 import javax.swing.JComponent;
 
+import org.processmining.OCLPMDiscovery.gui.OCLPMPropertiesPanel;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.framework.util.ui.widgets.ProMList;
-import org.processmining.framework.util.ui.widgets.ProMPropertiesPanel;
 import org.processmining.framework.util.ui.wizard.ProMWizardStep;
 
-public class OCLPMDiscoveryLPMStep extends ProMPropertiesPanel implements ProMWizardStep<OCLPMDiscoveryParameters>{
+public class OCLPMDiscoveryLPMStep extends OCLPMPropertiesPanel implements ProMWizardStep<OCLPMDiscoveryParameters>{
 	
 	private static final String TITLE = "LPM Discovery Case Notion Settings";
 	

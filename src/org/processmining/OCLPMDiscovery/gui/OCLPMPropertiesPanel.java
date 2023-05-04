@@ -18,7 +18,6 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.text.JTextComponent;
 
 import org.processmining.framework.util.ui.widgets.ProMComboBox;
-import org.processmining.framework.util.ui.widgets.ProMHeaderPanel;
 import org.processmining.framework.util.ui.widgets.ProMPasswordField;
 import org.processmining.framework.util.ui.widgets.ProMScrollPane;
 import org.processmining.framework.util.ui.widgets.ProMScrollablePanel;
@@ -31,7 +30,7 @@ import com.fluxicon.slickerbox.factory.SlickerFactory;
 /**
  * ProMPropertiesPanel with some stuff changed
  */
-public class OCLPMPropertiesPanel extends ProMHeaderPanel {
+public class OCLPMPropertiesPanel extends OCLPMHeaderPanel {
 
 	/**
 	 * 

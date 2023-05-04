@@ -7,15 +7,15 @@ import java.util.List;
 
 import javax.swing.JComponent;
 
+import org.processmining.OCLPMDiscovery.gui.OCLPMPropertiesPanel;
 import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.Miner;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.framework.util.ui.widgets.ProMComboBox;
 import org.processmining.framework.util.ui.widgets.ProMList;
-import org.processmining.framework.util.ui.widgets.ProMPropertiesPanel;
 import org.processmining.framework.util.ui.wizard.ProMWizardStep;
 
-public class OCLPMDiscoverySettingsStep extends ProMPropertiesPanel implements ProMWizardStep<OCLPMDiscoveryParameters>{
+public class OCLPMDiscoverySettingsStep extends OCLPMPropertiesPanel implements ProMWizardStep<OCLPMDiscoveryParameters>{
 	
 	private static final String TITLE = "OCLPM Discovery Settings";
 	

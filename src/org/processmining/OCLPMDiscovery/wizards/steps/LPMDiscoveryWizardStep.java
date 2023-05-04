@@ -5,9 +5,9 @@ import java.awt.event.KeyListener;
 
 import javax.swing.JComponent;
 
+import org.processmining.OCLPMDiscovery.gui.OCLPMPropertiesPanel;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.framework.util.ui.widgets.ProMComboCheckBox;
-import org.processmining.framework.util.ui.widgets.ProMPropertiesPanel;
 import org.processmining.framework.util.ui.widgets.ProMTextField;
 import org.processmining.framework.util.ui.wizard.ProMWizardStep;
 import org.processmining.placebasedlpmdiscovery.plugins.mining.PlaceBasedLPMDiscoveryParameters;
@@ -17,7 +17,7 @@ import com.fluxicon.slickerbox.components.NiceSlider;
 import com.fluxicon.slickerbox.factory.SlickerFactory;
 
 // copy from placebasedlpmdiscovery wizard steps
-public class LPMDiscoveryWizardStep extends ProMPropertiesPanel implements ProMWizardStep<OCLPMDiscoveryParameters> {
+public class LPMDiscoveryWizardStep extends OCLPMPropertiesPanel implements ProMWizardStep<OCLPMDiscoveryParameters> {
 
     private static final String TITLE = "LPM Discovery Configuration";
 
