@@ -163,4 +163,12 @@ public class SPECppParameters {
 	public double getTau() {
 		return tau;
 	}
+	
+	public double getTotalTimeLimitAsMinutes() {
+		return this.totalTimeLimit.getSeconds()/60.0;
+	}
+	
+	public double getDiscoveryTimeLimitAsMinutes() {
+		return this.discoveryTimeLimit.getSeconds()/60.0;
+	}
 }

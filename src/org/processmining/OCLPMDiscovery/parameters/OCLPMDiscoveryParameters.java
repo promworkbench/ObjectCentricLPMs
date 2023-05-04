@@ -23,7 +23,7 @@ public class OCLPMDiscoveryParameters {
 	private PlaceBasedLPMDiscoveryParameters PBLPMDiscoveryParameters;
 	
 	//TODO set default when the real strategies work
-	private Miner placeDiscoveryAlgorithm 			= Miner.ILP;
+	private Miner placeDiscoveryAlgorithm 			= Miner.SPECPP;
 	private CaseNotionStrategy caseNotionStrategy 	= CaseNotionStrategy.DUMMY;
 	
 	public OCLPMDiscoveryParameters(OcelEventLog ocel) {
