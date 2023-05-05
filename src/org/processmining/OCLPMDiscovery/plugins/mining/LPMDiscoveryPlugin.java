@@ -86,10 +86,10 @@ public class LPMDiscoveryPlugin {
 			affiliation = "RWTH - PADS",
 			author = "Marvin Porsil",
 			email = "marvin.porsil@rwth-aachen.de",
-			uiLabel = "Local Process Model Discovery given OCEL"
+			uiLabel = "Local Process Model Discovery given OCEL and PlaceSet"
 	)
 	@PluginVariant(
-			variantLabel = "Local Process Model Discovery",
+			variantLabel = "Local Process Model Discovery given OCEL and PlaceSet",
 			requiredParameterLabels = {0,1}
 	)
 	public static LPMResult mineLPMs(UIPluginContext context, OcelEventLog ocel, PlaceSet placeSet) {

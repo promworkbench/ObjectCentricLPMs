@@ -25,7 +25,7 @@ public class SPECppParameters {
 	
 	// Parameters that are useful to change:
 	// time limits
-	private Duration discoveryTimeLimit = Duration.ofMinutes(2);
+	private Duration discoveryTimeLimit = Duration.ofMinutes(2); //TODO those don't seem to be working correctly, specpp takes longer
 	private Duration totalTimeLimit = Duration.ofMinutes(3);
 	//	tau
 	private double tau = 1;
