@@ -93,11 +93,12 @@ public class OCLPMDiscoverySPECppStep extends OCLPMPropertiesPanel implements Pr
     	try
     	{
     	  double minutes = Double.parseDouble(input);
-    	  long seconds = (long) minutes*60;
+    	  long seconds = (long) (minutes*60.0);
     	  duration = Duration.ofSeconds(seconds);
     	}
     	catch(NumberFormatException e)
     	{
+    		System.out.println("Entered incorrect time format.");
     	  //not a double
     	}
     	return duration;

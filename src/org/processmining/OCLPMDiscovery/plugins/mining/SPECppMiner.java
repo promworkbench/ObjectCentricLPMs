@@ -9,7 +9,6 @@ import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.specpp.base.impls.SPECpp;
 import org.processmining.specpp.composition.BasePlaceComposition;
-import org.processmining.specpp.config.parameters.ExecutionParameters;
 import org.processmining.specpp.datastructures.petri.CollectionOfPlaces;
 import org.processmining.specpp.datastructures.petri.Place;
 import org.processmining.specpp.datastructures.petri.ProMPetrinetWrapper;
@@ -32,7 +31,7 @@ public class SPECppMiner {
 
         ExecutionEnvironment.SPECppExecution<Place, BasePlaceComposition, CollectionOfPlaces, ProMPetrinetWrapper> execution;
         try (ExecutionEnvironment ee = new ExecutionEnvironment(Runtime.getRuntime().availableProcessors())) {
-            execution = ee.execute(specpp, ExecutionParameters.noTimeouts());
+            execution = ee.execute(specpp, specppParameters.getExecutionParameters());
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

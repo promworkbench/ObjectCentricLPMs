@@ -22,11 +22,14 @@ import org.processmining.specpp.preprocessing.orderings.Lexicographic;
 public class SPECppParameters {
 	
 	private SPECppConfigBundle cfg;
+	private ExecutionParameters executionParameters;
 	
 	// Parameters that are useful to change:
 	// time limits
-	private Duration discoveryTimeLimit = Duration.ofMinutes(2); //TODO those don't seem to be working correctly, specpp takes longer
-	private Duration totalTimeLimit = Duration.ofMinutes(3);
+//	private Duration discoveryTimeLimit = Duration.ofMinutes(2);
+	private Duration discoveryTimeLimit = Duration.ofSeconds(30);
+//	private Duration totalTimeLimit = Duration.ofMinutes(3);
+	private Duration totalTimeLimit = Duration.ofSeconds(60);
 	//	tau
 	private double tau = 1;
 	//	permit negative markings during token replay (more freedom = more possibilities but less pruning = more time)
@@ -92,16 +95,20 @@ public class SPECppParameters {
 				new ExecutionParameters.ExecutionTimeLimits(this.discoveryTimeLimit, null, this.totalTimeLimit), 
 				ExecutionParameters.ParallelizationTarget.Moderate, 
 				ExecutionParameters.PerformanceFocus.Balanced);
+		this.setExecutionParameters(exp);
+		
 //        PlaceGeneratorParameters pgp = new PlaceGeneratorParameters(pc.depth < 0 ? Integer.MAX_VALUE : pc.depth, true, pc.respectWiring, false, false);
 		
 		AlgorithmParameterConfig currentAPC = this.cfg.getAlgorithmParameterConfig();
 		
 		ParameterProvider pp = new ParameterProvider() {
             @Override
-            public void init() {
+            public void init() { //TODO does all this even work?
             	// combine default parameters with new parameters
                 currentAPC.registerAlgorithmParameters(globalComponentSystem());
                 
+                System.out.println("SPECpp registering total time limit: "+exp.getTimeLimits().getTotalTimeLimit().getSeconds()+" seconds.");
+                System.out.println("SPECpp registering discovery time limit: "+exp.getTimeLimits().getDiscoveryTimeLimit().getSeconds()+" seconds.");
             	globalComponentSystem()
                 .provide(ParameterRequirements.EXECUTION_PARAMETERS.fulfilWithStatic(exp))
                 .provide(ParameterRequirements.TAU_FITNESS_THRESHOLDS.fulfilWithStatic(TauFitnessThresholds.tau(tau)))
@@ -170,5 +177,13 @@ public class SPECppParameters {
 	
 	public double getDiscoveryTimeLimitAsMinutes() {
 		return this.discoveryTimeLimit.getSeconds()/60.0;
+	}
+
+	public ExecutionParameters getExecutionParameters() {
+		return executionParameters;
+	}
+
+	public void setExecutionParameters(ExecutionParameters executionParameters) {
+		this.executionParameters = executionParameters;
 	}
 }
