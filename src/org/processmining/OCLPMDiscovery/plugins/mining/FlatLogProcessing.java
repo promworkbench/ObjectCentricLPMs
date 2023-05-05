@@ -20,12 +20,18 @@ import org.processmining.placebasedlpmdiscovery.model.Place;
 
 public class FlatLogProcessing {
 	
-	// Discover Petri net, convert to place nets and tag them
-	public static Set<Place> processFlatLog (PluginContext context, XLog log, String objectType, OCLPMDiscoveryParameters parameters){
+	/**
+	 *  Discover Petri net, convert to place nets and tag them
+	 * @param context
+	 * @param log
+	 * @param objectType
+	 * @param parameters
+	 * @return {Set<Place>, HashMap<String,String>}
+	 */
+	public static Object[] processFlatLog (PluginContext context, XLog log, String objectType, OCLPMDiscoveryParameters parameters){
 		Petrinet petrinet = discoverPetriNet (context, log, parameters);
-		Set<Place> placeNets = convertPetriNetToPlaceNets (context, petrinet, objectType);
-//		Set<TaggedPlace> taggedPlaceNets = tagPlaceNets (placeNets, objectType);
-		return placeNets;
+		Object[] results = convertPetriNetToPlaceNetsWithMap (context, petrinet, objectType);
+		return results;
 	}
 
 	public static Petrinet discoverPetriNet (PluginContext context, XLog log, OCLPMDiscoveryParameters parameters) {
@@ -45,7 +51,39 @@ public class FlatLogProcessing {
 		return petrinet;
 	}
 	
-	// tags place nets but casts from TaggedPlace to Place
+	/**
+	 *  tags place nets by saving a map <Place.id,tag>
+	 * @param context
+	 * @param petrinet
+	 * @param objectType
+	 * @return {Set<Place>, HashMap<String,String>}
+	 */
+	public static Object[] convertPetriNetToPlaceNetsWithMap (PluginContext context, Petrinet petrinet, String objectType){
+		Marking initialMarking = null;
+		List<Marking> finalMarkings = null;
+		try {
+			initialMarking = context.getConnectionManager()
+					.getFirstConnection(InitialMarkingConnection.class, context, petrinet)
+					.getObjectWithRole(InitialMarkingConnection.MARKING);
+			finalMarkings = context.getConnectionManager().getConnections(FinalMarkingConnection.class, context, petrinet)
+					.stream()
+					.map(c -> (Marking) c.getObjectWithRole(FinalMarkingConnection.MARKING))
+					.collect(Collectors.toList());
+		} catch (ConnectionCannotBeObtained cannotBeObtained) {
+			cannotBeObtained.printStackTrace(); //TODO always occurs, is this a problem?
+		}
+		AcceptingPetriNet acceptingPetriNet = new AcceptingPetriNetImpl(petrinet);
+		PetriNetTaggedPlaceConverter converter = new PetriNetTaggedPlaceConverter(objectType);
+		return converter.convertWithMap(acceptingPetriNet);
+	}
+	
+	/**
+	 *  tags place nets but casts from TaggedPlace to Place
+	 * @param context
+	 * @param petrinet
+	 * @param objectType
+	 * @return
+	 */
 	public static Set<Place> convertPetriNetToPlaceNets (PluginContext context, Petrinet petrinet, String objectType){
 		Marking initialMarking = null;
 		List<Marking> finalMarkings = null;
@@ -62,7 +100,7 @@ public class FlatLogProcessing {
 		}
 		AcceptingPetriNet acceptingPetriNet = new AcceptingPetriNetImpl(petrinet);
 		PetriNetTaggedPlaceConverter converter = new PetriNetTaggedPlaceConverter(objectType);
-		return converter.convert(acceptingPetriNet);
+		return converter.convertCasted(acceptingPetriNet);
 	}
 	
 	public static Set<TaggedPlace> convertPetriNetToTaggedPlaceNets (PluginContext context, Petrinet petrinet, String objectType){

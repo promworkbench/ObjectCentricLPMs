@@ -27,8 +27,8 @@ import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 @Plugin(
 		name = "Discovery of Place Set on OCEL", // not shown anywhere anymore because overwritten by uiLabel?
 		parameterLabels = {"OCEL", "Parameters", "Petri Net"},
-		returnLabels = { "Place Set" },
-		returnTypes = { PlaceSet.class },
+		returnLabels = { "Place Set", "Object Type Map"},
+		returnTypes = { PlaceSet.class, HashMap.class },
 		help = "Discovers a Place Set from an object-centric event log (OCEL standard)."
 )
 public class PlaceSetDiscoveryPlugin {
@@ -42,7 +42,7 @@ public class PlaceSetDiscoveryPlugin {
 			variantLabel = "Discovery of Place Set on OCEL",
 			requiredParameterLabels = {0}
 	)
-	public static PlaceSet minePlaceSet (UIPluginContext context, OcelEventLog ocel) {
+	public static Object[] minePlaceSet (UIPluginContext context, OcelEventLog ocel) {
 		Main.setUp(context);
 		
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);

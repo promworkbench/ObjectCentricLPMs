@@ -1,5 +1,6 @@
 package org.processmining.OCLPMDiscovery;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,7 +40,9 @@ public class Main {
 	
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
         //TODO print out progress in ProM and show progression bar
-		PlaceSet placeSet = discoverPlaceSet(ocel,parameters);
+		Object[] results = discoverPlaceSet(ocel,parameters);
+		PlaceSet placeSet = (PlaceSet) results[0];
+		HashMap<String,String> typeMap = (HashMap<String,String>) results[1];
 		
 		LPMResult lpmResult = discoverLPMs(ocel, parameters, placeSet);
 		
@@ -55,7 +58,7 @@ public class Main {
 	
 	public static LPMResult runLPMDiscovery(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
         
-		PlaceSet placeSet = discoverPlaceSet(ocel,parameters);
+		PlaceSet placeSet = (PlaceSet) discoverPlaceSet(ocel,parameters)[0];
 		
 		LPMResult lpmResult = discoverLPMs(ocel, parameters, placeSet);
 
@@ -72,9 +75,16 @@ public class Main {
 	//===================================================================
 	//		logic
 	//===================================================================
-	
-	public static PlaceSet discoverPlaceSet(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
+	/**
+	 * Returns a PlaceSet and a map which maps each Place.id to the ObjectType of the flat log on which it has been discovered
+	 * @param ocel
+	 * @param parameters
+	 * @return {PlaceSet, HashMap<String,String>}
+	 */
+	public static Object[] discoverPlaceSet(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
 		Set<Place> placeNetsUnion = new HashSet<>();
+		HashMap<String,String> typeMap = new HashMap<String,String>();
+		
 		// place net discovery
 		for (String currentType : parameters.getObjectTypesPlaceNets()) {
 			// flatten ocel
@@ -84,17 +94,22 @@ public class Main {
 			// discover petri net using est-miner (use specpp)
 			// split petri net into place nets
 			// tag places with current object type
-			Set<Place> placeNets = FlatLogProcessing.processFlatLog(Context, flatLog, currentType, parameters); //TODO what happens if Context==null?
+			Object[] results = FlatLogProcessing.processFlatLog(Context, flatLog, currentType, parameters); //TODO what happens if Context==null?
+			assert(results[0] instanceof Set);
+			Set<Place> placeNets = (Set<Place>) results[0];
+			assert(results[1] instanceof HashMap);
+			HashMap<String,String> newMap = (HashMap<String,String>) results[1];
 			System.out.println("Finished discovery of place nets for object type "+currentType);
 
 			// unite place nets
 			placeNetsUnion.addAll(placeNets);
+			typeMap.putAll(newMap);
 		}
 		
 		// convert set of places to PlaceSet
 		PlaceSet placeSet = new PlaceSet(placeNetsUnion);
 		
-		return placeSet;
+		return new Object[] {placeSet, typeMap};
 	}
 	
 	public static LPMResult discoverLPMs(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet) {
