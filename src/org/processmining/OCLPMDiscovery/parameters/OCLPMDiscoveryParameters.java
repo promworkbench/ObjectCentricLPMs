@@ -4,14 +4,13 @@ import java.util.Set;
 
 import javax.swing.DefaultListModel;
 
-import org.deckfour.xes.model.XLog;
 import org.processmining.OCLPMDiscovery.utils.OCELUtils;
 import org.processmining.hybridilpminer.parameters.XLogHybridILPMinerParametersImpl;
-import org.processmining.ocel.flattening.Flattening;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
+import org.processmining.placebasedlpmdiscovery.model.logs.EventLog;
 import org.processmining.placebasedlpmdiscovery.plugins.mining.PlaceBasedLPMDiscoveryParameters;
 
-public class OCLPMDiscoveryParameters {
+public class OCLPMDiscoveryParameters implements EventLog{
 	private OcelEventLog ocel;
 	private Set<String> activities;
 	private Set<String> objectTypesAll;
@@ -40,11 +39,7 @@ public class OCLPMDiscoveryParameters {
         }
         
         // setup LPM discovery
-        String dummyType = "DummyType";
-		OcelEventLog dummyOcel = OCELUtils.addDummyCaseNotion(ocel,"DummyType","42");
-		XLog flatDummyLog = Flattening.flatten(dummyOcel,dummyType);
-        this.PBLPMDiscoveryParameters = new PlaceBasedLPMDiscoveryParameters(flatDummyLog); // null-init leads to problems, needs a log with all activities
-        
+        this.PBLPMDiscoveryParameters = new PlaceBasedLPMDiscoveryParameters(this); // null-init leads to problems, needs a log with all activities        
 	}
 
 	@Override
