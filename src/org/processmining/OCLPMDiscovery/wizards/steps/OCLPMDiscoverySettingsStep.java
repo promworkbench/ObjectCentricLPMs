@@ -7,29 +7,27 @@ import java.util.List;
 
 import javax.swing.JComponent;
 
+import org.processmining.OCLPMDiscovery.gui.OCLPMList;
 import org.processmining.OCLPMDiscovery.gui.OCLPMPropertiesPanel;
-import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.Miner;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.framework.util.ui.widgets.ProMComboBox;
-import org.processmining.framework.util.ui.widgets.ProMList;
 import org.processmining.framework.util.ui.wizard.ProMWizardStep;
 
 public class OCLPMDiscoverySettingsStep extends OCLPMPropertiesPanel implements ProMWizardStep<OCLPMDiscoveryParameters>{
 	
 	private static final String TITLE = "OCLPM Discovery Settings";
 	
-	ProMList<String> list_TypesPlaceNets;
+	OCLPMList<String> list_TypesPlaceNets;
 	ProMComboBox<String> box_placeDiscoveryMiner;
-	ProMComboBox<String> box_LPMDiscoveryCaseNotionStrategy;
 	List<Miner> minersListEnums;
-	List<CaseNotionStrategy> caseNotionListEnums;
 
     public OCLPMDiscoverySettingsStep(OCLPMDiscoveryParameters parameters) {
         super(TITLE);        
 		
         // scrollable list with all object types where each can be ticked off or on
-        this.list_TypesPlaceNets = addProperty("Place Nets", new ProMList<String>("Select Object Types for Place Net Discovery",parameters.getObjectTypesList()));
+        this.list_TypesPlaceNets = new OCLPMList<String>("Select Object Types for Place Net Discovery",parameters.getObjectTypesList());
+        addProperty("Place Nets", this.list_TypesPlaceNets);
         
         // set initial state to be all selected
         int start = 0;
@@ -47,14 +45,6 @@ public class OCLPMDiscoverySettingsStep extends OCLPMPropertiesPanel implements 
         // set default selection
         this.box_placeDiscoveryMiner.setSelectedItem(parameters.getPlaceDiscoveryAlgorithm().getName());
         
-        // selection of strategy for artificial case notion
-        this.caseNotionListEnums = Arrays.asList(CaseNotionStrategy.values());
-        ArrayList<String> caseNotionListStrings = new ArrayList<String>();
-        this.caseNotionListEnums.forEach(cur -> caseNotionListStrings.add(cur.getName()));
-        this.box_LPMDiscoveryCaseNotionStrategy = addComboBox("LPM Case Notion", caseNotionListStrings);//TODO Add some description when hovering over the box?
-        // set default selection
-        this.box_LPMDiscoveryCaseNotionStrategy.setSelectedItem(parameters.getCaseNotionStrategy().getName());
-        
 //        System.out.println("Finished OCLPMDiscoverySettingsStep constructor.");
     }
 
@@ -65,7 +55,6 @@ public class OCLPMDiscoverySettingsStep extends OCLPMPropertiesPanel implements 
         }
         parameters.setObjectTypesPlaceNets(new HashSet<String>(list_TypesPlaceNets.getSelectedValuesList()));
         parameters.setPlaceDiscoveryAlgorithm(this.minersListEnums.get(box_placeDiscoveryMiner.getSelectedIndex()));
-        parameters.setCaseNotionStrategy(this.caseNotionListEnums.get(box_LPMDiscoveryCaseNotionStrategy.getSelectedIndex()));
         return parameters;
     }
 

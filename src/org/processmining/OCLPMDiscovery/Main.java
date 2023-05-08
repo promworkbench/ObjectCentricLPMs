@@ -7,7 +7,7 @@ import java.util.Set;
 import org.deckfour.xes.model.XLog;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
-import org.processmining.OCLPMDiscovery.plugins.mining.FlatLogProcessing;
+import org.processmining.OCLPMDiscovery.utils.FlatLogProcessing;
 import org.processmining.OCLPMDiscovery.utils.OCELUtils;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.ocel.flattening.Flattening;
@@ -31,13 +31,12 @@ public class Main {
 	//===================================================================
 	//		Variants
 	//===================================================================
-	public static Object[] run() {
-        System.out.println("Hello from main run!");
-        OCLPMResult result = new OCLPMResult();
-
-        return new Object[] {result};
-    }
-	
+	/**
+	 * Full OCLPMs discovery starting from ocel
+	 * @param ocel
+	 * @param parameters
+	 * @return
+	 */
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
         //TODO print out progress in ProM and show progression bar
 		Object[] results = discoverPlaceSet(ocel,parameters);
@@ -46,16 +45,31 @@ public class Main {
 		
 		LPMResult lpmResult = discoverLPMs(ocel, parameters, placeSet);
 		
-		//TODO make OCLPMResult object
-		OCLPMResult oclpmResult = new OCLPMResult();
-		
-		// TODO assign places to objects
-		
-		// TODO identify variable arcs
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, lpmResult, typeMap);
 
         return new Object[] {oclpmResult};
     }
 	
+	/**
+	 * Full OCLPMs discovery starting from place nets
+	 * @param ocel
+	 * @param parameters
+	 * @return
+	 */
+	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet, HashMap<String,String> typeMap) {
+        LPMResult lpmResult = discoverLPMs(ocel, parameters, placeSet);
+		
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, lpmResult, typeMap);
+
+        return new Object[] {oclpmResult};
+    }
+	
+	/**
+	 * Discover only LPMs starting from ocel
+	 * @param ocel
+	 * @param parameters
+	 * @return
+	 */
 	public static LPMResult runLPMDiscovery(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
         
 		PlaceSet placeSet = (PlaceSet) discoverPlaceSet(ocel,parameters)[0];
@@ -65,6 +79,13 @@ public class Main {
         return lpmResult;
     }
 	
+	/**
+	 * Discover only LPMs starting with place set
+	 * @param ocel
+	 * @param parameters
+	 * @param placeSet
+	 * @return
+	 */
 	public static LPMResult runLPMDiscovery(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet) {
         	
 		LPMResult lpmResult = discoverLPMs(ocel, parameters, placeSet);
@@ -149,5 +170,16 @@ public class Main {
 		System.out.println("LPMResult stores "+lpmResult.size()+" LPMs.");
 		
 		return lpmResult;
+	}
+	
+	public static OCLPMResult convertLPMstoOCLPMs (OCLPMDiscoveryParameters parameters, LPMResult lpmResult, HashMap<String,String> typeMap) {
+		//TODO make OCLPMResult object
+		OCLPMResult oclpmResult = new OCLPMResult(parameters, lpmResult, typeMap);
+		
+		// TODO assign places to objects
+		
+		// TODO identify variable arcs
+		
+		return oclpmResult;
 	}
 }

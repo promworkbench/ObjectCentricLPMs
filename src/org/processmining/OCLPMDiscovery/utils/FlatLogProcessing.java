@@ -1,4 +1,4 @@
-package org.processmining.OCLPMDiscovery.plugins.mining;
+package org.processmining.OCLPMDiscovery.utils;
 
 import java.util.List;
 import java.util.Set;
@@ -8,6 +8,8 @@ import org.deckfour.xes.model.XLog;
 import org.processmining.OCLPMDiscovery.converters.PetriNetTaggedPlaceConverter;
 import org.processmining.OCLPMDiscovery.model.TaggedPlace;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
+import org.processmining.OCLPMDiscovery.plugins.mining.ILPMiner;
+import org.processmining.OCLPMDiscovery.plugins.mining.SPECppMiner;
 import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.acceptingpetrinet.models.impl.AcceptingPetriNetImpl;
 import org.processmining.framework.connections.ConnectionCannotBeObtained;

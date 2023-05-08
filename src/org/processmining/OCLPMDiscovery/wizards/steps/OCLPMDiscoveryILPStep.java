@@ -4,30 +4,35 @@ import java.util.List;
 
 import javax.swing.JComponent;
 
-import org.deckfour.xes.classification.XEventNameClassifier;
 import org.processmining.OCLPMDiscovery.gui.OCLPMPropertiesPanel;
 import org.processmining.OCLPMDiscovery.parameters.Miner;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
-import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.util.ui.widgets.ProMComboBox;
+import org.processmining.framework.util.ui.widgets.ProMTextArea;
 import org.processmining.framework.util.ui.wizard.ProMWizardStep;
-import org.processmining.hybridilpminer.parameters.XLogHybridILPMinerParametersImpl;
 
 public class OCLPMDiscoveryILPStep extends OCLPMPropertiesPanel implements ProMWizardStep<OCLPMDiscoveryParameters>{
 	
 	private static final String TITLE = "Hybrid ILP Miner Settings";
+	
+	ProMTextArea textArea;
 	
 	ProMComboBox<String> box_IlpMiners;
 	List<Miner> minersListEnums;
 
     public OCLPMDiscoveryILPStep(OCLPMDiscoveryParameters parameters) {
         super(TITLE);
-        PluginContext context = null; //TODO does this work?
-        XLogHybridILPMinerParametersImpl ilpParameters = new XLogHybridILPMinerParametersImpl(context);
-        parameters.setIlpParameters(ilpParameters);
-        XEventNameClassifier classifier = new XEventNameClassifier();
-		classifier.setName("concept:name");
-		parameters.getIlpParameters().setEventClassifier(classifier);
+//        PluginContext context = null; //TODO does this work?
+//        XLogHybridILPMinerParametersImpl ilpParameters = new XLogHybridILPMinerParametersImpl(context);
+//        parameters.setIlpParameters(ilpParameters);
+//        XEventNameClassifier classifier = new XEventNameClassifier();
+//		classifier.setName("concept:name");
+//		parameters.getIlpParameters().setEventClassifier(classifier);
+        
+        this.textArea = new ProMTextArea();
+        textArea.setEditable(false);
+        textArea.append("ILP Miner settings follow in the next wizard after this one."); //TODO integrate settings into this if necessary
+        addProperty("",textArea,0);
 
         //TODO set default parameters
         

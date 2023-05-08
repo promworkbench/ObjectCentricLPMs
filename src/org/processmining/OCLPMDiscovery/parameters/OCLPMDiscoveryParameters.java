@@ -14,11 +14,13 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	private OcelEventLog ocel;
 	private Set<String> activities;
 	private Set<String> objectTypesAll;
+	private DefaultListModel<String> objectTypesList = new DefaultListModel<String>();
 	private Set<String> objectTypesPlaceNets; // object types for which the log is flattened and place nets are discovered
 	private Set<String> objectTypesLeadingTypes; // object types which are used as leading types for discovering process executions
+	
+	// place discovery
 	private SPECppParameters specppParameters;
 	private XLogHybridILPMinerParametersImpl ilpParameters;
-	private DefaultListModel<String> objectTypesList = new DefaultListModel<String>();
 	private PlaceBasedLPMDiscoveryParameters PBLPMDiscoveryParameters;
 	
 	//TODO set default when the real strategies work

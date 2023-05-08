@@ -55,7 +55,6 @@ public class LPMDiscoveryPlugin {
 //		stepMap.put(OCLPMDiscoveryWizard.PD_ILP, new OCLPMDiscoveryILPStep(parameters)); 
 			//TODO integrate ILP wizard here or warn the user that it follows afterwards
 		stepMap.put(OCLPMDiscoveryWizard.PD_SPECPP, new OCLPMDiscoverySPECppStep(parameters));
-		// TODO implement the eST miner or just remove it from the selection
 		
 		
 		// let user select parameters for LPM discovery

@@ -6,9 +6,11 @@ import java.util.Set;
 
 import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
+import org.processmining.OCLPMDiscovery.utils.FlatLogProcessing;
 import org.processmining.OCLPMDiscovery.wizards.OCLPMDiscoveryWizard;
 import org.processmining.OCLPMDiscovery.wizards.steps.LPMDiscoveryWizardStep;
 import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryDummyFinishStep;
+import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryILPStep;
 import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryLPMStep;
 import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoverySPECppStep;
 import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoverySettingsStep;
@@ -54,11 +56,8 @@ public class PlaceSetDiscoveryPlugin {
 		stepMap.put(OCLPMDiscoveryWizard.INITIAL_KEY, new OCLPMDiscoverySettingsStep(parameters));
 		
 		// let user select parameters for Place Net discovery
-//		stepMap.put(OCLPMDiscoveryWizard.PD_ILP, new OCLPMDiscoveryILPStep(parameters)); 
-			//TODO integrate ILP wizard here or warn the user that it follows afterwards
+		stepMap.put(OCLPMDiscoveryWizard.PD_ILP, new OCLPMDiscoveryILPStep(parameters)); 
 		stepMap.put(OCLPMDiscoveryWizard.PD_SPECPP, new OCLPMDiscoverySPECppStep(parameters));
-		// TODO implement the eST miner or just remove it from the selection
-		
 		
 		// let user select parameters for LPM discovery
 		stepMap.put(OCLPMDiscoveryWizard.LPM_NOTION, new OCLPMDiscoveryLPMStep(parameters));

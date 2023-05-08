@@ -2,7 +2,7 @@ package org.processmining.OCLPMDiscovery.parameters;
 
 public enum Miner {
 	SPECPP ("SPECpp"),
-	EST ("eST-Miner"),
+//	EST ("eST-Miner"),
 	ILP ("Hybrid ILP Miner")// "ILP-Based Process Discovery" base on the hybrid ILP miner
 	;
 	
