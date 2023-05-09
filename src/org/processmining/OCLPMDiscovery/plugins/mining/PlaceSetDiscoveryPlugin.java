@@ -45,7 +45,6 @@ public class PlaceSetDiscoveryPlugin {
 			requiredParameterLabels = {0}
 	)
 	public static Object[] minePlaceSet (UIPluginContext context, OcelEventLog ocel) {
-		Main.setUp(context);
 		
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
 
@@ -80,6 +79,8 @@ public class PlaceSetDiscoveryPlugin {
 				break;
 			default:
 		}
+		
+		Main.setUp(context, parameters, true, false);
 		return Main.discoverPlaceSet(ocel, parameters);
 	}
 	

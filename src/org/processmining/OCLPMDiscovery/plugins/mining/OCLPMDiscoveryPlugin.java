@@ -58,7 +58,6 @@ public class OCLPMDiscoveryPlugin {
 			requiredParameterLabels = {0}
 	)
 	public static OCLPMResult mineOCLPMs(UIPluginContext context, OcelEventLog ocel) {
-		Main.setUp(context);
 		
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
 
@@ -94,6 +93,8 @@ public class OCLPMDiscoveryPlugin {
 			default:
 		}
 		
+		Main.setUp(context, parameters, true, true);
+		
 		return (OCLPMResult) Main.run(ocel, parameters)[0];
 	}
 	
@@ -109,7 +110,6 @@ public class OCLPMDiscoveryPlugin {
 			requiredParameterLabels = {0,1,2}
 	)
 	public static OCLPMResult mineOCLPMs(UIPluginContext context, OcelEventLog ocel, PlaceSet placeSet, HashMap<String,String> typeMap) {
-		Main.setUp(context);
 		
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
 
@@ -128,6 +128,7 @@ public class OCLPMDiscoveryPlugin {
 		if (parameters == null)
 			return null;		
 		
+		Main.setUp(context, parameters, false, true);
 		return (OCLPMResult) Main.run(ocel, parameters, placeSet, typeMap)[0];
 	}
 	

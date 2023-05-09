@@ -6,10 +6,13 @@ import java.util.Set;
 
 import org.deckfour.xes.model.XLog;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
+import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.utils.FlatLogProcessing;
 import org.processmining.OCLPMDiscovery.utils.OCELUtils;
+import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.framework.plugin.PluginContext;
+import org.processmining.framework.plugin.events.Logger.MessageLevel;
 import org.processmining.ocel.flattening.Flattening;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
 import org.processmining.placebasedlpmdiscovery.model.Place;
@@ -19,14 +22,11 @@ import org.processmining.placebasedlpmdiscovery.plugins.mining.PlaceBasedLPMDisc
 
 public class Main {
 	private static PluginContext Context;
+	private static UIPluginContext UIContext;
+	private static boolean UsingUI = false;
+	private static boolean UsingContext = false;
 	
-	public static void setUp(PluginContext context) {
-        Main.Context = context;
-    }
 	
-	public static PluginContext getContext() {
-        return Context;
-    }
 	
 	//===================================================================
 	//		Variants
@@ -108,6 +108,7 @@ public class Main {
 		
 		// place net discovery
 		for (String currentType : parameters.getObjectTypesPlaceNets()) {
+			Main.messageNormal("Starting flattening and place net discovery for type "+currentType+".");
 			// flatten ocel
 			XLog flatLog = Flattening.flatten(ocel, currentType);
 			System.out.println("Flattened ocel for type "+currentType);
@@ -121,6 +122,7 @@ public class Main {
 			assert(results[1] instanceof HashMap);
 			HashMap<String,String> newMap = (HashMap<String,String>) results[1];
 			System.out.println("Finished discovery of place nets for object type "+currentType);
+			Main.updateProgress("Finished discovery of place nets for object type "+currentType+".");
 
 			// unite place nets
 			placeNetsUnion.addAll(placeNets);
@@ -162,7 +164,7 @@ public class Main {
 				XLog log = Flattening.flatten(dummyOcel,dummyType);
 				System.out.println("Flattened on dummy type.");
 				System.out.println("Starting LPM discovery using a dummy type as case notion.");
-				Object[] lpmResults = PlaceBasedLPMDiscoveryPlugin.mineLPMs(Context, log, placeSet, parameters.getPBLPMDiscoveryParameters()); //TODO what happens if Context==null?
+				Object[] lpmResults = runLPMPlugin(log, placeSet, parameters);
 				assert(lpmResults[0] instanceof LPMResult);
 				lpmResult = (LPMResult) lpmResults[0];
 		}
@@ -181,5 +183,84 @@ public class Main {
 		// TODO identify variable arcs
 		
 		return oclpmResult;
+	}
+	
+	//===================================================================
+	//		helpers / setup
+	//===================================================================
+	
+	public static void setUp(PluginContext context) {
+        Main.Context = context;
+        if (context != null) {
+        	Main.UsingContext = true;
+        }
+    }
+	
+	public static void setUp(PluginContext context, int min, int max) {
+        Main.setUp(context);
+        if (context instanceof UIPluginContext) {
+        	Main.UIContext = (UIPluginContext) Main.Context;
+        	Main.UsingUI = true;
+        	Main.UIContext.getProgress().setMinimum(min);
+        	Main.UIContext.getProgress().setMaximum(max);
+        }
+    }
+	
+	/**
+	 * Calculates the steps shown in the UI progress indicator.
+	 * @param context
+	 * @param parameters
+	 * @param placeDiscovery set true if discovery of place nets is performed
+	 * @param lpmDiscovery set true if LPM discovery is performed
+	 */
+	public static void setUp (PluginContext context, OCLPMDiscoveryParameters parameters, boolean placeDiscovery, boolean lpmDiscovery) {
+		int numSteps = 0;
+		// progress indicators for: 
+		// + each completed place discovery for each selected object type
+		if (placeDiscovery) {
+			numSteps += parameters.getObjectTypesPlaceNets().size();			
+		}
+		// TODO each finished discovery and assignment of process execution (if that takes considerable time)
+		// + each completed LPM discovery for each selected case notion
+		if (lpmDiscovery) {
+			if (CaseNotionStrategy.typeSelectionNeeded.contains(parameters.getCaseNotionStrategy())) {
+				numSteps += parameters.getObjectTypesLeadingTypes().size();
+			}
+			else {
+				numSteps += 1;
+			}
+		}
+		Main.setUp(context, 0, numSteps);
+	}
+	
+	public static PluginContext getContext() {
+        return Context;
+    }
+	
+	public static void messageNormal(String message) {
+		if (UsingContext) {
+			Context.log(message, MessageLevel.NORMAL);
+		}
+	}
+	
+	public static void updateProgress() {
+		if (UsingUI) {
+			UIContext.getProgress().inc();
+		}
+	}
+	
+	public static void updateProgress(String message) {
+		Main.messageNormal(message);
+		if (UsingUI) {
+			UIContext.getProgress().inc();
+		}
+	}
+	
+	public static Object[] runLPMPlugin(XLog log, PlaceSet placeSet, OCLPMDiscoveryParameters parameters) {
+		messageNormal("Starting LPM discovery.");
+		//TODO what happens if Context==null?
+		Object[] lpmResults = PlaceBasedLPMDiscoveryPlugin.mineLPMs(Context, log, placeSet, parameters.getPBLPMDiscoveryParameters());
+		updateProgress("Finished LPM discovery.");
+		return lpmResults;
 	}
 }
