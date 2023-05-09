@@ -1,6 +1,7 @@
 package org.processmining.OCLPMDiscovery.parameters;
 
 import java.time.Duration;
+import java.util.Objects;
 
 import org.deckfour.xes.classification.XEventNameClassifier;
 import org.processmining.OCLPMDiscovery.specpp.CodeDefinedConfigurationSample;
@@ -72,17 +73,31 @@ public class SPECppParameters {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SPECppParameters that = (SPECppParameters) o;
-        return true; // TODO
+        return
+        		this.getDiscoveryTimeLimit().equals(that.getDiscoveryTimeLimit())
+        		&& this.getTotalTimeLimit().equals(that.getTotalTimeLimit())
+        		&& this.getTau() == that.getTau()
+        		&& this.isPermitNegativeMarkingsDuringReplay() == that.isPermitNegativeMarkingsDuringReplay()
+        		;
     }
 
     @Override
     public int hashCode() {
-        return 1; //TODO
+        return Objects.hash(
+        		this.getDiscoveryTimeLimit(),
+        		this.getTotalTimeLimit(),
+        		this.getTau(),
+        		this.isPermitNegativeMarkingsDuringReplay()
+        		);
     }
     
 	@Override
     public String toString() {
-        return "Hi"; //TODO
+        return "Discovery Time Limit: "+this.getDiscoveryTimeLimitAsMinutes()+" minutes\n"
+        		+ "Total Time Limit: "+this.getTotalTimeLimitAsMinutes()+" minutes\n"
+        		+ "Tau: "+this.getTau()+"\n"
+        		+ "Permit Negative Markings During Replay: "+Boolean.toString(this.isPermitNegativeMarkingsDuringReplay())+"\n"
+        		;
     }
 	
 	// call this after changing any parameters!

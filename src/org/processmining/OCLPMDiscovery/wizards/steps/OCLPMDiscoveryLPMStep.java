@@ -33,7 +33,7 @@ public class OCLPMDiscoveryLPMStep extends OCLPMPropertiesPanel implements ProMW
         this.caseNotionListEnums = Arrays.asList(CaseNotionStrategy.values());
         ArrayList<String> caseNotionListStrings = new ArrayList<String>();
         this.caseNotionListEnums.forEach(cur -> caseNotionListStrings.add(cur.getName()));
-        this.box_LPMDiscoveryCaseNotionStrategy = addComboBox("LPM Case Notion", caseNotionListStrings);//TODO Add some description when hovering over the box?
+        this.box_LPMDiscoveryCaseNotionStrategy = addComboBox("LPM Case Notion", caseNotionListStrings);
         // set default selection
         this.box_LPMDiscoveryCaseNotionStrategy.setSelectedItem(parameters.getCaseNotionStrategy().getName());
         this.box_LPMDiscoveryCaseNotionStrategy.addActionListener(e -> this.changedCaseNotion());

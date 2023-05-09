@@ -2,6 +2,7 @@ package org.processmining.OCLPMDiscovery.plugins.mining;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
@@ -112,6 +113,9 @@ public class OCLPMDiscoveryPlugin {
 	public static OCLPMResult mineOCLPMs(UIPluginContext context, OcelEventLog ocel, PlaceSet placeSet, HashMap<String,String> typeMap) {
 		
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
+		
+		// just for printing settings...
+		parameters.setObjectTypesPlaceNets((Set<String>) typeMap.values());
 
 		Map<String, ProMWizardStep<OCLPMDiscoveryParameters>> stepMap = new HashMap<>();		
 		

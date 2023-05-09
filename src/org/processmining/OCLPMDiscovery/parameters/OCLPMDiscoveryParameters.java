@@ -1,5 +1,6 @@
 package org.processmining.OCLPMDiscovery.parameters;
 
+import java.util.Objects;
 import java.util.Set;
 
 import javax.swing.DefaultListModel;
@@ -49,20 +50,73 @@ public class OCLPMDiscoveryParameters implements EventLog{
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         OCLPMDiscoveryParameters that = (OCLPMDiscoveryParameters) o;
-        return true; // TODO
+		return this.specppParameters.equals(that.getSpecppParameters())
+			&& this.ilpParameters.equals(that.getIlpParameters())
+			&& this.PBLPMDiscoveryParameters.equals(that.getPBLPMDiscoveryParameters())
+			&& this.placeDiscoveryAlgorithm == that.getPlaceDiscoveryAlgorithm()
+			&& this.caseNotionStrategy == that.getCaseNotionStrategy()
+			&& this.objectTypesPlaceNets.equals(that.getObjectTypesPlaceNets())
+			&& this.objectTypesLeadingTypes.equals(that.getObjectTypesLeadingTypes())
+			;
     }
 
     @Override
     public int hashCode() {
-        return 1; //TODO
+        return Objects.hash(
+        		this.specppParameters,
+        		this.ilpParameters,
+        		this.PBLPMDiscoveryParameters,
+        		this.placeDiscoveryAlgorithm,
+        		this.caseNotionStrategy,
+        		this.objectTypesPlaceNets,
+        		this.objectTypesLeadingTypes
+        		);
     }
     
 	@Override
     public String toString() {
-        return "OCLPM Discovery parameters:\n"
-        		+ "Place Discovery Algorithm: "+this.getPlaceDiscoveryAlgorithm().getName()+"\n"
-        		+ "Case Notion Strategy: "+this.getCaseNotionStrategy(); 
-        //TODO Add the other parameters
+        String caption = "OCLPM Discovery parameters:\n";
+        String broadParameters = 		
+        		"Place Discovery Algorithm: "+this.getPlaceDiscoveryAlgorithm().getName()+"\n"
+        		+ "Case Notion Strategy: "+this.getCaseNotionStrategy().getName()+"\n"
+        		;
+        String otherParams = "";
+        int s,i;
+        
+        otherParams += "Place Discovery Object Types: ";
+        s = this.getObjectTypesPlaceNets().size();
+        i = 0;
+        for (String current : this.getObjectTypesPlaceNets()) {
+        	otherParams += current;
+        	i++;
+        	if (i<s) otherParams+=", ";
+        	else otherParams+="\n";
+        }
+        
+        if (CaseNotionStrategy.typeSelectionNeeded.contains(this.getCaseNotionStrategy())) {
+        	otherParams += "LPM Case Notion Object Types: ";
+            s = this.getObjectTypesLeadingTypes().size();
+            i = 0;
+            for (String current : this.getObjectTypesLeadingTypes()) {
+            	otherParams += current;
+            	i++;
+            	if (i<s) otherParams+=", ";
+            	else otherParams+="\n";
+            }
+        }
+        
+        if (this.getPlaceDiscoveryAlgorithm() == Miner.SPECPP) {
+        	otherParams += "SPECpp parameters:\n";
+        	otherParams += this.getSpecppParameters().toString();
+        }
+        
+        else if (this.getPlaceDiscoveryAlgorithm() == Miner.ILP) {
+        	otherParams += "ILP parameters:\n";
+        	otherParams += "Wizard follows now.\n";
+//        	otherParams += this.getIlpParameters().toString();
+        }
+        
+        return caption + broadParameters + otherParams;
     }
 
 	public Set<String> getObjectTypesAll() {

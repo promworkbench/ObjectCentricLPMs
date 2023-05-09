@@ -38,7 +38,6 @@ public class Main {
 	 * @return
 	 */
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
-        //TODO print out progress in ProM and show progression bar
 		Object[] results = discoverPlaceSet(ocel,parameters);
 		PlaceSet placeSet = (PlaceSet) results[0];
 		HashMap<String,String> typeMap = (HashMap<String,String>) results[1];
@@ -175,7 +174,7 @@ public class Main {
 	}
 	
 	public static OCLPMResult convertLPMstoOCLPMs (OCLPMDiscoveryParameters parameters, LPMResult lpmResult, HashMap<String,String> typeMap) {
-		//TODO make OCLPMResult object
+
 		OCLPMResult oclpmResult = new OCLPMResult(parameters, lpmResult, typeMap);
 		
 		// TODO assign places to objects

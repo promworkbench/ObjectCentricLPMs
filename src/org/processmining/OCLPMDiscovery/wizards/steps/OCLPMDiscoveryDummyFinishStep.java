@@ -14,11 +14,8 @@ public class OCLPMDiscoveryDummyFinishStep extends OCLPMPropertiesPanel implemen
 
     public OCLPMDiscoveryDummyFinishStep(OCLPMDiscoveryParameters parameters) {
         super(TITLE);
-        //TODO print more selected parameters
         this.textArea = new ProMTextArea();
         textArea.setEditable(false);
-        textArea.append(parameters.toString());
-        textArea.append("\n Yes, this currently only shows the default values, not the selected parameters..."); //TODO fix that
         addProperty("",textArea,0);
     }
 
@@ -37,7 +34,7 @@ public class OCLPMDiscoveryDummyFinishStep extends OCLPMPropertiesPanel implemen
 
     @Override
     public JComponent getComponent(OCLPMDiscoveryParameters parameters) {
-        
+    	textArea.setText(parameters.toString());
         return this;
     }
 

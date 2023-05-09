@@ -17,7 +17,6 @@ public class OCLPMDiscoverySPECppStep extends OCLPMPropertiesPanel implements Pr
 	
 	private static final String TITLE = "SPECpp Settings";
 	
-	//TODO ui
 	private OCLPMCheckBoxWithTextField discoveryTimeLimitInput;
     private OCLPMCheckBoxWithTextField totalTimeLimitInput;
     private JCheckBox permitNegativeMarkingsDuringReplayBox;
@@ -29,7 +28,6 @@ public class OCLPMDiscoverySPECppStep extends OCLPMPropertiesPanel implements Pr
         parameters.setSpecppParameters(new SPECppParameters());
         this.parameters = parameters;
         
-        //TODO Make UI elements more beautiful
         // create UI elements
         int nameLabelSize = 250;
         

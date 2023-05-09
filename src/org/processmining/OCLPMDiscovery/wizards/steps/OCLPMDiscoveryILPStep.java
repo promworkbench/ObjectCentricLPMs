@@ -34,11 +34,11 @@ public class OCLPMDiscoveryILPStep extends OCLPMPropertiesPanel implements ProMW
         textArea.append("ILP Miner settings follow in the next wizard after this one."); //TODO integrate settings into this if necessary
         addProperty("",textArea,0);
 
-        //TODO set default parameters
+        // set default parameters
         
-        //TODO create UI elements
+        // create UI elements
         
-        //TODO set default selections
+        // set default selections
         
     }
 
