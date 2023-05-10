@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.deckfour.xes.model.XLog;
+import org.processmining.OCLPMDiscovery.model.LPMResultsTagged;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
@@ -42,9 +43,9 @@ public class Main {
 		PlaceSet placeSet = (PlaceSet) results[0];
 		HashMap<String,String> typeMap = (HashMap<String,String>) results[1];
 		
-		LPMResult lpmResult = discoverLPMs(ocel, parameters, placeSet);
+		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
 		
-		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, lpmResult, typeMap);
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
 
         return new Object[] {oclpmResult};
     }
@@ -56,22 +57,35 @@ public class Main {
 	 * @return
 	 */
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet, HashMap<String,String> typeMap) {
-        LPMResult lpmResult = discoverLPMs(ocel, parameters, placeSet);
+		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
 		
-		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, lpmResult, typeMap);
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
 
         return new Object[] {oclpmResult};
     }
 	
 	/**
-	 * OCLPMs discovery starting from LPMs
+	 * OCLPMs discovery starting from Tagged LPMs
+	 * @param ocel
+	 * @param parameters
+	 * @return
+	 */
+	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, HashMap<String,String> typeMap, LPMResultsTagged tlpms) {
+        		
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
+
+        return new Object[] {oclpmResult};
+    }
+	
+	/**
+	 * OCLPMs discovery starting from LPMs of a single case notion
 	 * @param ocel
 	 * @param parameters
 	 * @return
 	 */
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, HashMap<String,String> typeMap, LPMResult lpms) {
-        		
-		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, lpms, typeMap);
+        LPMResultsTagged tlpms = new LPMResultsTagged(lpms,"Single Case Notion");
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
 
         return new Object[] {oclpmResult};
     }
@@ -82,13 +96,13 @@ public class Main {
 	 * @param parameters
 	 * @return
 	 */
-	public static LPMResult runLPMDiscovery(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
+	public static LPMResultsTagged runLPMDiscovery(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
         
 		PlaceSet placeSet = (PlaceSet) discoverPlaceSet(ocel,parameters)[0];
 		
-		LPMResult lpmResult = discoverLPMs(ocel, parameters, placeSet);
+		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
 
-        return lpmResult;
+        return tlpms;
     }
 	
 	/**
@@ -98,11 +112,11 @@ public class Main {
 	 * @param placeSet
 	 * @return
 	 */
-	public static LPMResult runLPMDiscovery(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet) {
+	public static LPMResultsTagged runLPMDiscovery(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet) {
         	
-		LPMResult lpmResult = discoverLPMs(ocel, parameters, placeSet);
+		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
 
-        return lpmResult;
+        return tlpms;
     }
 	
 	//===================================================================
@@ -147,9 +161,9 @@ public class Main {
 		return new Object[] {placeSet, typeMap};
 	}
 	
-	public static LPMResult discoverLPMs(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet) {
-		// initialize LPMResult
-		LPMResult lpmResult = new LPMResult();
+	public static LPMResultsTagged discoverLPMs(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet) {
+
+		LPMResultsTagged lpmsTagged = new LPMResultsTagged();
 		
 		switch (parameters.getCaseNotionStrategy()) {
 		
@@ -178,17 +192,18 @@ public class Main {
 				System.out.println("Starting LPM discovery using a dummy type as case notion.");
 				Object[] lpmResults = runLPMPlugin(log, placeSet, parameters);
 				assert(lpmResults[0] instanceof LPMResult);
-				lpmResult = (LPMResult) lpmResults[0];
+				LPMResult lpmResult = (LPMResult) lpmResults[0];
+				lpmsTagged.put(lpmResult, dummyType);
 		}
 		System.out.println("Finished LPM discovery.");
-		System.out.println("LPMResult stores "+lpmResult.size()+" LPMs.");
+		System.out.println("LPMResult stores "+lpmsTagged.totalLPMs()+" LPMs.");
 		
-		return lpmResult;
+		return lpmsTagged;
 	}
 	
-	public static OCLPMResult convertLPMstoOCLPMs (OCLPMDiscoveryParameters parameters, LPMResult lpmResult, HashMap<String,String> typeMap) {
+	public static OCLPMResult convertLPMstoOCLPMs (OCLPMDiscoveryParameters parameters, LPMResultsTagged tlpms, HashMap<String,String> typeMap) {
 
-		OCLPMResult oclpmResult = new OCLPMResult(parameters, lpmResult, typeMap);
+		OCLPMResult oclpmResult = new OCLPMResult(parameters, tlpms, typeMap);
 		
 		// TODO assign places to objects
 		

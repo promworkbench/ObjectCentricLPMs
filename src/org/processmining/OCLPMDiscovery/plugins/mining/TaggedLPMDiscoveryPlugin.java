@@ -25,26 +25,25 @@ import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
 import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 
 @Plugin(
-		name = "Discovery of Local Process Models", // not shown anywhere anymore because overwritten by uiLabel?
+		name = "Discovery of Tagged Local Process Models", // not shown anywhere anymore because overwritten by uiLabel?
 		parameterLabels = {"Log", "Set of Places", "Petri Net", "Parameters"},
 		returnLabels = { "LPM set" },
 		returnTypes = { LPMResult.class },
-		help = "Discovers Local Process Models on an object-centric event log (OCEL standard)."
-				+ "In case a case notion strategy using multiple case notions is chosen "
-				+ "the resulting LPMResults are merged togeather for all notions."
+		help = "Discovers Tagged Local Process Models (LPMResult combined with the name "
+				+ "of the case notion they were discovered on) on an object-centric event log (OCEL standard)."
 )
-public class LPMDiscoveryPlugin {
+public class TaggedLPMDiscoveryPlugin {
 	@UITopiaVariant(
 			affiliation = "RWTH - PADS",
 			author = "Marvin Porsil",
 			email = "marvin.porsil@rwth-aachen.de",
-			uiLabel = "Local Process Model Discovery given OCEL"
+			uiLabel = "Tagged Local Process Model Discovery given OCEL"
 	)
 	@PluginVariant(
 			variantLabel = "Local Process Model Discovery",
 			requiredParameterLabels = {0}
 	)
-	public static LPMResult mineLPMs(UIPluginContext context, OcelEventLog ocel) {
+	public static LPMResultsTagged mineTLPMs(UIPluginContext context, OcelEventLog ocel) {
 		Main.setUp(context);
 		
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
@@ -81,22 +80,20 @@ public class LPMDiscoveryPlugin {
 				break;
 			default:
 		}
-		
-		LPMResultsTagged tlpms = Main.runLPMDiscovery(ocel, parameters);
-		return mergeLPMResults(tlpms);
+		return Main.runLPMDiscovery(ocel, parameters);
 	}
 	
 	@UITopiaVariant(
 			affiliation = "RWTH - PADS",
 			author = "Marvin Porsil",
 			email = "marvin.porsil@rwth-aachen.de",
-			uiLabel = "Local Process Model Discovery given OCEL and PlaceSet"
+			uiLabel = "Tagged Local Process Model Discovery given OCEL and PlaceSet"
 	)
 	@PluginVariant(
 			variantLabel = "Local Process Model Discovery given OCEL and PlaceSet",
 			requiredParameterLabels = {0,1}
 	)
-	public static LPMResult mineLPMs(UIPluginContext context, OcelEventLog ocel, PlaceSet placeSet) {
+	public static LPMResultsTagged mineTLPMs(UIPluginContext context, OcelEventLog ocel, PlaceSet placeSet) {
 		Main.setUp(context);
 		
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
@@ -133,15 +130,6 @@ public class LPMDiscoveryPlugin {
 				break;
 			default:
 		}
-		LPMResultsTagged tlpms = Main.runLPMDiscovery(ocel, parameters, placeSet);
-		return mergeLPMResults(tlpms);
-	}
-	
-	public static LPMResult mergeLPMResults(LPMResultsTagged tlpms) {
-		LPMResult lpms = new LPMResult();
-		for (LPMResult res : tlpms.getTypeMap().keySet()) {
-			lpms.addAll(res.getElements());
-		}
-		return lpms;
+		return Main.runLPMDiscovery(ocel, parameters, placeSet);
 	}
 }

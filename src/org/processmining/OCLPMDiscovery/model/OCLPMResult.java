@@ -21,12 +21,15 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     	
     }
     
-    public OCLPMResult (OCLPMDiscoveryParameters discoveryParameters, LPMResult lpmResult, HashMap<String,String> typeMap) {
+    public OCLPMResult (OCLPMDiscoveryParameters discoveryParameters, LPMResultsTagged tlpms, HashMap<String,String> typeMap) {
     	super();
-    	HashSet<ObjectCentricLocalProcessModel> oclpms = new HashSet<ObjectCentricLocalProcessModel>(lpmResult.size());
-    	for (LocalProcessModel lpm : lpmResult.getElements()) {
-    		ObjectCentricLocalProcessModel oclpm = new ObjectCentricLocalProcessModel(lpm, "Dummy"); // TODO rewrite for other case notions
-    		oclpms.add(oclpm);
+    	HashSet<ObjectCentricLocalProcessModel> oclpms = new HashSet<ObjectCentricLocalProcessModel>(tlpms.totalLPMs());
+    	// convert LPM objects into OCLPM objects
+    	for (LPMResult res : tlpms.getTypeMap().keySet()) { // for all used case notions
+	    	for (LocalProcessModel lpm : res.getElements()) { // for all lpms discovered for that notion
+	    		ObjectCentricLocalProcessModel oclpm = new ObjectCentricLocalProcessModel(lpm, tlpms.getTypeOf(res));
+	    		oclpms.add(oclpm);
+	    	}
     	}
     	this.addAll(oclpms);
     	this.typeMap = typeMap;
