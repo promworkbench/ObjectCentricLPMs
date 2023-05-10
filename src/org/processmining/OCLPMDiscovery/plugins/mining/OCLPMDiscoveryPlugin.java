@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
+import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.wizards.OCLPMDiscoveryWizard;
 import org.processmining.OCLPMDiscovery.wizards.steps.LPMDiscoveryWizardStep;
@@ -23,30 +24,32 @@ import org.processmining.framework.util.ui.wizard.ProMWizardDisplay;
 import org.processmining.framework.util.ui.wizard.ProMWizardStep;
 import org.processmining.hybridilpminer.parameters.XLogHybridILPMinerParametersImpl;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
+import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
 import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 
 @Plugin(
 		name = "Discovery of Object-Centric Local Process Models", // not shown anywhere anymore because overwritten by uiLabel?
-		parameterLabels = {"OCEL", "Set of Places", "Object Type HashMap", "Petri Net", "Parameters"},
+		parameterLabels = {"OCEL", "Set of Places", "Object Type HashMap", "Petri Net", "Parameters", "LPMs"},
 		returnLabels = { "OCLPM set" },
 		returnTypes = { OCLPMResult.class },
-		help = "Discovers Object-Centric Local Process Models on an object-centric event log (OCEL standard)."
+		help = "Discovers Object-Centric Local Process Models on an object-centric event log (OCEL standard).",
+		userAccessible = true
 )
 public class OCLPMDiscoveryPlugin {
 		
-	@UITopiaVariant(
-			affiliation = "RWTH - PADS",
-			author = "Marvin Porsil",
-			email = "marvin.porsil@rwth-aachen.de",
-			uiLabel = "OCLPM test uiLabel" // name shown in ProM
-	)
-	@PluginVariant(
-			variantLabel = "OCLPM test variantLabel", // this isn't shown anywhere?
-			requiredParameterLabels = {}
-	)
-	public static String helloWorld(PluginContext context) {
-		return "Hello World";
-	}
+//	@UITopiaVariant(
+//			affiliation = "RWTH - PADS",
+//			author = "Marvin Porsil",
+//			email = "marvin.porsil@rwth-aachen.de",
+//			uiLabel = "OCLPM test uiLabel" // name shown in ProM
+//	)
+//	@PluginVariant(
+//			variantLabel = "OCLPM test variantLabel", // this isn't shown anywhere?
+//			requiredParameterLabels = {}
+//	)
+//	public static String helloWorld(PluginContext context) {
+//		return "Hello World";
+//	}
 	
 	@UITopiaVariant(
 			affiliation = "RWTH - PADS",
@@ -138,6 +141,24 @@ public class OCLPMDiscoveryPlugin {
 	
 	// variant skipping the place net discovery and process execution computation
 	//TODO: variant with input (ocel, set(set(place net),object type), (log,set(column names)))
+	
+	// variant skipping the place net and LPM discovery
+	@UITopiaVariant(
+			affiliation = "RWTH - PADS",
+			author = "Marvin Porsil",
+			email = "marvin.porsil@rwth-aachen.de",
+			uiLabel = "Object-Centric Local Process Model Discovery given hashmap of object types and LPMs."
+	)
+	@PluginVariant(
+			variantLabel = "Object-Centric Local Process Model Discovery given hashmap of object types and LPMs.",
+			requiredParameterLabels = {0,2,5}
+	)
+	public static OCLPMResult mineOCLPMs(PluginContext context, OcelEventLog ocel, HashMap<String,String> typeMap, LPMResult lpms) {
+		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel); // TODO OCEL necessary?
+		parameters.setCaseNotionStrategy(CaseNotionStrategy.DUMMY); // TODO make user selectable
+		Main.setUp(context, parameters, false, false);
+		return (OCLPMResult) Main.run(ocel, parameters, typeMap, lpms)[0];
+	}
 	
 	//==============================================
 	// TODO all variants without UI

@@ -64,6 +64,19 @@ public class Main {
     }
 	
 	/**
+	 * OCLPMs discovery starting from LPMs
+	 * @param ocel
+	 * @param parameters
+	 * @return
+	 */
+	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, HashMap<String,String> typeMap, LPMResult lpms) {
+        		
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, lpms, typeMap);
+
+        return new Object[] {oclpmResult};
+    }
+	
+	/**
 	 * Discover only LPMs starting from ocel
 	 * @param ocel
 	 * @param parameters

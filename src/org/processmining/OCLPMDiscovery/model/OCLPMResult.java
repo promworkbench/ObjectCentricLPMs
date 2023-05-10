@@ -1,10 +1,11 @@
 package org.processmining.OCLPMDiscovery.model;
 
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
+import org.processmining.placebasedlpmdiscovery.model.LocalProcessModel;
 import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
 import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableList;
 
@@ -12,7 +13,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     private static final long serialVersionUID = 9159252267279978544L; //?
     
     private Set<String> objectTypes; // all object types from the ocel
-    private Set<String> discoveryTypes; // types which were used as a case notion for LPM discovery
+    private Set<String> lpmDiscoveryTypes; // types which were used as a case notion for LPM discovery
     private String oclpmDiscoverySettings; // settings used for the discovery of this result
     private HashMap<String,String> typeMap; // maps each place.id to an object type
     
@@ -21,11 +22,13 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     }
     
     public OCLPMResult (OCLPMDiscoveryParameters discoveryParameters, LPMResult lpmResult, HashMap<String,String> typeMap) {
-    	this(discoveryParameters, (Collection<ObjectCentricLocalProcessModel>) lpmResult.getSet(), typeMap);
-    }
-    
-    public OCLPMResult (OCLPMDiscoveryParameters discoveryParameters, Collection<ObjectCentricLocalProcessModel> elements, HashMap<String,String> typeMap) {
-    	super(elements);
+    	super();
+    	HashSet<ObjectCentricLocalProcessModel> oclpms = new HashSet<ObjectCentricLocalProcessModel>(lpmResult.size());
+    	for (LocalProcessModel lpm : lpmResult.getElements()) {
+    		ObjectCentricLocalProcessModel oclpm = new ObjectCentricLocalProcessModel(lpm, "Dummy"); // TODO rewrite for other case notions
+    		oclpms.add(oclpm);
+    	}
+    	this.addAll(oclpms);
     	this.typeMap = typeMap;
     	copyDiscoveryParameters(discoveryParameters);
     }
@@ -33,15 +36,15 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     public void copyDiscoveryParameters(OCLPMDiscoveryParameters discoveryParameters) {
     	this.oclpmDiscoverySettings = discoveryParameters.toString();
     	this.objectTypes = discoveryParameters.getObjectTypesAll();
-    	this.discoveryTypes = discoveryParameters.getObjectTypesLeadingTypes();
+    	this.lpmDiscoveryTypes = discoveryParameters.getObjectTypesLeadingTypes();
     }
 
 	public Set<String> getObjectTypes() {
 		return objectTypes;
 	}
 
-	public Set<String> getDiscoveryTypes() {
-		return discoveryTypes;
+	public Set<String> getLpmDiscoveryTypes() {
+		return lpmDiscoveryTypes;
 	}
 
 	public String getOclpmDiscoverySettings() {

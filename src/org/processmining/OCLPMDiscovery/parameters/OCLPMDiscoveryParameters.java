@@ -106,14 +106,24 @@ public class OCLPMDiscoveryParameters implements EventLog{
         }
         
         if (this.getPlaceDiscoveryAlgorithm() == Miner.SPECPP) {
-        	otherParams += "SPECpp parameters:\n";
-        	otherParams += this.getSpecppParameters().toString();
+        	if (this.getSpecppParameters() == null) {
+        		otherParams += "SPECpp parameters haven't been saved.\n";
+        	}
+        	else {
+        		otherParams += "SPECpp parameters:\n";
+        		otherParams += this.getSpecppParameters().toString();        		
+        	}
         }
         
         else if (this.getPlaceDiscoveryAlgorithm() == Miner.ILP) {
-        	otherParams += "ILP parameters:\n";
-        	otherParams += "Wizard follows now.\n";
-//        	otherParams += this.getIlpParameters().toString();
+        	if (this.getPlaceDiscoveryAlgorithm() == null) {
+        		otherParams += "ILP parameters haven't been saved.\n";
+        	}
+        	else {
+        		otherParams += "ILP parameters:\n";
+        		otherParams += "Wizard follows now.\n";
+//        		otherParams += this.getIlpParameters().toString();        		
+        	}
         }
         
         return caption + broadParameters + otherParams;
