@@ -1,38 +1,44 @@
 package org.processmining.OCLPMDiscovery.plugins.visualization;
 
+import java.awt.Font;
+import java.awt.Insets;
+import java.util.Map;
+
+import javax.swing.BoxLayout;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+
+import org.processmining.OCLPMDiscovery.model.OCLPMResult;
+import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
+import org.processmining.OCLPMDiscovery.model.TaggedPlace;
+import org.processmining.OCLPMDiscovery.utils.OCLPMUtils;
 import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.Visualizer;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
-import org.processmining.placebasedlpmdiscovery.model.LocalProcessModel;
-import org.processmining.placebasedlpmdiscovery.model.Place;
 import org.processmining.placebasedlpmdiscovery.model.additionalinfo.Passage;
 import org.processmining.placebasedlpmdiscovery.model.additionalinfo.PlaceAdditionalInfo;
-import org.processmining.placebasedlpmdiscovery.utils.LocalProcessModelUtils;
 
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
-import java.util.Map;
-
-public class PlaceVisualizer {
+public class TaggedPlaceVisualizer {
 
     private static final Font LABEL_FONT = new Font(Font.DIALOG, Font.PLAIN, 20);
 
-    @Plugin(name = "@0 Visualize Place", returnLabels = {"Visualized Place"},
+    @Plugin(name = "@0 Visualize Tagged Place", returnLabels = {"Visualized Place"},
             returnTypes = {JComponent.class},
             parameterLabels = {"Place"}, userAccessible = false)
     @Visualizer
     @PluginVariant(requiredParameterLabels = {0})
-    public JComponent visualize(UIPluginContext context, Place place) {
+    public JComponent visualize(UIPluginContext context, TaggedPlace place, OCLPMResult result) {
         if (place == null)
             throw new IllegalArgumentException("The local process model to be visualized should not be null: " + place);
-        AcceptingPetriNet net = LocalProcessModelUtils.getAcceptingPetriNetRepresentation(new LocalProcessModel(place));
+        AcceptingPetriNet net = OCLPMUtils.getAcceptingPetriNetRepresentation(new ObjectCentricLocalProcessModel(place));
 
         JComponent component = new JPanel();
         component.setLayout(new BoxLayout(component, BoxLayout.X_AXIS));
-        component.add((new CustomAcceptingPetriNetVisualizer()).visualize(context, net));
+        component.add((new CustomAcceptingPetriNetVisualizer()).visualize(context, net, result));
         component.add(getPlaceAdditionalInfoComponent(place.getAdditionalInfo()));
         return component;
     }

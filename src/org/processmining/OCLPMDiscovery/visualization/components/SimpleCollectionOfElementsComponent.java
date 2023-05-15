@@ -10,14 +10,15 @@ import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import org.processmining.OCLPMDiscovery.plugins.visualization.LocalProcessModelVisualizer;
-import org.processmining.OCLPMDiscovery.plugins.visualization.PlaceVisualizer;
+import org.processmining.OCLPMDiscovery.model.OCLPMResult;
+import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
+import org.processmining.OCLPMDiscovery.model.TaggedPlace;
+import org.processmining.OCLPMDiscovery.plugins.visualization.OCLPMVisualizer;
+import org.processmining.OCLPMDiscovery.plugins.visualization.TaggedPlaceVisualizer;
 import org.processmining.OCLPMDiscovery.visualization.components.tables.TableComposition;
 import org.processmining.OCLPMDiscovery.visualization.components.tables.TableListener;
 import org.processmining.OCLPMDiscovery.visualization.components.tables.factories.AbstractPluginVisualizerTableFactory;
 import org.processmining.contexts.uitopia.UIPluginContext;
-import org.processmining.placebasedlpmdiscovery.model.LocalProcessModel;
-import org.processmining.placebasedlpmdiscovery.model.Place;
 import org.processmining.placebasedlpmdiscovery.model.TextDescribable;
 import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
 import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
@@ -28,13 +29,13 @@ public class SimpleCollectionOfElementsComponent<T extends TextDescribable & Ser
         extends JComponent implements TableListener<T>, ComponentListener {
 
     private final UIPluginContext context;
-    private final SerializableCollection<T> result;
+    private final OCLPMResult result;
     private final AbstractPluginVisualizerTableFactory<T> tableFactory;
 
     private JComponent visualizerComponent;
 
     public SimpleCollectionOfElementsComponent(UIPluginContext context,
-                                               SerializableCollection<T> result,
+    											OCLPMResult result,
                                                AbstractPluginVisualizerTableFactory<T> tableFactory) {
         this.context = context;
         this.result = result;
@@ -48,7 +49,7 @@ public class SimpleCollectionOfElementsComponent<T extends TextDescribable & Ser
 
         // create the table and LPM visualization containers
         visualizerComponent = createVisualizerComponent();
-        JComponent tableContainer = new TableComposition<>(this.result, this.tableFactory, this);
+        JComponent tableContainer = new TableComposition<>((SerializableCollection<T>) (this.result), this.tableFactory, this);
 
         // set the preferred dimension of the two containers
         int windowHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
@@ -74,23 +75,23 @@ public class SimpleCollectionOfElementsComponent<T extends TextDescribable & Ser
         if (visualizerComponent.getComponents().length >= 1)
             visualizerComponent.remove(0); // remove it
 
-        if (selectedObject instanceof LocalProcessModel) {
+        if (selectedObject instanceof ObjectCentricLocalProcessModel) {
             // create the visualizer
-            LocalProcessModelVisualizer visualizer = new LocalProcessModelVisualizer();
+            OCLPMVisualizer visualizer = new OCLPMVisualizer();
             // add visualization for the newly selected LPM
-            LocalProcessModel lpm = (LocalProcessModel) selectedObject;
+            ObjectCentricLocalProcessModel oclpm = (ObjectCentricLocalProcessModel) selectedObject;
             visualizerComponent.add(
-                    visualizer.visualize(context, lpm),
+                    visualizer.visualize(context, oclpm, this.result),
                     BorderLayout.CENTER);
         }
 
-        if (selectedObject instanceof Place) {
+        if (selectedObject instanceof TaggedPlace) {
             // create the visualizer
-            PlaceVisualizer visualizer = new PlaceVisualizer();
+            TaggedPlaceVisualizer visualizer = new TaggedPlaceVisualizer();
             // add visualization for the newly selected Place
-            Place place = (Place) selectedObject;
+            TaggedPlace place = (TaggedPlace) selectedObject;
             visualizerComponent.add(
-                    visualizer.visualize(context, place),
+                    visualizer.visualize(context, place, this.result),
                     BorderLayout.CENTER);
         }
 
