@@ -66,7 +66,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 		// generate colors
 		int numTypes = this.getObjectTypes().size();
 		float saturation = 1.0f;
-		float luminance = 0.3f;
+		float luminance = 0.8f;
 		float hueStart = 0f;
 		float hueEnd = 255f;
 		float hue = hueStart;
