@@ -10,6 +10,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 
 import org.processmining.OCLPMDiscovery.visualization.components.ColorMapPanel;
 
@@ -40,9 +41,10 @@ public class TestColorMapPanel {
         int windowHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
         int windowWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
         
-		// outer container
         JFrame frame = new JFrame("Color Map");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		// outer container
 		Container container = frame.getContentPane();
 		container.setPreferredSize(new Dimension(windowWidth, windowHeight));
 		container.setLayout(new BoxLayout(container, BoxLayout.X_AXIS));
@@ -50,21 +52,29 @@ public class TestColorMapPanel {
 		// left container
 		JPanel panelLeft = new JPanel();
 		panelLeft.setPreferredSize(new Dimension(80 * windowWidth / 100, windowHeight));
-		container.add(panelLeft);
-		
-		// right container
-		JPanel panelRight = new JPanel();
-		panelRight.setLayout(new BoxLayout(panelRight, BoxLayout.Y_AXIS));
-		panelRight.setPreferredSize(new Dimension(20 * windowWidth / 100, windowHeight));
-		container.add(panelRight);
+//		container.add(panelLeft);
 		
 		JScrollPane colorPane = new JScrollPane(colorMapPanel);
-		colorPane.setPreferredSize(new Dimension(10000, windowHeight / 10));
-		panelRight.add(colorPane);
+		colorPane.setPreferredSize(new Dimension(20 * windowWidth / 100, 20 * windowHeight / 100));
 		
 		JPanel panelRightBottom = new JPanel();
 		panelRightBottom.setPreferredSize(new Dimension(20 * windowWidth / 100, 80 * windowHeight / 100));
-		panelRight.add(panelRightBottom);
+		
+		// Right split pane
+		JSplitPane splitPaneRight = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		splitPaneRight.setPreferredSize(new Dimension(20 * windowWidth / 100, windowHeight));
+		splitPaneRight.setResizeWeight(0.3);
+		splitPaneRight.setTopComponent(colorPane);
+		splitPaneRight.setBottomComponent(panelRightBottom);
+		container.add(splitPaneRight);
+		
+		// outer split pane
+		JSplitPane splitPaneOuter = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+//		splitPaneOuter.setPreferredSize(new Dimension(20 * windowWidth / 100, windowHeight));
+		splitPaneOuter.setResizeWeight(0.8);
+		splitPaneOuter.setLeftComponent(panelLeft);
+		splitPaneOuter.setRightComponent(splitPaneRight);
+		container.add(splitPaneOuter);
 		
 //		frame.setPreferredSize(new Dimension(15 * frame.getContentPane().getWidth(), frame.getContentPane().getHeight() / 20));
 //		frame.setPreferredSize(new Dimension(100, 200));

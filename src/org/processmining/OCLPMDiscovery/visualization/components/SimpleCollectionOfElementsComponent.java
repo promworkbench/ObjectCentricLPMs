@@ -5,10 +5,9 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.Serializable;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
@@ -26,7 +25,7 @@ import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableC
 import org.processmining.plugins.utils.ProvidedObjectHelper;
 
 public class SimpleCollectionOfElementsComponent<T extends TextDescribable & Serializable>
-        extends JComponent implements TableListener<T>, ComponentListener {
+        extends JSplitPane implements TableListener<T>, ComponentListener {
 
     private final UIPluginContext context;
     private final OCLPMResult result;
@@ -44,8 +43,7 @@ public class SimpleCollectionOfElementsComponent<T extends TextDescribable & Ser
     }
 
     private void init() {
-        // set up the layout of this component
-        this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        this.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
 
         // create the table and LPM visualization containers
         visualizerComponent = createVisualizerComponent();
@@ -55,12 +53,12 @@ public class SimpleCollectionOfElementsComponent<T extends TextDescribable & Ser
         int windowHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
         int windowWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
         tableContainer.setPreferredSize(new Dimension(15 * windowWidth / 100, windowHeight));
-        visualizerComponent.setPreferredSize(new Dimension(80 * windowWidth / 100, windowHeight));
+        visualizerComponent.setPreferredSize(new Dimension(85 * windowWidth / 100, windowHeight)); // doesn't really work well
+        this.setResizeWeight(0.05); // weighs which side should be larger
 
-        // add the table and LPM visualization containers and add some space between them
-        this.add(tableContainer);
-        this.add(Box.createRigidArea(new Dimension(windowWidth / 100, windowHeight)));
-        this.add(visualizerComponent);
+        // add the table and LPM visualization containers
+        this.setLeftComponent(tableContainer);
+        this.setRightComponent(visualizerComponent);
     }
 
     private JComponent createVisualizerComponent() {
@@ -119,5 +117,10 @@ public class SimpleCollectionOfElementsComponent<T extends TextDescribable & Ser
     public void componentExpansion(ComponentId componentId, boolean expanded) {
         // change visibility of lpm container
         this.visualizerComponent.setVisible(!expanded);
+        
+        // reset split position
+        if (!expanded) {
+        	this.setDividerLocation(0.05);
+        }
     }
 }

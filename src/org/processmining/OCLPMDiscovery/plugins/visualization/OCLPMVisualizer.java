@@ -8,6 +8,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
@@ -33,23 +34,16 @@ public class OCLPMVisualizer {
         AcceptingPetriNet net = OCLPMUtils.getAcceptingPetriNetRepresentation(oclpm);
         ReduceUsingMurataRulesPlugin reductorPlugin = new ReduceUsingMurataRulesPlugin();
         net = reductorPlugin.runDefault(context, net);
-
-        JComponent component = new JPanel();
-        component.setLayout(new BoxLayout(component, BoxLayout.X_AXIS));
         
         int windowHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
         int windowWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
         
         // Petri Net on the left
-        component.add((new CustomAcceptingPetriNetVisualizer()).visualize(context, net, oclpmResult));
-
-        // Component on the right
-        JComponent componentRight = new JPanel();
-        componentRight.setLayout(new BoxLayout(componentRight, BoxLayout.Y_AXIS));
+        JScrollPane petriNetPane = new JScrollPane((new CustomAcceptingPetriNetVisualizer()).visualize(context, net, oclpmResult));
+//        component.add((new CustomAcceptingPetriNetVisualizer()).visualize(context, net, oclpmResult));
         
-        // add color legend top right
+        // Color Legend
         JScrollPane colorPane = new JScrollPane(new ColorMapPanel(oclpmResult.getMapTypeColor()));
-        componentRight.add(colorPane);
         
         // model stats
         JComponent evalComponent = new JPanel();
@@ -60,23 +54,33 @@ public class OCLPMVisualizer {
         // ?
         evalComponent.add(new JLabel("Histogram"));
         
-        componentRight.add(evalPane);
-        component.add(componentRight);
+        // Component on the right
+        JSplitPane componentRight = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        componentRight.setTopComponent(colorPane);
+        componentRight.setBottomComponent(evalPane);
+        
+        // outer Component
+        JSplitPane componentOuter = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        componentOuter.setLeftComponent(petriNetPane);
+        componentOuter.setRightComponent(componentRight);
         
         //===============
         // set sizes
         //===============
+        // outer component        
+        componentOuter.setResizeWeight(0.8);
+        
         // petri net
-        component.getComponent(0).setPreferredSize(new Dimension(80 * windowWidth / 100, windowHeight));
+        petriNetPane.setPreferredSize(new Dimension(80 * windowWidth / 100, windowHeight));
         
         // right component
-//        component.getComponent(1).setPreferredSize(new Dimension(20 * windowWidth / 100, windowHeight));
         componentRight.setPreferredSize(new Dimension(20 * windowWidth / 100, windowHeight));
+        componentRight.setResizeWeight(0.3);
         
         // stuff inside the right component
         colorPane.setPreferredSize(new Dimension(windowWidth, 20 * windowHeight / 100));
         evalPane.setPreferredSize(new Dimension(windowWidth, 80 * windowHeight / 100));
         
-        return component;
+        return componentOuter;
     }
 }
