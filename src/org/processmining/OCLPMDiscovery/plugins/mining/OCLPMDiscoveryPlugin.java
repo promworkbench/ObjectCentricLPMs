@@ -22,8 +22,8 @@ import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 @Plugin(
 		name = "Discovery of Object-Centric Local Process Models", // not shown anywhere anymore because overwritten by uiLabel?
 		parameterLabels = {"OCEL", "Set of Places", "Object Type HashMap", "Petri Net", "Parameters", "LPMs"},
-		returnLabels = { "OCLPM set" },
-		returnTypes = { OCLPMResult.class },
+		returnLabels = { "OCLPM Result"},
+		returnTypes = { OCLPMResult.class},
 		help = "Discovers Object-Centric Local Process Models on an object-centric event log (OCEL standard).",
 		userAccessible = true
 )
@@ -65,7 +65,8 @@ public class OCLPMDiscoveryPlugin {
 		
 		Main.setUp(context, parameters, true, true);
 		
-		return (OCLPMResult) Main.run(ocel, parameters)[0];
+		Object[] result = Main.run(ocel, parameters); 
+		return (OCLPMResult) result[0];
 	}
 	
 	// variant skipping the place net discovery
@@ -95,7 +96,8 @@ public class OCLPMDiscoveryPlugin {
 			return null;		
 		
 		Main.setUp(context, parameters, false, true);
-		return (OCLPMResult) Main.run(ocel, parameters, placeSet, typeMap)[0];
+		Object[] result = Main.run(ocel, parameters, placeSet, typeMap);
+		return (OCLPMResult) result[0];
 	}
 	
 	// variant skipping the place net discovery and process execution computation
@@ -123,10 +125,12 @@ public class OCLPMDiscoveryPlugin {
 	// TODO all variants without UI
 	//==============================================
 	public static OCLPMResult mineOCLPMs(OCLPMDiscoveryParameters parameters, OcelEventLog ocel) {
-		return (OCLPMResult) Main.run(ocel, parameters)[0];
+		Object[] result = Main.run(ocel, parameters); 
+		return (OCLPMResult) result[0];
 	}
 	
 	public static OCLPMResult mineOCLPMs(OCLPMDiscoveryParameters parameters, OcelEventLog ocel, PlaceSet placeSet, HashMap<String,String> typeMap) {
-		return (OCLPMResult) Main.run(ocel, parameters, placeSet, typeMap)[0];
+		Object[] result = Main.run(ocel, parameters, placeSet, typeMap);
+		return (OCLPMResult) result[0];
 	}
 }

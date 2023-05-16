@@ -20,6 +20,7 @@ import org.processmining.placebasedlpmdiscovery.model.Place;
 import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
 import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 import org.processmining.placebasedlpmdiscovery.plugins.mining.PlaceBasedLPMDiscoveryPlugin;
+import org.processmining.plugins.utils.ProvidedObjectHelper;
 
 public class Main {
 	private static PluginContext Context;
@@ -36,39 +37,43 @@ public class Main {
 	 * Full OCLPMs discovery starting from ocel
 	 * @param ocel
 	 * @param parameters
-	 * @return
+	 * @return {oclpmResult, tlpms, placeSet, typeMap}
 	 */
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
 		Object[] results = discoverPlaceSet(ocel,parameters);
 		PlaceSet placeSet = (PlaceSet) results[0];
+		Main.exportPlaceSet(placeSet);
 		HashMap<String,String> typeMap = (HashMap<String,String>) results[1];
+		Main.exportHashMap(typeMap);
 		
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
+		Main.exportTlpms(tlpms);
 		
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
 
-        return new Object[] {oclpmResult};
+        return new Object[] {oclpmResult, tlpms, placeSet, typeMap};
     }
 	
 	/**
 	 * Full OCLPMs discovery starting from place nets
 	 * @param ocel
 	 * @param parameters
-	 * @return
+	 * @return {oclpmResult, tlpms}
 	 */
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet, HashMap<String,String> typeMap) {
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
+		Main.exportTlpms(tlpms);
 		
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
 
-        return new Object[] {oclpmResult};
+        return new Object[] {oclpmResult, tlpms};
     }
 	
 	/**
 	 * OCLPMs discovery starting from Tagged LPMs
 	 * @param ocel
 	 * @param parameters
-	 * @return
+	 * @return {oclpmResult}
 	 */
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, HashMap<String,String> typeMap, LPMResultsTagged tlpms) {
         		
@@ -81,13 +86,14 @@ public class Main {
 	 * OCLPMs discovery starting from LPMs of a single case notion
 	 * @param ocel
 	 * @param parameters
-	 * @return
+	 * @return {oclpmResult, tlpms}
 	 */
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, HashMap<String,String> typeMap, LPMResult lpms) {
         LPMResultsTagged tlpms = new LPMResultsTagged(lpms,"Single Case Notion");
+        Main.exportTlpms(tlpms);
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
 
-        return new Object[] {oclpmResult};
+        return new Object[] {oclpmResult, tlpms};
     }
 	
 	/**
@@ -98,7 +104,10 @@ public class Main {
 	 */
 	public static LPMResultsTagged runLPMDiscovery(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
         
-		PlaceSet placeSet = (PlaceSet) discoverPlaceSet(ocel,parameters)[0];
+		Object[] result = discoverPlaceSet(ocel,parameters);
+		PlaceSet placeSet = (PlaceSet) result[0];
+		Main.exportPlaceSet(placeSet);
+		Main.exportHashMap((HashMap<String,String>) result[1]);
 		
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
 
@@ -160,7 +169,7 @@ public class Main {
 		
 		return new Object[] {placeSet, typeMap};
 	}
-	
+
 	public static LPMResultsTagged discoverLPMs(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet) {
 
 		LPMResultsTagged lpmsTagged = new LPMResultsTagged();
@@ -289,5 +298,34 @@ public class Main {
 		Object[] lpmResults = PlaceBasedLPMDiscoveryPlugin.mineLPMs(Context, log, placeSet, parameters.getPBLPMDiscoveryParameters());
 		updateProgress("Finished LPM discovery.");
 		return lpmResults;
+	}
+	
+	public static void exportPlaceSet(PlaceSet placeSet) {
+		// Add the places as a provided object
+		if (UsingContext) {
+	        Main.getContext().getProvidedObjectManager().createProvidedObject(
+	        		"OCLPM Discovery: United Place Set"
+	        		, placeSet, PlaceSet.class, Main.getContext());
+	        ProvidedObjectHelper.setFavorite(Main.getContext(), placeSet);
+		}
+	}
+	
+
+	private static void exportHashMap(HashMap<String, String> typeMap) {
+		if (UsingContext) {
+	        Main.getContext().getProvidedObjectManager().createProvidedObject(
+	        		"OCLPM Discovery: HashMap for Places to Object Types"
+	        		, typeMap, HashMap.class, Main.getContext());
+	        ProvidedObjectHelper.setFavorite(Main.getContext(), typeMap);
+		}
+	}
+	
+	private static void exportTlpms(LPMResultsTagged tlpms) {
+		if (UsingContext) {
+	        Main.getContext().getProvidedObjectManager().createProvidedObject(
+	        		"OCLPM Discovery: LPMResults for all Case Notions"
+	        		, tlpms, LPMResultsTagged.class, Main.getContext());
+	        ProvidedObjectHelper.setFavorite(Main.getContext(), tlpms);
+		}
 	}
 }
