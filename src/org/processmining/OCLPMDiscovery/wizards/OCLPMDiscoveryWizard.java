@@ -2,9 +2,16 @@ package org.processmining.OCLPMDiscovery.wizards;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
+import org.processmining.OCLPMDiscovery.wizards.steps.LPMDiscoveryWizardStep;
+import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryDummyFinishStep;
+import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryILPStep;
+import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryLPMStep;
+import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoverySPECppStep;
+import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoverySettingsStep;
 import org.processmining.framework.util.ui.wizard.MapWizard;
 import org.processmining.framework.util.ui.wizard.ProMWizardStep;
 
@@ -24,6 +31,36 @@ public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, St
 		super(steps);
         this.discoverPlaces = discoverPlaces;
     }
+	
+	public static OCLPMDiscoveryWizard setUp(OCLPMDiscoveryParameters parameters, boolean discoverPlaces, boolean discoverLPMs) {
+		
+		Map<String, ProMWizardStep<OCLPMDiscoveryParameters>> stepMap = new HashMap<>();
+		
+		// let user select object types for which to discover place nets
+		// let user select object types to use as leading types for process executions		
+		stepMap.put(OCLPMDiscoveryWizard.INITIAL_KEY, new OCLPMDiscoverySettingsStep(parameters));
+		
+		if (discoverPlaces) {
+			// let user select parameters for Place Net discovery
+			stepMap.put(OCLPMDiscoveryWizard.PD_ILP, new OCLPMDiscoveryILPStep(parameters)); 
+			stepMap.put(OCLPMDiscoveryWizard.PD_SPECPP, new OCLPMDiscoverySPECppStep(parameters));		
+		}
+		
+		if (discoverLPMs) {
+			// let user select parameters for LPM discovery
+			stepMap.put(OCLPMDiscoveryWizard.LPM_NOTION, new OCLPMDiscoveryLPMStep(parameters));
+			stepMap.put(OCLPMDiscoveryWizard.LPM_CONFIG, new LPMDiscoveryWizardStep(parameters));
+		}
+		
+		// when users only wants to convert LPMs + HashMap to OCLPMResult they need to specify the used LPM notion
+		if (!discoverPlaces && !discoverLPMs) {
+			stepMap.put(OCLPMDiscoveryWizard.LPM_NOTION, new OCLPMDiscoveryLPMStep(parameters));
+		}
+			
+		stepMap.put(OCLPMDiscoveryWizard.FINISH, new OCLPMDiscoveryDummyFinishStep(parameters));
+		
+		return new OCLPMDiscoveryWizard(stepMap, discoverPlaces);
+	}
 	
 	@Override
 	public Collection<String> getFinalKeys(MapModel<OCLPMDiscoveryParameters, String> currentWizardModel) {

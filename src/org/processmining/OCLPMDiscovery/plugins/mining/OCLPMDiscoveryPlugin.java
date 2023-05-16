@@ -2,26 +2,18 @@ package org.processmining.OCLPMDiscovery.plugins.mining;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
 import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.wizards.OCLPMDiscoveryWizard;
-import org.processmining.OCLPMDiscovery.wizards.steps.LPMDiscoveryWizardStep;
-import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryDummyFinishStep;
-import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryILPStep;
-import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryLPMStep;
-import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoverySPECppStep;
-import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoverySettingsStep;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.framework.util.ui.wizard.ProMWizardDisplay;
-import org.processmining.framework.util.ui.wizard.ProMWizardStep;
 import org.processmining.hybridilpminer.parameters.XLogHybridILPMinerParametersImpl;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
 import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
@@ -36,20 +28,6 @@ import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 		userAccessible = true
 )
 public class OCLPMDiscoveryPlugin {
-		
-//	@UITopiaVariant(
-//			affiliation = "RWTH - PADS",
-//			author = "Marvin Porsil",
-//			email = "marvin.porsil@rwth-aachen.de",
-//			uiLabel = "OCLPM test uiLabel" // name shown in ProM
-//	)
-//	@PluginVariant(
-//			variantLabel = "OCLPM test variantLabel", // this isn't shown anywhere?
-//			requiredParameterLabels = {}
-//	)
-//	public static String helloWorld(PluginContext context) {
-//		return "Hello World";
-//	}
 	
 	@UITopiaVariant(
 			affiliation = "RWTH - PADS",
@@ -64,23 +42,11 @@ public class OCLPMDiscoveryPlugin {
 	public static OCLPMResult mineOCLPMs(UIPluginContext context, OcelEventLog ocel) {
 		
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
-
-		Map<String, ProMWizardStep<OCLPMDiscoveryParameters>> stepMap = new HashMap<>();
 		
-		// let user select object types for which to discover place nets
-		// let user select object types to use as leading types for process executions		
-		stepMap.put(OCLPMDiscoveryWizard.INITIAL_KEY, new OCLPMDiscoverySettingsStep(parameters));
+		// setup wizard with place discovery and LPM discovery
+		OCLPMDiscoveryWizard wizard = OCLPMDiscoveryWizard.setUp(parameters, true, true);
 		
-		// let user select parameters for Place Net discovery
-		stepMap.put(OCLPMDiscoveryWizard.PD_ILP, new OCLPMDiscoveryILPStep(parameters)); 
-		stepMap.put(OCLPMDiscoveryWizard.PD_SPECPP, new OCLPMDiscoverySPECppStep(parameters));		
-		
-		// let user select parameters for LPM discovery
-		stepMap.put(OCLPMDiscoveryWizard.LPM_NOTION, new OCLPMDiscoveryLPMStep(parameters));
-		stepMap.put(OCLPMDiscoveryWizard.LPM_CONFIG, new LPMDiscoveryWizardStep(parameters));
-		
-		stepMap.put(OCLPMDiscoveryWizard.FINISH, new OCLPMDiscoveryDummyFinishStep(parameters));
-		OCLPMDiscoveryWizard wizard = new OCLPMDiscoveryWizard(stepMap, true);
+		//TODO option to return all the intermediate computations to ProM (PlaceSet, HashMap, LPMs, OCLPMResult) 
 		
 		// show wizard
 		parameters = ProMWizardDisplay.show(context, wizard, parameters);
@@ -120,14 +86,7 @@ public class OCLPMDiscoveryPlugin {
 		// just for printing settings...
 		parameters.setObjectTypesPlaceNets(new HashSet<String>(typeMap.values()));
 
-		Map<String, ProMWizardStep<OCLPMDiscoveryParameters>> stepMap = new HashMap<>();		
-		
-		// let user select parameters for LPM discovery
-		stepMap.put(OCLPMDiscoveryWizard.LPM_NOTION, new OCLPMDiscoveryLPMStep(parameters));
-		stepMap.put(OCLPMDiscoveryWizard.LPM_CONFIG, new LPMDiscoveryWizardStep(parameters));
-		
-		stepMap.put(OCLPMDiscoveryWizard.FINISH, new OCLPMDiscoveryDummyFinishStep(parameters));
-		OCLPMDiscoveryWizard wizard = new OCLPMDiscoveryWizard(stepMap, false);
+		OCLPMDiscoveryWizard wizard = OCLPMDiscoveryWizard.setUp(parameters, false, true);
 		
 		// show wizard
 		parameters = ProMWizardDisplay.show(context, wizard, parameters);

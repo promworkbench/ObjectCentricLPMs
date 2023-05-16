@@ -1,24 +1,14 @@
 package org.processmining.OCLPMDiscovery.plugins.mining;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.model.LPMResultsTagged;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.wizards.OCLPMDiscoveryWizard;
-import org.processmining.OCLPMDiscovery.wizards.steps.LPMDiscoveryWizardStep;
-import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryDummyFinishStep;
-import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryILPStep;
-import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryLPMStep;
-import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoverySPECppStep;
-import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoverySettingsStep;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.framework.util.ui.wizard.ProMWizardDisplay;
-import org.processmining.framework.util.ui.wizard.ProMWizardStep;
 import org.processmining.hybridilpminer.parameters.XLogHybridILPMinerParametersImpl;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
 import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
@@ -45,27 +35,10 @@ public class LPMDiscoveryPlugin {
 			requiredParameterLabels = {0}
 	)
 	public static LPMResult mineLPMs(UIPluginContext context, OcelEventLog ocel) {
-		Main.setUp(context);
 		
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
 
-		Map<String, ProMWizardStep<OCLPMDiscoveryParameters>> stepMap = new HashMap<>();
-		
-		// let user select object types for which to discover place nets
-		// let user select object types to use as leading types for process executions		
-		stepMap.put(OCLPMDiscoveryWizard.INITIAL_KEY, new OCLPMDiscoverySettingsStep(parameters));
-		
-		// let user select parameters for Place Net discovery
-		stepMap.put(OCLPMDiscoveryWizard.PD_ILP, new OCLPMDiscoveryILPStep(parameters));
-		stepMap.put(OCLPMDiscoveryWizard.PD_SPECPP, new OCLPMDiscoverySPECppStep(parameters));
-		
-		
-		// let user select parameters for LPM discovery
-		stepMap.put(OCLPMDiscoveryWizard.LPM_NOTION, new OCLPMDiscoveryLPMStep(parameters));
-		stepMap.put(OCLPMDiscoveryWizard.LPM_CONFIG, new LPMDiscoveryWizardStep(parameters));
-		
-		stepMap.put(OCLPMDiscoveryWizard.FINISH, new OCLPMDiscoveryDummyFinishStep(parameters));
-		OCLPMDiscoveryWizard wizard = new OCLPMDiscoveryWizard(stepMap, true);
+		OCLPMDiscoveryWizard wizard = OCLPMDiscoveryWizard.setUp(parameters, true, true);
 		
 		// show wizard
 		parameters = ProMWizardDisplay.show(context, wizard, parameters);
@@ -82,6 +55,7 @@ public class LPMDiscoveryPlugin {
 			default:
 		}
 		
+		Main.setUp(context, parameters, true, true);
 		LPMResultsTagged tlpms = Main.runLPMDiscovery(ocel, parameters);
 		return mergeLPMResults(tlpms);
 	}
@@ -97,27 +71,10 @@ public class LPMDiscoveryPlugin {
 			requiredParameterLabels = {0,1}
 	)
 	public static LPMResult mineLPMs(UIPluginContext context, OcelEventLog ocel, PlaceSet placeSet) {
-		Main.setUp(context);
 		
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
 
-		Map<String, ProMWizardStep<OCLPMDiscoveryParameters>> stepMap = new HashMap<>();
-		
-		// let user select object types for which to discover place nets
-		// let user select object types to use as leading types for process executions		
-		stepMap.put(OCLPMDiscoveryWizard.INITIAL_KEY, new OCLPMDiscoverySettingsStep(parameters));
-		
-		// let user select parameters for Place Net discovery
-		stepMap.put(OCLPMDiscoveryWizard.PD_ILP, new OCLPMDiscoveryILPStep(parameters));
-		stepMap.put(OCLPMDiscoveryWizard.PD_SPECPP, new OCLPMDiscoverySPECppStep(parameters));
-		
-		
-		// let user select parameters for LPM discovery
-		stepMap.put(OCLPMDiscoveryWizard.LPM_NOTION, new OCLPMDiscoveryLPMStep(parameters));
-		stepMap.put(OCLPMDiscoveryWizard.LPM_CONFIG, new LPMDiscoveryWizardStep(parameters));
-		
-		stepMap.put(OCLPMDiscoveryWizard.FINISH, new OCLPMDiscoveryDummyFinishStep(parameters));
-		OCLPMDiscoveryWizard wizard = new OCLPMDiscoveryWizard(stepMap, true);
+		OCLPMDiscoveryWizard wizard = OCLPMDiscoveryWizard.setUp(parameters, false, true);
 		
 		// show wizard
 		parameters = ProMWizardDisplay.show(context, wizard, parameters);
@@ -133,6 +90,7 @@ public class LPMDiscoveryPlugin {
 				break;
 			default:
 		}
+		Main.setUp(context, parameters, false, true);
 		LPMResultsTagged tlpms = Main.runLPMDiscovery(ocel, parameters, placeSet);
 		return mergeLPMResults(tlpms);
 	}

@@ -25,6 +25,8 @@ public class OCLPMResultVisualizer {
         if (result.size() < 1)
             return new JPanel();
         
+        result.refreshColors();
+        
         OCLPMResultPluginVisualizerTableFactory factory = new OCLPMResultPluginVisualizerTableFactory();
         SimpleCollectionOfElementsComponent scoec = new SimpleCollectionOfElementsComponent<>(context, result, factory);
         return scoec;
