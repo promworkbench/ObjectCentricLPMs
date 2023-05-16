@@ -38,6 +38,8 @@ public class OCLPMVisualizer {
         int windowHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
         int windowWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
         
+        //TODO instead of the JScrollPanes, use nicer looking ones (ProMScrollPanes?)
+        
         // Petri Net on the left
         JScrollPane petriNetPane = new JScrollPane((new CustomAcceptingPetriNetVisualizer()).visualize(context, net, oclpmResult));
 //        component.add((new CustomAcceptingPetriNetVisualizer()).visualize(context, net, oclpmResult));

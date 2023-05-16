@@ -14,15 +14,14 @@ public class ColorMapPanel extends JPanel implements Scrollable {
 
     private final HashMap<String, Color> colorMap;
     private final int cellHeight = 30;
+    private final int borderSize = 1;
+    private final int rowSeparation = 2;
+    private final int diameter = cellHeight-2*rowSeparation;
+    private final int textDistance = 6; // additional distance from circles to the string
 
     public ColorMapPanel(HashMap<String, Color> colorMap) {
         this.colorMap = colorMap;
-        setPreferredSize(new Dimension(200, colorMap.size() * cellHeight));
-    }
-    
-    public ColorMapPanel(HashMap<String, Color> colorMap, int width) {
-        this.colorMap = colorMap;
-        setPreferredSize(new Dimension(width, colorMap.size() * cellHeight));
+        setPreferredSize(new Dimension(200, colorMap.size() * cellHeight));    
     }
 
     @Override
@@ -30,10 +29,12 @@ public class ColorMapPanel extends JPanel implements Scrollable {
         super.paintComponent(g);
         int i = 0;
         for (Map.Entry<String, Color> entry : colorMap.entrySet()) {
+        	g.setColor(Color.BLACK);
+            g.fillOval(rowSeparation, (i * cellHeight)+rowSeparation, diameter, diameter); // circle border
+            g.drawString(entry.getKey(), diameter+rowSeparation*2+textDistance, (i + 1) * cellHeight - 10);
             g.setColor(entry.getValue());
-            g.fillRect(0, i * cellHeight, 50, cellHeight);
+            g.fillOval(rowSeparation+borderSize, (i * cellHeight)+rowSeparation+borderSize, diameter-2*borderSize, diameter-2*borderSize); // circle
             g.setColor(Color.BLACK);
-            g.drawString(entry.getKey(), 60, (i + 1) * cellHeight - 10);
             i++;
         }
     }
