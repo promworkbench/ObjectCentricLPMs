@@ -6,10 +6,12 @@ import java.awt.Toolkit;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
+import org.processmining.OCLPMDiscovery.gui.OCLPMColors;
+import org.processmining.OCLPMDiscovery.gui.OCLPMPanel;
+import org.processmining.OCLPMDiscovery.gui.OCLPMScrollPane;
+import org.processmining.OCLPMDiscovery.gui.OCLPMSplitPane;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
 import org.processmining.OCLPMDiscovery.utils.OCLPMUtils;
@@ -25,10 +27,13 @@ import org.processmining.framework.plugin.annotations.PluginVariant;
 public class OCLPMVisualizer {
 
     @Plugin(name = "@0 Visualize Object-Centric Local Process Model", returnLabels = {"Visualized Object-Centric Local Process Model"},
-            returnTypes = {JComponent.class}, parameterLabels = {"Object-Centric Local Process Model"}, userAccessible = false)
+            returnTypes = {JComponent.class}, parameterLabels = {"Object-Centric Local Process Model", "OCLPM Result", "OCLPMColors"}, userAccessible = false)
     @Visualizer
-    @PluginVariant(requiredParameterLabels = {0})
-    public JComponent visualize(PluginContext context, ObjectCentricLocalProcessModel oclpm, OCLPMResult oclpmResult) {
+    @PluginVariant(requiredParameterLabels = {0, 1})
+    public JComponent visualize(PluginContext context, ObjectCentricLocalProcessModel oclpm, OCLPMResult oclpmResult, OCLPMColors theme) {
+    	if (theme == null) {
+    		theme = new OCLPMColors();
+    	}
         if (oclpm == null)
             throw new IllegalArgumentException("The local process model to be visualized should not be null: " + oclpm);
         AcceptingPetriNet net = OCLPMUtils.getAcceptingPetriNetRepresentation(oclpm);
@@ -38,18 +43,16 @@ public class OCLPMVisualizer {
         int windowHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
         int windowWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
         
-        //TODO instead of the JScrollPanes, use nicer looking ones (ProMScrollPanes?)
-        
         // Petri Net on the left
-        JScrollPane petriNetPane = new JScrollPane((new CustomAcceptingPetriNetVisualizer()).visualize(context, net, oclpmResult));
+        OCLPMScrollPane petriNetPane = new OCLPMScrollPane((new CustomAcceptingPetriNetVisualizer()).visualize(context, net, oclpmResult), theme);
 //        component.add((new CustomAcceptingPetriNetVisualizer()).visualize(context, net, oclpmResult));
         
         // Color Legend
-        JScrollPane colorPane = new JScrollPane(new ColorMapPanel(oclpmResult.getMapTypeColor()));
+        OCLPMScrollPane colorPane = new OCLPMScrollPane(new ColorMapPanel(oclpmResult.getMapTypeColor(), theme), theme);
         
         // model stats
-        JComponent evalComponent = new JPanel();
-        JScrollPane evalPane = new JScrollPane(evalComponent);
+        JComponent evalComponent = new OCLPMPanel(theme);
+        OCLPMScrollPane evalPane = new OCLPMScrollPane(evalComponent, theme);
         evalComponent.setLayout(new BoxLayout(evalComponent, BoxLayout.Y_AXIS));
         evalComponent.add(ComponentFactory.getComplexEvaluationResultComponent(oclpm.getAdditionalInfo().getEvaluationResult()));
         
@@ -57,12 +60,12 @@ public class OCLPMVisualizer {
         evalComponent.add(new JLabel("Histogram"));
         
         // Component on the right
-        JSplitPane componentRight = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        OCLPMSplitPane componentRight = new OCLPMSplitPane(JSplitPane.VERTICAL_SPLIT, theme);
         componentRight.setTopComponent(colorPane);
         componentRight.setBottomComponent(evalPane);
         
         // outer Component
-        JSplitPane componentOuter = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        OCLPMSplitPane componentOuter = new OCLPMSplitPane(JSplitPane.HORIZONTAL_SPLIT, theme);
         componentOuter.setLeftComponent(petriNetPane);
         componentOuter.setRightComponent(componentRight);
         

@@ -1,12 +1,13 @@
 package org.processmining.OCLPMDiscovery.visualization.components.tables;
 
-import org.processmining.placebasedlpmdiscovery.model.TextDescribable;
-
-import javax.swing.*;
-import javax.swing.table.JTableHeader;
-import java.awt.*;
+import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.util.Map;
+
+import javax.swing.JTable;
+import javax.swing.table.JTableHeader;
+
+import org.processmining.placebasedlpmdiscovery.model.TextDescribable;
 
 public class GenericTextDescribableTableComponent<T extends TextDescribable> extends JTable {
 

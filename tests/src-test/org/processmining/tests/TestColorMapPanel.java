@@ -8,15 +8,47 @@ import java.util.HashMap;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 
+import org.processmining.OCLPMDiscovery.gui.OCLPMColors;
+import org.processmining.OCLPMDiscovery.gui.OCLPMPanel;
+import org.processmining.OCLPMDiscovery.gui.OCLPMScrollPane;
+import org.processmining.OCLPMDiscovery.gui.OCLPMSplitPane;
 import org.processmining.OCLPMDiscovery.visualization.components.ColorMapPanel;
 
 public class TestColorMapPanel {
 	public static void main(String[] args) {
 		HashMap<String, Color> colorMap = new HashMap<>();
+		OCLPMColors colorTheme = OCLPMColors.getLightMode();
+//		colorTheme = OCLPMColors.getDarkMode();
+		Boolean useLaF = false;
+		
+		if (useLaF) {
+		try {
+		    for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+		        if ("Nimbus".equals(info.getName())) {
+		            UIManager.setLookAndFeel(info.getClassName());
+		            UIManager.put("nimbusBase", colorTheme.ELEMENTS); // scroll bar
+		    		UIManager.put("nimbusBlueGrey", Color.PINK); // dividers and scroll bar background
+		    		UIManager.put("control", colorTheme.BACKGROUND);
+		            break;
+		        }
+		    }
+		} catch (Exception e) {
+		    // If Nimbus is not available, you can set the GUI to another look and feel.
+			try {
+				UIManager.setLookAndFeel(
+//					UIManager.getCrossPlatformLookAndFeelClassName()
+					UIManager.getSystemLookAndFeelClassName()
+				);
+			} 
+			catch(Exception e2) {
+				System.out.println("Failed setting the look and feel.");
+			}
+		}
+		}
 		
 		// generate colors
 		int numTypes = 10;
@@ -35,7 +67,7 @@ public class TestColorMapPanel {
 //		colorMap.put("Red", Color.RED);
 //		colorMap.put("Green", Color.GREEN);
 //		colorMap.put("Blue", Color.BLUE);
-		ColorMapPanel colorMapPanel = new ColorMapPanel(colorMap);
+		ColorMapPanel colorMapPanel = new ColorMapPanel(colorMap, colorTheme);
 
 		// set the preferred dimension of the two containers
         int windowHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
@@ -50,18 +82,18 @@ public class TestColorMapPanel {
 		container.setLayout(new BoxLayout(container, BoxLayout.X_AXIS));
 		
 		// left container
-		JPanel panelLeft = new JPanel();
+		OCLPMPanel panelLeft = new OCLPMPanel(colorTheme);
 		panelLeft.setPreferredSize(new Dimension(80 * windowWidth / 100, windowHeight));
 //		container.add(panelLeft);
 		
-		JScrollPane colorPane = new JScrollPane(colorMapPanel);
+		OCLPMScrollPane colorPane = new OCLPMScrollPane(colorMapPanel, colorTheme);
 		colorPane.setPreferredSize(new Dimension(20 * windowWidth / 100, 20 * windowHeight / 100));
 		
-		JPanel panelRightBottom = new JPanel();
+		OCLPMPanel panelRightBottom = new OCLPMPanel(colorTheme);
 		panelRightBottom.setPreferredSize(new Dimension(20 * windowWidth / 100, 80 * windowHeight / 100));
 		
 		// Right split pane
-		JSplitPane splitPaneRight = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		OCLPMSplitPane splitPaneRight = new OCLPMSplitPane(JSplitPane.VERTICAL_SPLIT, colorTheme);
 		splitPaneRight.setPreferredSize(new Dimension(20 * windowWidth / 100, windowHeight));
 		splitPaneRight.setResizeWeight(0.3);
 		splitPaneRight.setTopComponent(colorPane);
@@ -69,7 +101,7 @@ public class TestColorMapPanel {
 		container.add(splitPaneRight);
 		
 		// outer split pane
-		JSplitPane splitPaneOuter = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		OCLPMSplitPane splitPaneOuter = new OCLPMSplitPane(OCLPMSplitPane.HORIZONTAL_SPLIT, colorTheme);
 //		splitPaneOuter.setPreferredSize(new Dimension(20 * windowWidth / 100, windowHeight));
 		splitPaneOuter.setResizeWeight(0.8);
 		splitPaneOuter.setLeftComponent(panelLeft);
@@ -78,6 +110,7 @@ public class TestColorMapPanel {
 		
 //		frame.setPreferredSize(new Dimension(15 * frame.getContentPane().getWidth(), frame.getContentPane().getHeight() / 20));
 //		frame.setPreferredSize(new Dimension(100, 200));
+//		SwingUtilities.updateComponentTreeUI(frame);
 		frame.pack();
 		frame.setVisible(true);
 	}

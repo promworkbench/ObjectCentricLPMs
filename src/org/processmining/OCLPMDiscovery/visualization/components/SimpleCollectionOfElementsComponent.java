@@ -9,6 +9,8 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
+import org.processmining.OCLPMDiscovery.gui.OCLPMColors;
+import org.processmining.OCLPMDiscovery.gui.OCLPMSplitPane;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
 import org.processmining.OCLPMDiscovery.model.TaggedPlace;
@@ -25,11 +27,12 @@ import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableC
 import org.processmining.plugins.utils.ProvidedObjectHelper;
 
 public class SimpleCollectionOfElementsComponent<T extends TextDescribable & Serializable>
-        extends JSplitPane implements TableListener<T>, ComponentListener {
+        extends OCLPMSplitPane implements TableListener<T>, ComponentListener {
 
     private final UIPluginContext context;
     private final OCLPMResult result;
     private final AbstractPluginVisualizerTableFactory<T> tableFactory;
+    private OCLPMColors theme = new OCLPMColors();
 
     private JComponent visualizerComponent;
 
@@ -41,13 +44,24 @@ public class SimpleCollectionOfElementsComponent<T extends TextDescribable & Ser
         this.tableFactory = tableFactory;
         init();
     }
+    
+    public SimpleCollectionOfElementsComponent(UIPluginContext context,
+												OCLPMResult result,
+												AbstractPluginVisualizerTableFactory<T> tableFactory,
+												OCLPMColors theme) {
+    	super(JSplitPane.HORIZONTAL_SPLIT, theme, 0);
+		this.context = context;
+		this.result = result;
+		this.tableFactory = tableFactory;
+		this.theme = theme;
+		init();
+	}
 
     private void init() {
-        this.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
 
         // create the table and LPM visualization containers
         visualizerComponent = createVisualizerComponent();
-        JComponent tableContainer = new TableComposition<>((SerializableCollection<T>) (this.result), this.tableFactory, this);
+        JComponent tableContainer = new TableComposition<>((SerializableCollection<T>) (this.result), this.tableFactory, this, theme);
 
         // set the preferred dimension of the two containers
         int windowHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
@@ -79,7 +93,7 @@ public class SimpleCollectionOfElementsComponent<T extends TextDescribable & Ser
             // add visualization for the newly selected LPM
             ObjectCentricLocalProcessModel oclpm = (ObjectCentricLocalProcessModel) selectedObject;
             visualizerComponent.add(
-                    visualizer.visualize(context, oclpm, this.result),
+                    visualizer.visualize(context, oclpm, this.result, theme),
                     BorderLayout.CENTER);
         }
 
@@ -116,11 +130,14 @@ public class SimpleCollectionOfElementsComponent<T extends TextDescribable & Ser
     @Override
     public void componentExpansion(ComponentId componentId, boolean expanded) {
         // change visibility of lpm container
-        this.visualizerComponent.setVisible(!expanded);
+//        this.visualizerComponent.setVisible(!expanded);
         
         // reset split position
         if (!expanded) {
         	this.setDividerLocation(0.05);
+        }
+        if (expanded) {
+        	this.setDividerLocation(1.0);
         }
     }
 }

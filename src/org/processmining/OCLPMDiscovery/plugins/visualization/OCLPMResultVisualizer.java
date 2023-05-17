@@ -3,6 +3,7 @@ package org.processmining.OCLPMDiscovery.plugins.visualization;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import org.processmining.OCLPMDiscovery.gui.OCLPMColors;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.visualization.components.SimpleCollectionOfElementsComponent;
 import org.processmining.OCLPMDiscovery.visualization.components.tables.factories.OCLPMResultPluginVisualizerTableFactory;
@@ -27,8 +28,10 @@ public class OCLPMResultVisualizer {
         
         result.refreshColors();
         
+        OCLPMColors theme = OCLPMColors.getLightMode();
+        
         OCLPMResultPluginVisualizerTableFactory factory = new OCLPMResultPluginVisualizerTableFactory();
-        SimpleCollectionOfElementsComponent scoec = new SimpleCollectionOfElementsComponent<>(context, result, factory);
+        SimpleCollectionOfElementsComponent scoec = new SimpleCollectionOfElementsComponent<>(context, result, factory, theme);
         return scoec;
     }
 }

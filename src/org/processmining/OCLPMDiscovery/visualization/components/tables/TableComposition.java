@@ -6,8 +6,6 @@ import java.io.Serializable;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
@@ -16,6 +14,9 @@ import javax.swing.RowSorter;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import org.processmining.OCLPMDiscovery.gui.OCLPMColors;
+import org.processmining.OCLPMDiscovery.gui.OCLPMPanel;
+import org.processmining.OCLPMDiscovery.gui.OCLPMScrollPane;
 import org.processmining.OCLPMDiscovery.visualization.components.ComponentId;
 import org.processmining.OCLPMDiscovery.visualization.components.ICommunicativePanel;
 import org.processmining.OCLPMDiscovery.visualization.components.tables.factories.AbstractPluginVisualizerTableFactory;
@@ -29,6 +30,7 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
     private final SerializableCollection<T> result;
     private final AbstractPluginVisualizerTableFactory<T> tableFactory;
     private final TableListener<T> controller;
+    private OCLPMColors theme = new OCLPMColors();
 
     public TableComposition(SerializableCollection<T> result,
                             AbstractPluginVisualizerTableFactory<T> tableFactory,
@@ -40,16 +42,29 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
 
         init();
     }
+    
+    public TableComposition(SerializableCollection<T> result,
+            AbstractPluginVisualizerTableFactory<T> tableFactory,
+            TableListener<T> controller,
+            OCLPMColors theme) {
+		this.componentId = new ComponentId(ComponentId.Type.TableComponent);
+		this.result = result;
+		this.tableFactory = tableFactory;
+		this.controller = controller;
+		this.theme = theme;
+		
+		init();
+	}
 
     private void init() {
         this.setLayout(new BorderLayout());
 
         // create the table
         GenericTextDescribableTableComponent<T> table = this.tableFactory.getPluginVisualizerTable(this.result, controller);
-        JScrollPane scrollPane = new JScrollPane(table); // add the table in a scroll pane
+        OCLPMScrollPane scrollPane = new OCLPMScrollPane(table, theme); // add the table in a scroll pane
 
         // create the filter form
-        JPanel filterForm = new JPanel();
+        OCLPMPanel filterForm = new OCLPMPanel(this.theme);
         filterForm.setLayout(new FlowLayout());
         filterForm.add(new JLabel("Filter:"));
         filterForm.add(createRowFilter(table));
