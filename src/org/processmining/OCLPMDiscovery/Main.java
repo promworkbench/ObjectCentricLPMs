@@ -30,6 +30,8 @@ public class Main {
 	private static UIPluginContext UIContext;
 	private static boolean UsingUI = false;
 	private static boolean UsingContext = false;
+	private static Graph<String,DefaultEdge> graph;
+	private static boolean graphProvided = false;
 	
 	
 	
@@ -324,10 +326,15 @@ public class Main {
 	}
 	
 	public static Graph<String,DefaultEdge> buildObjectGraph(OcelEventLog ocel){
-		messageNormal("Starting object graph construction.");
-		Graph<String,DefaultEdge> graph = ProcessExecutions.buildObjectGraph(ocel);
-		// TODO export object graph and write plugin variants which accept graph as input
-		updateProgress("Contructed object graph with "+graph.vertexSet().size()+" vertices and "+graph.edgeSet().size()+" edges.");
+		if (!graphProvided) {
+			messageNormal("Starting object graph construction.");
+			Main.graph = ProcessExecutions.buildObjectGraph(ocel);
+			exportObjectGraph(graph);
+			updateProgress("Contructed object graph with "+graph.vertexSet().size()+" vertices and "+graph.edgeSet().size()+" edges.");
+		}
+		else {
+			updateProgress("Object graph provided with "+graph.vertexSet().size()+" vertices and "+graph.edgeSet().size()+" edges.");
+		}
 		return graph;
 	}
 	
@@ -358,5 +365,23 @@ public class Main {
 	        		, tlpms, LPMResultsTagged.class, Main.getContext());
 	        ProvidedObjectHelper.setFavorite(Main.getContext(), tlpms);
 		}
+	}
+	
+	private static void exportObjectGraph(Graph<String,DefaultEdge> graph) {
+		if (UsingContext) {
+	        Main.getContext().getProvidedObjectManager().createProvidedObject(
+	        		"OCLPM Discovery: Object Graph"
+	        		, graph, Graph.class, Main.getContext());
+	        ProvidedObjectHelper.setFavorite(Main.getContext(), graph);
+		}
+	}
+
+	public static Graph<String,DefaultEdge> getGraph() {
+		return graph;
+	}
+
+	public static void setGraph(Graph<String,DefaultEdge> graph) {
+		Main.graph = graph;
+		Main.graphProvided = true;
 	}
 }

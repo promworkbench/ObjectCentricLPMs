@@ -3,6 +3,8 @@ package org.processmining.OCLPMDiscovery.plugins.mining;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.jgrapht.Graph;
+import org.jgrapht.graph.DefaultEdge;
 import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
@@ -21,7 +23,13 @@ import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 
 @Plugin(
 		name = "Discovery of Object-Centric Local Process Models", // not shown anywhere anymore because overwritten by uiLabel?
-		parameterLabels = {"OCEL", "Set of Places", "Object Type HashMap", "Petri Net", "Parameters", "LPMs"},
+		parameterLabels = {"OCEL", 			// 0
+				"Set of Places", 			// 1
+				"Object Type HashMap", 		// 2 
+				"Petri Net", "Parameters", 	// 3
+				"LPMs", 					// 4
+				"Object Graph" 				// 5
+				},
 		returnLabels = { "OCLPM Result"},
 		returnTypes = { OCLPMResult.class},
 		help = "Discovers Object-Centric Local Process Models on an object-centric event log (OCEL standard).",
@@ -97,6 +105,41 @@ public class OCLPMDiscoveryPlugin {
 		Object[] result = Main.run(ocel, parameters, placeSet, typeMap);
 		return (OCLPMResult) result[0];
 	}
+	
+	// variant skipping the place net discovery and object graph computation
+		@UITopiaVariant(
+				affiliation = "RWTH - PADS",
+				author = "Marvin Porsil",
+				email = "marvin.porsil@rwth-aachen.de",
+				uiLabel = "Object-Centric Local Process Model Discovery given place set, hashmap and object graph."
+		)
+		@PluginVariant(
+				variantLabel = "Object-Centric Local Process Model Discovery",
+				requiredParameterLabels = {0,1,2,5}
+		)
+		public static OCLPMResult mineOCLPMs (
+				UIPluginContext context, OcelEventLog ocel, PlaceSet placeSet, 
+				HashMap<String,String> typeMap, Graph<String,DefaultEdge> graph
+				) {
+			
+			OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
+			
+			// just for printing settings...
+			parameters.setObjectTypesPlaceNets(new HashSet<String>(typeMap.values()));
+
+			OCLPMDiscoveryWizard wizard = OCLPMDiscoveryWizard.setUp(parameters, false, true);
+			
+			// show wizard
+			parameters = ProMWizardDisplay.show(context, wizard, parameters);
+
+			if (parameters == null)
+				return null;		
+			
+			Main.setUp(context, parameters, false, true);
+			Main.setGraph(graph);
+			Object[] result = Main.run(ocel, parameters, placeSet, typeMap);
+			return (OCLPMResult) result[0];
+		}
 	
 	// variant skipping the place net discovery and process execution computation
 	//TODO: variant with input (ocel, set(set(place net),object type), (log,set(column names)))
