@@ -34,6 +34,10 @@ public class OCLPMTable extends RoundedPanel {
 	private static final long serialVersionUID = 1L;
 	private final JTable table;
 
+	public OCLPMTable() {
+		super();
+		this.table = new JTable();
+	}
 	/**
 	 * @param model
 	 */
@@ -285,6 +289,26 @@ public class OCLPMTable extends RoundedPanel {
 
 	protected JTable createTable(final TableModel model, final TableColumnModel columnModel) {
 		return new JTable(model, columnModel);
+	}
+	
+	protected JTableHeader createDefaultTableHeader() {
+		return new JTable().getTableHeader();
+	}
+	
+	public int getSelectedRowCount() {
+		return table.getSelectedRowCount();
+	}
+	
+	public void changeSelection(int rowIndex, int columnIndex, boolean toggle, boolean extend ) {
+		table.changeSelection(rowIndex, columnIndex, toggle, extend);
+	}
+	
+	public int convertRowIndexToModel(int index) {
+		return table.convertRowIndexToModel(index);
+	}
+	
+	public int[] getSelectedRows() {
+		return table.getSelectedRows();
 	}
 
 }

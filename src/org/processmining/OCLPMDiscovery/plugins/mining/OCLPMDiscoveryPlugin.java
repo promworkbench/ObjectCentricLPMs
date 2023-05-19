@@ -44,9 +44,7 @@ public class OCLPMDiscoveryPlugin {
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
 		
 		// setup wizard with place discovery and LPM discovery
-		OCLPMDiscoveryWizard wizard = OCLPMDiscoveryWizard.setUp(parameters, true, true);
-		
-		//TODO option to return all the intermediate computations to ProM (PlaceSet, HashMap, LPMs, OCLPMResult) 
+		OCLPMDiscoveryWizard wizard = OCLPMDiscoveryWizard.setUp(parameters, true, true); 
 		
 		// show wizard
 		parameters = ProMWizardDisplay.show(context, wizard, parameters);

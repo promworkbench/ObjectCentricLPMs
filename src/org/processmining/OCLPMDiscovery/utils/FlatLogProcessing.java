@@ -87,38 +87,12 @@ public class FlatLogProcessing {
 	 * @return
 	 */
 	public static Set<Place> convertPetriNetToPlaceNets (PluginContext context, Petrinet petrinet, String objectType){
-		Marking initialMarking = null;
-		List<Marking> finalMarkings = null;
-		try {
-			initialMarking = context.getConnectionManager()
-					.getFirstConnection(InitialMarkingConnection.class, context, petrinet)
-					.getObjectWithRole(InitialMarkingConnection.MARKING);
-			finalMarkings = context.getConnectionManager().getConnections(FinalMarkingConnection.class, context, petrinet)
-					.stream()
-					.map(c -> (Marking) c.getObjectWithRole(FinalMarkingConnection.MARKING))
-					.collect(Collectors.toList());
-		} catch (ConnectionCannotBeObtained cannotBeObtained) {
-			cannotBeObtained.printStackTrace(); //TODO always occurs, is this a problem?
-		}
 		AcceptingPetriNet acceptingPetriNet = new AcceptingPetriNetImpl(petrinet);
 		PetriNetTaggedPlaceConverter converter = new PetriNetTaggedPlaceConverter(objectType);
 		return converter.convertCasted(acceptingPetriNet);
 	}
 	
 	public static Set<TaggedPlace> convertPetriNetToTaggedPlaceNets (PluginContext context, Petrinet petrinet, String objectType){
-		Marking initialMarking = null;
-		List<Marking> finalMarkings = null;
-		try {
-			initialMarking = context.getConnectionManager()
-					.getFirstConnection(InitialMarkingConnection.class, context, petrinet)
-					.getObjectWithRole(InitialMarkingConnection.MARKING);
-			finalMarkings = context.getConnectionManager().getConnections(FinalMarkingConnection.class, context, petrinet)
-					.stream()
-					.map(c -> (Marking) c.getObjectWithRole(FinalMarkingConnection.MARKING))
-					.collect(Collectors.toList());
-		} catch (ConnectionCannotBeObtained cannotBeObtained) {
-			cannotBeObtained.printStackTrace();
-		}
 		AcceptingPetriNet acceptingPetriNet = new AcceptingPetriNetImpl(petrinet);
 		PetriNetTaggedPlaceConverter converter = new PetriNetTaggedPlaceConverter(objectType);
 		return converter.convertToTagged(acceptingPetriNet);

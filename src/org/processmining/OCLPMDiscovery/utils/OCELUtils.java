@@ -8,6 +8,7 @@ import org.processmining.ocel.ocelobjects.OcelObject;
 import org.processmining.ocel.ocelobjects.OcelObjectType;
 
 public class OCELUtils {
+	
 	/**
 	 * Adds new object type with the same object for each event.
 	 * @param ocel input ocel

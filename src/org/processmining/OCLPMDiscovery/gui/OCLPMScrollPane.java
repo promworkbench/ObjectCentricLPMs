@@ -57,6 +57,7 @@ public class OCLPMScrollPane extends JScrollPane {
 		vBar.setUI(new SlickerScrollBarUI(vBar, new Color(0, 0, 0, 0), colors.FOCUS,
 				colors.NON_FOCUS, 4, 12));
 		vBar.setOpaque(true);
+		vBar.setBackground(colors.BACKGROUND);
 		this.getViewport().setBackground(colors.BACKGROUND);
 	}
 

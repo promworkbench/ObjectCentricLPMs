@@ -61,6 +61,8 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
 
         // create the table
         GenericTextDescribableTableComponent<T> table = this.tableFactory.getPluginVisualizerTable(this.result, controller);
+        //TODO make this work with OCLPM tables
+//        OCLPMTextDescribableTableComponent<T> table = this.tableFactory.getOCLPMPluginVisualizerTable(this.result, controller);
         OCLPMScrollPane scrollPane = new OCLPMScrollPane(table, theme); // add the table in a scroll pane
 
         // create the filter form

@@ -5,12 +5,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.deckfour.xes.model.XLog;
+import org.jgrapht.Graph;
+import org.jgrapht.graph.DefaultEdge;
 import org.processmining.OCLPMDiscovery.model.LPMResultsTagged;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.utils.FlatLogProcessing;
 import org.processmining.OCLPMDiscovery.utils.OCELUtils;
+import org.processmining.OCLPMDiscovery.utils.ProcessExecutions;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.events.Logger.MessageLevel;
@@ -40,15 +43,18 @@ public class Main {
 	 * @return {oclpmResult, tlpms, placeSet, typeMap}
 	 */
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
+		// place discovery
 		Object[] results = discoverPlaceSet(ocel,parameters);
 		PlaceSet placeSet = (PlaceSet) results[0];
 		Main.exportPlaceSet(placeSet);
 		HashMap<String,String> typeMap = (HashMap<String,String>) results[1];
 		Main.exportHashMap(typeMap);
 		
+		// LPM discovery
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
 		Main.exportTlpms(tlpms);
 		
+		// OCLPM conversion
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
 
         return new Object[] {oclpmResult, tlpms, placeSet, typeMap};
@@ -173,6 +179,9 @@ public class Main {
 	public static LPMResultsTagged discoverLPMs(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet) {
 
 		LPMResultsTagged lpmsTagged = new LPMResultsTagged();
+		XLog log;
+		Object[] lpmResults;
+		LPMResult lpmResult;
 		
 		switch (parameters.getCaseNotionStrategy()) {
 		
@@ -189,6 +198,16 @@ public class Main {
 				break;
 				
 			case PE_CONNECTED:
+				Graph<String,DefaultEdge> graph = buildObjectGraph(ocel);
+				String ot = "ConnectedComponent";
+				ocel = ProcessExecutions.enhanceConnectedComponent(ocel, ot, graph);
+				messageNormal("Discovered "+ocel.objectTypes.get(ot).objects.size()+" connected components.");
+				log = Flattening.flatten(ocel, ot);
+				System.out.println("Starting LPM discovery using connected components as case notion.");
+				lpmResults = runLPMPlugin(log, placeSet, parameters);
+				assert(lpmResults[0] instanceof LPMResult);
+				lpmResult = (LPMResult) lpmResults[0];
+				lpmsTagged.put(lpmResult, ot);
 				break;
 				
 			case DUMMY:
@@ -196,12 +215,12 @@ public class Main {
 				String dummyType = "DummyType";
 				OcelEventLog dummyOcel = OCELUtils.addDummyCaseNotion(ocel,"DummyType","42");
 				System.out.println("Added dummy type to ocel.");
-				XLog log = Flattening.flatten(dummyOcel,dummyType);
+				log = Flattening.flatten(dummyOcel,dummyType);
 				System.out.println("Flattened on dummy type.");
 				System.out.println("Starting LPM discovery using a dummy type as case notion.");
-				Object[] lpmResults = runLPMPlugin(log, placeSet, parameters);
+				lpmResults = runLPMPlugin(log, placeSet, parameters);
 				assert(lpmResults[0] instanceof LPMResult);
-				LPMResult lpmResult = (LPMResult) lpmResults[0];
+				lpmResult = (LPMResult) lpmResults[0];
 				lpmsTagged.put(lpmResult, dummyType);
 		}
 		System.out.println("Finished LPM discovery.");
@@ -259,6 +278,10 @@ public class Main {
 		// TODO each finished discovery and assignment of process execution (if that takes considerable time)
 		// + each completed LPM discovery for each selected case notion
 		if (lpmDiscovery) {
+			// +1 if object graph needs to be built
+			if (CaseNotionStrategy.objectGraphNeeded.contains(parameters.getCaseNotionStrategy())) {
+				numSteps +=1;
+			}
 			if (CaseNotionStrategy.typeSelectionNeeded.contains(parameters.getCaseNotionStrategy())) {
 				numSteps += parameters.getObjectTypesLeadingTypes().size();
 			}
@@ -298,6 +321,14 @@ public class Main {
 		Object[] lpmResults = PlaceBasedLPMDiscoveryPlugin.mineLPMs(Context, log, placeSet, parameters.getPBLPMDiscoveryParameters());
 		updateProgress("Finished LPM discovery.");
 		return lpmResults;
+	}
+	
+	public static Graph<String,DefaultEdge> buildObjectGraph(OcelEventLog ocel){
+		messageNormal("Starting object graph construction.");
+		Graph<String,DefaultEdge> graph = ProcessExecutions.buildObjectGraph(ocel);
+		// TODO export object graph and write plugin variants which accept graph as input
+		updateProgress("Contructed object graph with "+graph.vertexSet().size()+" vertices and "+graph.edgeSet().size()+" edges.");
+		return graph;
 	}
 	
 	public static void exportPlaceSet(PlaceSet placeSet) {
