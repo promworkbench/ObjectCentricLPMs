@@ -23,6 +23,7 @@
     	<!-- Please uncomment the second line in the resolve target in your build.xml file
     	     if you have any third party libraries. -->
  		<!-- Third party library downloaded from maven repository. -->
+		<dependency conf="lib->default" org="org.json" name="json" rev="20220320"/>
     	<!-- dependency conf="lib->default" org="org.reflections" name="reflections" rev="0.9.10" /-->
     	<!-- Third party library downloaded from ProM library. -->
     	<!-- dependency conf="lib->default" org="prom-libs" name="opencsv" rev="2.4-patched" transitive="false" /--> 

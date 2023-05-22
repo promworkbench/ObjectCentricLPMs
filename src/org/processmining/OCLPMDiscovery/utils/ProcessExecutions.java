@@ -126,9 +126,90 @@ public class ProcessExecutions {
 		return ocel;
 	}
 	
-	public static OcelEventLog enhanceLeadingType (OcelEventLog ocel, String otName, String leadingType) {
+	public static OcelEventLog enhanceLeadingType (OcelEventLog ocel, String newTypeLabel, String leadingType, Graph<String,DefaultEdge> graph) {
 
-		// TODO
+		System.out.println("Starting ocel enhancement using the leading type strategy for type "+leadingType+".");
+		// breadth first search on each object of leading type
+		// to build a hashmap mapping each object to its closest objects of type leading type
+		HashMap<String,Set<String>> map = new HashMap<>(); // maps object identifier to object id of leading type/s it has been assigned to
+		String currentType, vType;
+		int vDepth; 
+		int lastDepth = 0;
+		for (String currentObject : graph.vertexSet()) {
+			currentType = ocel.getObjects().get(currentObject).objectType.name; // TODO too slow?
+			// current object not leading type -> skip
+			if (!currentType.equals(leadingType)) { 
+				continue;
+			}
+			else { // on object of leading type
+				BreadthFirstIteratorWithLevel<String,DefaultEdge> bfIterator = new BreadthFirstIteratorWithLevel<String,DefaultEdge>(graph, currentObject);
+				String v;
+				// for each object type remember if it has been found and at which depth
+				HashMap<String, Integer> foundMap = new HashMap();
+				foundMap.put(currentType, 0); // leading type has been found at depth 0
+				while (bfIterator.hasNext()) {
+					v = bfIterator.next();
+					vType = ocel.getObjects().get(v).objectType.name;
+					vDepth = bfIterator.getDepth(v);
+					// if all types have been found and new depth is entered quit
+					if (foundMap.keySet().size() == ocel.getObjectTypes().size() && vDepth > lastDepth) {
+						break;
+					}
+					// if node of this type has already been added with a shorter distance discard it
+					if (foundMap.containsKey(vType) && vDepth > foundMap.get(vType)) {
+						continue;
+					}
+					// object of this type already found but this has the same distance
+					else if (foundMap.containsKey(vType)) {
+						if (map.containsKey(v)) { // object is also closest to another of leading type
+							HashSet<String> tmpSet = new HashSet<String>(); 
+							tmpSet.addAll(map.get(v));
+							tmpSet.add(currentObject);
+							map.put(v,tmpSet);
+						}
+						else {
+							map.put(v, Collections.singleton(currentObject));
+						}
+					}
+					// object of this type is new
+					else {
+						foundMap.put(vType, vDepth);
+						lastDepth = vDepth;
+						if (map.containsKey(v)) { // object is also closest to another of leading type
+							HashSet<String> tmpSet = new HashSet<String>(); 
+							tmpSet.addAll(map.get(v));
+							tmpSet.add(currentObject);
+							map.put(v,tmpSet);
+						}
+						else {
+							map.put(v, Collections.singleton(currentObject));
+						}
+					}
+				}
+			}
+		}
+		
+		// add new object type
+		OcelObjectType ot = new OcelObjectType(ocel, newTypeLabel);
+		ocel.objectTypes.put(newTypeLabel, ot);
+		
+		// assign each event the objects which result from putting all the objects 
+		// from all the types of the event into the hashmap
+		// some objects hash to nothing, which is ok. 
+		// If an event has only objects mapping to nothing it will be discarded when flattening.
+		HashSet<String> tmpSet = new HashSet<String>();
+		for (OcelEvent event : ocel.getEvents().values()) {
+			// for each event have to check each object of each type
+			for (String obj : event.relatedObjectsIdentifiers) {
+				tmpSet.addAll(map.get(obj)); // doesn't work without tmpSet because of concurrent modifications
+			}
+			event.relatedObjectsIdentifiers.addAll(tmpSet);
+			tmpSet.clear();
+		}
+		
+		ocel.register();
+		
+		System.out.println("Finished ocel enhancement using the leading type strategy for type "+leadingType+".");
 		
 		return ocel;
 	}

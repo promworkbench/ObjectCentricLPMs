@@ -1,5 +1,6 @@
 package org.processmining.OCLPMDiscovery;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -185,23 +186,39 @@ public class Main {
 		Object[] lpmResults;
 		LPMResult lpmResult;
 		Graph<String,DefaultEdge> graph;
+		ArrayList<String> newTypeLabels;
 		
 		switch (parameters.getCaseNotionStrategy()) {
 		
 			case PE_LEADING:
+				newTypeLabels = new ArrayList<String>(parameters.getObjectTypesLeadingTypes().size());
 				graph = buildObjectGraph(ocel);
-				// TODO enhance log by process executions as case notions
 				// LPM discovery for each new case notion
 				for (String currentType : parameters.getObjectTypesLeadingTypes()) {
+					messageNormal("Starting ocel enhancement using the leading type strategy for type "+currentType+".");
+					
+					// enhance log by process executions as case notions
+					String newTypeLabel = "PE_"+currentType;
+					newTypeLabels.add(newTypeLabel);
+					ocel = ProcessExecutions.enhanceLeadingType(ocel, newTypeLabel, currentType, graph);				
+					
+					// flatten ocel
+					log = Flattening.flatten(ocel, newTypeLabel);
 				
-					// TODO flatten ocel
-				
-					// TODO discover LPMs (name of the currentType column needs concept:name, which the flattening does)
-				
+					// discover LPMs (name of the currentType column needs concept:name, which the flattening does)
+					System.out.println("Starting LPM discovery using leading type "+newTypeLabel+" as case notion.");
+					lpmResults = runLPMPlugin(log, placeSet, parameters);
+					assert(lpmResults[0] instanceof LPMResult);
+					lpmResult = (LPMResult) lpmResults[0];
+					lpmsTagged.put(lpmResult, currentType);
+					
+					updateProgress("Finished ocel enhancement using the leading type strategy for type "+currentType+".");
 				}
+				exportOcel(ocel, newTypeLabels);
 				break;
 				
 			case PE_LEADING_RELAXED:
+				newTypeLabels = new ArrayList<String>(parameters.getObjectTypesLeadingTypes().size());
 				graph = buildObjectGraph(ocel);
 				// LPM discovery for each new case notion
 				for (String currentType : parameters.getObjectTypesLeadingTypes()) {
@@ -209,6 +226,7 @@ public class Main {
 					
 					// enhance log by process executions as case notions
 					String newTypeLabel = "PE_"+currentType;
+					newTypeLabels.add(newTypeLabel);
 					ocel = ProcessExecutions.enhanceLeadingTypeRelaxed(ocel, newTypeLabel, currentType, graph);				
 					
 					// flatten ocel
@@ -223,7 +241,7 @@ public class Main {
 					
 					updateProgress("Finished ocel enhancement using the leading type relaxed strategy for type "+currentType+".");
 				}
-				//TODO export enhanced ocel
+				exportOcel(ocel, newTypeLabels);
 				break;
 				
 			case PE_CONNECTED:
@@ -261,8 +279,6 @@ public class Main {
 	public static OCLPMResult convertLPMstoOCLPMs (OCLPMDiscoveryParameters parameters, LPMResultsTagged tlpms, HashMap<String,String> typeMap) {
 
 		OCLPMResult oclpmResult = new OCLPMResult(parameters, tlpms, typeMap);
-		
-		// TODO assign places to objects
 		
 		// TODO identify variable arcs
 		
@@ -402,6 +418,25 @@ public class Main {
 	        		"OCLPM Discovery: Object Graph"
 	        		, graph, Graph.class, Main.getContext());
 	        ProvidedObjectHelper.setFavorite(Main.getContext(), graph);
+		}
+	}
+	
+	private static void exportOcel(OcelEventLog ocel) { //TODO this doesn't work
+		if (UsingContext) {
+	        Main.getContext().getProvidedObjectManager().createProvidedObject(
+	        		"OCLPM Discovery: OCEL"
+	        		, ocel, OcelEventLog.class, Main.getContext());
+	        ProvidedObjectHelper.setFavorite(Main.getContext(), ocel);
+		}
+	}
+	
+	private static void exportOcel(OcelEventLog ocel, ArrayList<String> labels) {
+		exportOcel(ocel);
+		if (UsingContext) {
+	        Main.getContext().getProvidedObjectManager().createProvidedObject(
+	        		"OCLPM Discovery: new Type Labels"
+	        		, labels, ArrayList.class, Main.getContext());
+	        ProvidedObjectHelper.setFavorite(Main.getContext(), labels);
 		}
 	}
 

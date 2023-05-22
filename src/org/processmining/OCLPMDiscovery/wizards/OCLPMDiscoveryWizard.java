@@ -26,10 +26,16 @@ public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, St
 	public static final String[] FINALS = {FINISH};
 	
 	private final boolean discoverPlaces;
+	private final boolean discoverLPMs;
 	
 	public OCLPMDiscoveryWizard(Map<String, ProMWizardStep<OCLPMDiscoveryParameters>> steps, boolean discoverPlaces) {
+		this(steps, discoverPlaces, true);
+    }
+	
+	public OCLPMDiscoveryWizard(Map<String, ProMWizardStep<OCLPMDiscoveryParameters>> steps, boolean discoverPlaces, boolean discoverLPMs) {
 		super(steps);
-        this.discoverPlaces = discoverPlaces;
+		this.discoverPlaces = discoverPlaces;
+		this.discoverLPMs = discoverLPMs;
     }
 	
 	public static OCLPMDiscoveryWizard setUp(OCLPMDiscoveryParameters parameters, boolean discoverPlaces, boolean discoverLPMs) {
@@ -59,7 +65,7 @@ public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, St
 			
 		stepMap.put(OCLPMDiscoveryWizard.FINISH, new OCLPMDiscoveryDummyFinishStep(parameters));
 		
-		return new OCLPMDiscoveryWizard(stepMap, discoverPlaces);
+		return new OCLPMDiscoveryWizard(stepMap, discoverPlaces, discoverLPMs);
 	}
 	
 	@Override
@@ -95,16 +101,18 @@ public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, St
 			
 		}
 		
-		// check if LPM case notion discovery needs a wizard step
-		if ( !wizard.getCurrent().equals(LPM_NOTION)
-				&& !wizard.getCurrent().equals(LPM_CONFIG)
-				){
-			return LPM_NOTION;
-		}
-		
-		// do LPM discovery config if not already done
-		if (!wizard.getCurrent().equals(LPM_CONFIG)){
-			return LPM_CONFIG;
+		if (this.discoverLPMs) {
+			// check if LPM case notion discovery needs a wizard step
+			if ( !wizard.getCurrent().equals(LPM_NOTION)
+					&& !wizard.getCurrent().equals(LPM_CONFIG)
+					){
+				return LPM_NOTION;
+			}
+			
+			// do LPM discovery config if not already done
+			if (!wizard.getCurrent().equals(LPM_CONFIG)){
+				return LPM_CONFIG;
+			}
 		}
 		
 		return FINISH;

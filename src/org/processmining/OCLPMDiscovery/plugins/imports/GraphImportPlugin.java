@@ -12,7 +12,7 @@ import org.processmining.framework.plugin.annotations.Plugin;
 
 @Plugin(
 		name = "Import JGraphT graphs from a file", 
-		parameterLabels = {"Filename"}, returnLabels = {"OCLPM Result"}, 
+		parameterLabels = {"Filename"}, returnLabels = {"JGraphT"}, 
 		returnTypes = {Graph.class})
 @UIImportPlugin(
 		description = "Import JGraphT graphs from a file", 
