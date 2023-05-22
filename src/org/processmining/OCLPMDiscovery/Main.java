@@ -184,10 +184,12 @@ public class Main {
 		XLog log;
 		Object[] lpmResults;
 		LPMResult lpmResult;
+		Graph<String,DefaultEdge> graph;
 		
 		switch (parameters.getCaseNotionStrategy()) {
 		
 			case PE_LEADING:
+				graph = buildObjectGraph(ocel);
 				// TODO enhance log by process executions as case notions
 				// LPM discovery for each new case notion
 				for (String currentType : parameters.getObjectTypesLeadingTypes()) {
@@ -199,8 +201,33 @@ public class Main {
 				}
 				break;
 				
+			case PE_LEADING_RELAXED:
+				graph = buildObjectGraph(ocel);
+				// LPM discovery for each new case notion
+				for (String currentType : parameters.getObjectTypesLeadingTypes()) {
+					messageNormal("Starting ocel enhancement using the leading type relaxed strategy for type "+currentType+".");
+					
+					// enhance log by process executions as case notions
+					String newTypeLabel = "PE_"+currentType;
+					ocel = ProcessExecutions.enhanceLeadingTypeRelaxed(ocel, newTypeLabel, currentType, graph);				
+					
+					// flatten ocel
+					log = Flattening.flatten(ocel, newTypeLabel);
+				
+					// discover LPMs (name of the currentType column needs concept:name, which the flattening does)
+					System.out.println("Starting LPM discovery using leading type relaxed "+newTypeLabel+" as case notion.");
+					lpmResults = runLPMPlugin(log, placeSet, parameters);
+					assert(lpmResults[0] instanceof LPMResult);
+					lpmResult = (LPMResult) lpmResults[0];
+					lpmsTagged.put(lpmResult, currentType);
+					
+					updateProgress("Finished ocel enhancement using the leading type relaxed strategy for type "+currentType+".");
+				}
+				//TODO export enhanced ocel
+				break;
+				
 			case PE_CONNECTED:
-				Graph<String,DefaultEdge> graph = buildObjectGraph(ocel);
+				graph = buildObjectGraph(ocel);
 				String ot = "ConnectedComponent";
 				ocel = ProcessExecutions.enhanceConnectedComponent(ocel, ot, graph);
 				messageNormal("Discovered "+ocel.objectTypes.get(ot).objects.size()+" connected components.");
@@ -277,7 +304,6 @@ public class Main {
 		if (placeDiscovery) {
 			numSteps += parameters.getObjectTypesPlaceNets().size();			
 		}
-		// TODO each finished discovery and assignment of process execution (if that takes considerable time)
 		// + each completed LPM discovery for each selected case notion
 		if (lpmDiscovery) {
 			// +1 if object graph needs to be built
@@ -285,6 +311,9 @@ public class Main {
 				numSteps +=1;
 			}
 			if (CaseNotionStrategy.typeSelectionNeeded.contains(parameters.getCaseNotionStrategy())) {
+				// enhance ocel with case notion
+				numSteps += parameters.getObjectTypesLeadingTypes().size();
+				// lpm discovery
 				numSteps += parameters.getObjectTypesLeadingTypes().size();
 			}
 			else {

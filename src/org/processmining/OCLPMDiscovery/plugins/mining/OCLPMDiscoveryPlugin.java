@@ -141,9 +141,6 @@ public class OCLPMDiscoveryPlugin {
 			return (OCLPMResult) result[0];
 		}
 	
-	// variant skipping the place net discovery and process execution computation
-	//TODO: variant with input (ocel, set(set(place net),object type), (log,set(column names)))
-	
 	// variant skipping the place net and LPM discovery
 	@UITopiaVariant(
 			affiliation = "RWTH - PADS",
@@ -161,6 +158,8 @@ public class OCLPMDiscoveryPlugin {
 		Main.setUp(context, parameters, false, false);
 		return (OCLPMResult) Main.run(ocel, parameters, typeMap, lpms)[0];
 	}
+	
+	//TODO variant accepting enhanced ocel (ocel which already has case notions to be used for LPM discovery)
 	
 	//==============================================
 	// TODO all variants without UI

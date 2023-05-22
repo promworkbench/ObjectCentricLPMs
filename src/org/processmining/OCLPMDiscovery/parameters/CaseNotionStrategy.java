@@ -15,7 +15,8 @@ public enum CaseNotionStrategy {
 	
 	// case notions using specific object types selected by the user
 	public static final Set<CaseNotionStrategy> typeSelectionNeeded = new HashSet<CaseNotionStrategy>(Arrays.asList(
-			CaseNotionStrategy.PE_LEADING
+			CaseNotionStrategy.PE_LEADING,
+			PE_LEADING_RELAXED
 			));
 	
 	// case notions needing the object graph to be constructed

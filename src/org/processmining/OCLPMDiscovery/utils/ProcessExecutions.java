@@ -1,6 +1,8 @@
 package org.processmining.OCLPMDiscovery.utils;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -33,7 +35,6 @@ public class ProcessExecutions {
 		// add new object type
 		OcelObjectType ot = new OcelObjectType(ocel, otName);
 		ocel.objectTypes.put(otName, ot);
-//		ocel = OCELUtils.addDummyCaseNotion(ocel, otName, "42");
 		
 		// detect connected components
 		ConnectivityInspector<String,DefaultEdge> inspector = new ConnectivityInspector((UndirectedGraph) graph);
@@ -67,17 +68,60 @@ public class ProcessExecutions {
 		return ocel;
 	}
 	
-	public static OcelEventLog enhanceLeadingTypeRelaxed (OcelEventLog ocel, String otName, String leadingType) {
-
-		// build object graph
-		
-		// breadth first search on leading type 
+	public static OcelEventLog enhanceLeadingTypeRelaxed (OcelEventLog ocel, String newTypeLabel, String leadingType, Graph<String,DefaultEdge> graph) {
+		System.out.println("Starting ocel enhancement using the leading type relaxed strategy for type "+leadingType+".");
+		// breadth first search on each object 
 		// to build a hashmap mapping each object to its closest objects of type leading type
+		HashMap<String,Set<String>> map = new HashMap<>(); // maps object identifier to
+		for (String currentObject : graph.vertexSet()) {
+			// current object already leading type?
+			if (ocel.getObjects().get(currentObject).objectType.name.equals(leadingType)) { // TODO too slow?
+				map.put(currentObject, Collections.singleton(currentObject));
+			}
+			else {
+				//! bfIterator.getDepth(v) isn't supported in the JGraphT version which ProM uses...
+				BreadthFirstIteratorWithLevel<String,DefaultEdge> bfIterator = new BreadthFirstIteratorWithLevel<String,DefaultEdge>(graph, currentObject);
+				String v;
+				boolean foundOne = false; // set true if a vertex of leading type has been found
+				int foundAt = 0; // level where it has been found
+				HashSet<String> foundSet = new HashSet<String>();
+				while (bfIterator.hasNext()) {
+					v = bfIterator.next();
+					// there might be more vertices with the same distance
+					if (foundOne && foundAt < bfIterator.getDepth(v)) {
+						break;
+					}
+					if (ocel.getObjects().get(v).objectType.name.equals(leadingType)) {
+						if (!foundOne) {
+							foundOne = true;
+							foundAt = bfIterator.getDepth(v);							
+						}
+						foundSet.add(v);
+					}
+				}
+				map.put(currentObject,foundSet);
+			}
+		}
 		
 		// add new object type
+		OcelObjectType ot = new OcelObjectType(ocel, newTypeLabel);
+		ocel.objectTypes.put(newTypeLabel, ot);
 		
 		// assign each event the objects which result from putting all the objects 
 		// from all the types of the event into the hasmap
+		HashSet<String> tmpSet = new HashSet<String>();
+		for (OcelEvent event : ocel.getEvents().values()) {
+			// for each event have to check each object of each type
+			for (String obj : event.relatedObjectsIdentifiers) {
+				tmpSet.addAll(map.get(obj)); // doesn't work without tmpSet because of concurrent modifications
+			}
+			event.relatedObjectsIdentifiers.addAll(tmpSet);
+			tmpSet.clear();
+		}
+		
+		ocel.register();
+		
+		System.out.println("Finished ocel enhancement using the leading type relaxed strategy for type "+leadingType+".");
 		
 		return ocel;
 	}
