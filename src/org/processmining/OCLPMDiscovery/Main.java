@@ -16,6 +16,7 @@ import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.utils.FlatLogProcessing;
 import org.processmining.OCLPMDiscovery.utils.OCELUtils;
 import org.processmining.OCLPMDiscovery.utils.ProcessExecutions;
+import org.processmining.OCLPMDiscovery.utils.ProvidingObjects;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.events.Logger.MessageLevel;
@@ -25,15 +26,14 @@ import org.processmining.placebasedlpmdiscovery.model.Place;
 import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
 import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 import org.processmining.placebasedlpmdiscovery.plugins.mining.PlaceBasedLPMDiscoveryPlugin;
-import org.processmining.plugins.utils.ProvidedObjectHelper;
 
 public class Main {
-	private static PluginContext Context;
-	private static UIPluginContext UIContext;
-	private static boolean UsingUI = false;
-	private static boolean UsingContext = false;
-	private static Graph<String,DefaultEdge> graph;
-	private static boolean graphProvided = false;
+	public static PluginContext Context;
+	public static UIPluginContext UIContext;
+	public static boolean UsingUI = false;
+	public static boolean UsingContext = false;
+	public static Graph<String,DefaultEdge> graph;
+	public static boolean graphProvided = false;
 	
 	
 	
@@ -51,13 +51,13 @@ public class Main {
 		// place discovery
 		Object[] results = discoverPlaceSet(ocel,parameters);
 		PlaceSet placeSet = (PlaceSet) results[0];
-		Main.exportPlaceSet(placeSet);
+		ProvidingObjects.exportPlaceSet(placeSet);
 		HashMap<String,String> typeMap = (HashMap<String,String>) results[1];
-		Main.exportHashMap(typeMap);
+		ProvidingObjects.exportHashMap(typeMap);
 		
 		// LPM discovery
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
-		Main.exportTlpms(tlpms);
+		ProvidingObjects.exportTlpms(tlpms);
 		
 		// OCLPM conversion
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
@@ -73,7 +73,7 @@ public class Main {
 	 */
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet, HashMap<String,String> typeMap) {
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
-		Main.exportTlpms(tlpms);
+		ProvidingObjects.exportTlpms(tlpms);
 		
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
 
@@ -88,7 +88,7 @@ public class Main {
 	 */
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet, HashMap<String,String> typeMap, ArrayList<String> labels) {
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet, labels);
-		Main.exportTlpms(tlpms);
+		ProvidingObjects.exportTlpms(tlpms);
 		
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
 
@@ -116,7 +116,7 @@ public class Main {
 	 */
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, HashMap<String,String> typeMap, LPMResult lpms) {
         LPMResultsTagged tlpms = new LPMResultsTagged(lpms,"Single Case Notion");
-        Main.exportTlpms(tlpms);
+        ProvidingObjects.exportTlpms(tlpms);
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
 
         return new Object[] {oclpmResult, tlpms};
@@ -132,8 +132,8 @@ public class Main {
         
 		Object[] result = discoverPlaceSet(ocel,parameters);
 		PlaceSet placeSet = (PlaceSet) result[0];
-		Main.exportPlaceSet(placeSet);
-		Main.exportHashMap((HashMap<String,String>) result[1]);
+		ProvidingObjects.exportPlaceSet(placeSet);
+		ProvidingObjects.exportHashMap((HashMap<String,String>) result[1]);
 		
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
 
@@ -171,7 +171,7 @@ public class Main {
 		for (String currentType : parameters.getObjectTypesPlaceNets()) {
 			Main.messageNormal("Starting flattening and place net discovery for type "+currentType+".");
 			// flatten ocel
-			XLog flatLog = Flattening.flatten(ocel, currentType);
+			XLog flatLog = Main.flattenOCEL(ocel, currentType);
 			System.out.println("Flattened ocel for type "+currentType);
 			
 			// discover petri net using est-miner (use specpp)
@@ -211,7 +211,7 @@ public class Main {
 		LPMResult lpmResult;
 		for (String currentType : labels) {
 			// flatten ocel
-			log = Flattening.flatten(ocel, currentType);
+			log = Main.flattenOCEL(ocel, currentType);
 		
 			// discover LPMs (name of the currentType column needs concept:name, which the flattening does)
 			System.out.println("Starting LPM discovery using \""+currentType+"\" as case notion.");
@@ -242,21 +242,40 @@ public class Main {
 		ArrayList<String> newTypeLabels;
 		
 		switch (parameters.getCaseNotionStrategy()) {
-		
+				
 			case PE_LEADING:
+			case PE_LEADING_RELAXED:
+			case PE_LEADING_O1:
+			case PE_LEADING_RELAXED_O1:
 				newTypeLabels = new ArrayList<String>(parameters.getObjectTypesLeadingTypes().size());
 				graph = buildObjectGraph(ocel);
 				// LPM discovery for each new case notion
 				for (String currentType : parameters.getObjectTypesLeadingTypes()) {
-					messageNormal("Starting ocel enhancement using the leading type strategy for type "+currentType+".");
+					messageNormal("Starting ocel enhancement using the \""+parameters.getCaseNotionStrategy().getName()+"\" strategy for type \""+currentType+"\".");
 					
 					// enhance log by process executions as case notions
 					String newTypeLabel = "PE_"+currentType;
 					newTypeLabels.add(newTypeLabel);
-					ocel = ProcessExecutions.enhanceLeadingType(ocel, newTypeLabel, currentType, graph);				
+					switch (parameters.getCaseNotionStrategy()) {
+						case PE_LEADING:
+							ocel = ProcessExecutions.enhanceLeadingType(ocel, newTypeLabel, currentType, graph);
+							break;
+						case PE_LEADING_RELAXED:
+							ocel = ProcessExecutions.enhanceLeadingTypeRelaxed(ocel, newTypeLabel, currentType, graph);
+							break;
+						case PE_LEADING_O1:
+							ocel = ProcessExecutions.enhanceLeadingTypeOptimized1(ocel, newTypeLabel, currentType, graph);
+							break;
+						case PE_LEADING_RELAXED_O1:
+							ocel = ProcessExecutions.enhanceLeadingTypeRelaxedOptimized1(ocel, newTypeLabel, currentType, graph);
+							break;
+						default:
+							ocel = ProcessExecutions.enhanceLeadingTypeOptimized1(ocel, newTypeLabel, currentType, graph);
+							break;
+					}
 					
 					// flatten ocel
-					log = Flattening.flatten(ocel, newTypeLabel);
+					log = Main.flattenOCEL(ocel, newTypeLabel);
 				
 					// discover LPMs (name of the currentType column needs concept:name, which the flattening does)
 					System.out.println("Starting LPM discovery using leading type "+newTypeLabel+" as case notion.");
@@ -265,45 +284,18 @@ public class Main {
 					lpmResult = (LPMResult) lpmResults[0];
 					lpmsTagged.put(lpmResult, currentType);
 					
-					updateProgress("Finished ocel enhancement using the leading type strategy for type "+currentType+".");
+					updateProgress("Finished ocel enhancement using the \""+parameters.getCaseNotionStrategy().getName()+"\" strategy for type \""+currentType+"\".");
 				}
-				exportOcel(ocel, newTypeLabels);
-				break;
-				
-			case PE_LEADING_RELAXED:
-				newTypeLabels = new ArrayList<String>(parameters.getObjectTypesLeadingTypes().size());
-				graph = buildObjectGraph(ocel);
-				// LPM discovery for each new case notion
-				for (String currentType : parameters.getObjectTypesLeadingTypes()) {
-					messageNormal("Starting ocel enhancement using the leading type relaxed strategy for type "+currentType+".");
-					
-					// enhance log by process executions as case notions
-					String newTypeLabel = "PE_"+currentType;
-					newTypeLabels.add(newTypeLabel);
-					ocel = ProcessExecutions.enhanceLeadingTypeRelaxed(ocel, newTypeLabel, currentType, graph);				
-					
-					// flatten ocel
-					log = Flattening.flatten(ocel, newTypeLabel);
-				
-					// discover LPMs (name of the currentType column needs concept:name, which the flattening does)
-					System.out.println("Starting LPM discovery using leading type relaxed "+newTypeLabel+" as case notion.");
-					lpmResults = runLPMPlugin(log, placeSet, parameters);
-					assert(lpmResults[0] instanceof LPMResult);
-					lpmResult = (LPMResult) lpmResults[0];
-					lpmsTagged.put(lpmResult, currentType);
-					
-					updateProgress("Finished ocel enhancement using the leading type relaxed strategy for type "+currentType+".");
-				}
-				exportOcel(ocel, newTypeLabels);
+				ProvidingObjects.exportOcel(ocel, newTypeLabels);
 				break;
 				
 			case PE_CONNECTED:
 				graph = buildObjectGraph(ocel);
 				String ot = "ConnectedComponent";
 				ocel = ProcessExecutions.enhanceConnectedComponent(ocel, ot, graph);
-				exportOcel(ocel, new ArrayList<String>(Arrays.asList(ot)));
+				ProvidingObjects.exportOcel(ocel, new ArrayList<String>(Arrays.asList(ot)));
 				messageNormal("Discovered "+ocel.objectTypes.get(ot).objects.size()+" connected components.");
-				log = Flattening.flatten(ocel, ot);
+				log = Main.flattenOCEL(ocel, ot);
 				System.out.println("Starting LPM discovery using connected components as case notion.");
 				lpmResults = runLPMPlugin(log, placeSet, parameters);
 				assert(lpmResults[0] instanceof LPMResult);
@@ -316,7 +308,7 @@ public class Main {
 				String dummyType = "DummyType";
 				OcelEventLog dummyOcel = OCELUtils.addDummyCaseNotion(ocel,"DummyType","42");
 				System.out.println("Added dummy type to ocel.");
-				log = Flattening.flatten(dummyOcel,dummyType);
+				log = Main.flattenOCEL(dummyOcel,dummyType);
 				System.out.println("Flattened on dummy type.");
 				System.out.println("Starting LPM discovery using a dummy type as case notion.");
 				lpmResults = runLPMPlugin(log, placeSet, parameters);
@@ -398,6 +390,7 @@ public class Main {
     }
 	
 	public static void messageNormal(String message) {
+		System.out.println(message);
 		if (UsingContext) {
 			Context.log(message, MessageLevel.NORMAL);
 		}
@@ -428,71 +421,13 @@ public class Main {
 		if (!graphProvided) {
 			messageNormal("Starting object graph construction.");
 			Main.graph = ProcessExecutions.buildObjectGraph(ocel);
-			exportObjectGraph(graph);
+			ProvidingObjects.exportObjectGraph(graph);
 			updateProgress("Contructed object graph with "+graph.vertexSet().size()+" vertices and "+graph.edgeSet().size()+" edges.");
 		}
 		else {
 			updateProgress("Object graph provided with "+graph.vertexSet().size()+" vertices and "+graph.edgeSet().size()+" edges.");
 		}
 		return graph;
-	}
-	
-	public static void exportPlaceSet(PlaceSet placeSet) {
-		// Add the places as a provided object
-		if (UsingContext) {
-	        Main.getContext().getProvidedObjectManager().createProvidedObject(
-	        		"OCLPM Discovery: United Place Set"
-	        		, placeSet, PlaceSet.class, Main.getContext());
-	        ProvidedObjectHelper.setFavorite(Main.getContext(), placeSet);
-		}
-	}
-	
-
-	private static void exportHashMap(HashMap<String, String> typeMap) {
-		if (UsingContext) {
-	        Main.getContext().getProvidedObjectManager().createProvidedObject(
-	        		"OCLPM Discovery: HashMap for Places to Object Types"
-	        		, typeMap, HashMap.class, Main.getContext());
-	        ProvidedObjectHelper.setFavorite(Main.getContext(), typeMap);
-		}
-	}
-	
-	private static void exportTlpms(LPMResultsTagged tlpms) {
-		if (UsingContext) {
-	        Main.getContext().getProvidedObjectManager().createProvidedObject(
-	        		"OCLPM Discovery: LPMResults for all Case Notions"
-	        		, tlpms, LPMResultsTagged.class, Main.getContext());
-	        ProvidedObjectHelper.setFavorite(Main.getContext(), tlpms);
-		}
-	}
-	
-	private static void exportObjectGraph(Graph<String,DefaultEdge> graph) {
-		if (UsingContext) {
-	        Main.getContext().getProvidedObjectManager().createProvidedObject(
-	        		"OCLPM Discovery: Object Graph"
-	        		, graph, Graph.class, Main.getContext());
-	        ProvidedObjectHelper.setFavorite(Main.getContext(), graph);
-		}
-	}
-	
-	private static void exportOcel(OcelEventLog ocel) {
-		OcelEventLog ocelCopy = OCELUtils.deepCopy(ocel);
-		if (UsingContext) {
-	        Main.getContext().getProvidedObjectManager().createProvidedObject(
-	        		"OCLPM Discovery: OCEL"
-	        		, ocelCopy, OcelEventLog.class, Main.getContext());
-	        ProvidedObjectHelper.setFavorite(Main.getContext(), ocelCopy);
-		}
-	}
-	
-	private static void exportOcel(OcelEventLog ocel, ArrayList<String> labels) {
-		exportOcel(ocel);
-		if (UsingContext) {
-	        Main.getContext().getProvidedObjectManager().createProvidedObject(
-	        		"OCLPM Discovery: new Type Labels"
-	        		, labels, ArrayList.class, Main.getContext());
-	        ProvidedObjectHelper.setFavorite(Main.getContext(), labels);
-		}
 	}
 
 	public static Graph<String,DefaultEdge> getGraph() {
@@ -502,5 +437,13 @@ public class Main {
 	public static void setGraph(Graph<String,DefaultEdge> graph) {
 		Main.graph = graph;
 		Main.graphProvided = true;
+	}
+	
+	public static XLog flattenOCEL(OcelEventLog ocel, String newTypeLabel) {
+		XLog log = Flattening.flatten(ocel, newTypeLabel);
+//		int numEventsBefore = ocel.getEvents().size();
+//		int numEventsAfter = log.size();
+//		System.out.println("Flattening log for the new type \""+newTypeLabel+"\" lead to an increase of events by a factor of "+(double) numEventsAfter/numEventsBefore+".");
+		return log;
 	}
 }
