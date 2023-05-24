@@ -1,6 +1,7 @@
 package org.processmining.OCLPMDiscovery;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -46,6 +47,7 @@ public class Main {
 	 * @return {oclpmResult, tlpms, placeSet, typeMap}
 	 */
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
+		
 		// place discovery
 		Object[] results = discoverPlaceSet(ocel,parameters);
 		PlaceSet placeSet = (PlaceSet) results[0];
@@ -71,6 +73,21 @@ public class Main {
 	 */
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet, HashMap<String,String> typeMap) {
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
+		Main.exportTlpms(tlpms);
+		
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
+
+        return new Object[] {oclpmResult, tlpms};
+    }
+	
+	/**
+	 * Full OCLPMs discovery starting from place nets with enhanced OCEL input
+	 * @param ocel
+	 * @param parameters
+	 * @return {oclpmResult, tlpms}
+	 */
+	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet, HashMap<String,String> typeMap, ArrayList<String> labels) {
+		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet, labels);
 		Main.exportTlpms(tlpms);
 		
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
@@ -178,7 +195,43 @@ public class Main {
 		
 		return new Object[] {placeSet, typeMap};
 	}
+	
+	/**
+	 * LPM discovery with given case notions in the OCEL
+	 * @param ocel
+	 * @param parameters
+	 * @param placeSet
+	 * @param labels
+	 * @return
+	 */
+	public static LPMResultsTagged discoverLPMs(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet, ArrayList<String> labels) {
+		LPMResultsTagged lpmsTagged = new LPMResultsTagged();
+		XLog log;
+		Object[] lpmResults;
+		LPMResult lpmResult;
+		for (String currentType : labels) {
+			// flatten ocel
+			log = Flattening.flatten(ocel, currentType);
+		
+			// discover LPMs (name of the currentType column needs concept:name, which the flattening does)
+			System.out.println("Starting LPM discovery using \""+currentType+"\" as case notion.");
+			lpmResults = runLPMPlugin(log, placeSet, parameters);
+			assert(lpmResults[0] instanceof LPMResult);
+			lpmResult = (LPMResult) lpmResults[0];
+			lpmsTagged.put(lpmResult, currentType);
+		}
+		System.out.println("Finished LPM discovery.");
+		System.out.println("LPMResult stores "+lpmsTagged.totalLPMs()+" LPMs.");
+		return lpmsTagged;
+	}
 
+	/**
+	 * LPM discovery which first creates case notions to perform the LPM discovery on.
+	 * @param ocel
+	 * @param parameters
+	 * @param placeSet
+	 * @return
+	 */
 	public static LPMResultsTagged discoverLPMs(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet) {
 
 		LPMResultsTagged lpmsTagged = new LPMResultsTagged();
@@ -248,6 +301,7 @@ public class Main {
 				graph = buildObjectGraph(ocel);
 				String ot = "ConnectedComponent";
 				ocel = ProcessExecutions.enhanceConnectedComponent(ocel, ot, graph);
+				exportOcel(ocel, new ArrayList<String>(Arrays.asList(ot)));
 				messageNormal("Discovered "+ocel.objectTypes.get(ot).objects.size()+" connected components.");
 				log = Flattening.flatten(ocel, ot);
 				System.out.println("Starting LPM discovery using connected components as case notion.");
@@ -421,12 +475,13 @@ public class Main {
 		}
 	}
 	
-	private static void exportOcel(OcelEventLog ocel) { //TODO this doesn't work
+	private static void exportOcel(OcelEventLog ocel) {
+		OcelEventLog ocelCopy = OCELUtils.deepCopy(ocel);
 		if (UsingContext) {
 	        Main.getContext().getProvidedObjectManager().createProvidedObject(
 	        		"OCLPM Discovery: OCEL"
-	        		, ocel, OcelEventLog.class, Main.getContext());
-	        ProvidedObjectHelper.setFavorite(Main.getContext(), ocel);
+	        		, ocelCopy, OcelEventLog.class, Main.getContext());
+	        ProvidedObjectHelper.setFavorite(Main.getContext(), ocelCopy);
 		}
 	}
 	

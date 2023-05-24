@@ -10,6 +10,28 @@ import org.processmining.ocel.ocelobjects.OcelObjectType;
 public class OCELUtils {
 	
 	/**
+	 * Do a deep copy of the given OCEL.
+	 * @param ocel
+	 * @return
+	 */
+	public static OcelEventLog deepCopy (OcelEventLog ocel) {
+		OcelEventLog newOcel = ocel.cloneEmpty(); // sets the "global" stuff
+		// copy all events (also calls clone object())
+		for (OcelEvent eve : ocel.events.values()) {
+			newOcel.cloneEvent(eve);
+		}
+		
+		// workaround for a fault in the OCEL standard which pointed the new events to the old log
+		for (OcelEvent eve : newOcel.events.values()) {
+			eve.eventLog = newOcel;
+		}
+				
+		newOcel.register();
+		
+		return newOcel;
+	}
+	
+	/**
 	 * Adds new object type with the same object for each event.
 	 * @param ocel input ocel
 	 * @param typeName name of the new object type

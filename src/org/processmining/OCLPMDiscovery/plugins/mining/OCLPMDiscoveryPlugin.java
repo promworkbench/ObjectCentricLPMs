@@ -1,5 +1,6 @@
 package org.processmining.OCLPMDiscovery.plugins.mining;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -28,7 +29,8 @@ import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 				"Object Type HashMap", 		// 2 
 				"Petri Net", "Parameters", 	// 3
 				"LPMs", 					// 4
-				"Object Graph" 				// 5
+				"Object Graph",				// 5
+				"Case Notion Labels"		// 6
 				},
 		returnLabels = { "OCLPM Result"},
 		returnTypes = { OCLPMResult.class},
@@ -159,7 +161,41 @@ public class OCLPMDiscoveryPlugin {
 		return (OCLPMResult) Main.run(ocel, parameters, typeMap, lpms)[0];
 	}
 	
-	//TODO variant accepting enhanced ocel (ocel which already has case notions to be used for LPM discovery)
+	// variant accepting enhanced ocel (ocel which already has case notions to be used for LPM discovery)
+	@UITopiaVariant(
+			affiliation = "RWTH - PADS",
+			author = "Marvin Porsil",
+			email = "marvin.porsil@rwth-aachen.de",
+			uiLabel = "Object-Centric Local Process Model Discovery given place set, hashmap, object graph and OCEL with desired case notions."
+	)
+	@PluginVariant(
+			variantLabel = "Object-Centric Local Process Model Discovery given place set, hashmap, object graph and OCEL with desired case notions.",
+			requiredParameterLabels = {0,1,2,5,6}
+	)
+	public static OCLPMResult mineOCLPMs (
+			UIPluginContext context, OcelEventLog ocel, ArrayList<String> labels, PlaceSet placeSet, 
+			HashMap<String,String> typeMap, Graph<String,DefaultEdge> graph
+			) {
+		
+		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
+		
+		// just for printing settings...
+		parameters.setObjectTypesPlaceNets(new HashSet<String>(typeMap.values()));
+
+		//TODO adjust for this case where new case notion already given
+		OCLPMDiscoveryWizard wizard = OCLPMDiscoveryWizard.setUp(parameters, false, true);
+		
+		// show wizard
+		parameters = ProMWizardDisplay.show(context, wizard, parameters);
+
+		if (parameters == null)
+			return null;		
+		
+		Main.setUp(context, parameters, false, true);
+		Main.setGraph(graph);
+		Object[] result = Main.run(ocel, parameters, placeSet, typeMap, labels);
+		return (OCLPMResult) result[0];
+	}
 	
 	//==============================================
 	// TODO all variants without UI
