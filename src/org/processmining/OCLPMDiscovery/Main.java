@@ -247,12 +247,15 @@ public class Main {
 			case PE_LEADING_RELAXED:
 			case PE_LEADING_O1:
 			case PE_LEADING_RELAXED_O1:
+			case PE_LEADING_O2:
+			case PE_LEADING_RELAXED_O2:
 				newTypeLabels = new ArrayList<String>(parameters.getObjectTypesLeadingTypes().size());
 				graph = buildObjectGraph(ocel);
 				// LPM discovery for each new case notion
+				//TODO enhancement with multiple case notions isn't possible like that because the case notion 
+					// discovery algorithm would be including the previously added new case notions 
 				for (String currentType : parameters.getObjectTypesLeadingTypes()) {
 					messageNormal("Starting ocel enhancement using the \""+parameters.getCaseNotionStrategy().getName()+"\" strategy for type \""+currentType+"\".");
-					
 					// enhance log by process executions as case notions
 					String newTypeLabel = "PE_"+currentType;
 					newTypeLabels.add(newTypeLabel);
@@ -269,6 +272,10 @@ public class Main {
 						case PE_LEADING_RELAXED_O1:
 							ocel = ProcessExecutions.enhanceLeadingTypeRelaxedOptimized1(ocel, newTypeLabel, currentType, graph);
 							break;
+						case PE_LEADING_O2:
+							ocel = ProcessExecutions.enhanceLeadingTypeOptimized2(ocel, newTypeLabel, currentType, graph);
+							break;
+						//TODO leading relaxed optimized 2
 						default:
 							ocel = ProcessExecutions.enhanceLeadingTypeOptimized1(ocel, newTypeLabel, currentType, graph);
 							break;

@@ -500,6 +500,157 @@ public class ProcessExecutions {
 		return ocel;
 	}
 	
+	/**
+	 * Process Execution "Leading Type" strategy with optimization 1 and for events 
+	 * without leading type object, assigning them only to the PEs of the type belonging to the fewest PEs.
+	 * Leads to even fewer replications, and makes exploding memory consumption very unlikely.
+	 * @param ocel
+	 * @param newTypeLabel
+	 * @param leadingType
+	 * @param graph
+	 * @return
+	 */
+	public static OcelEventLog enhanceLeadingTypeOptimized2 (OcelEventLog ocel, String newTypeLabel, String leadingType, Graph<String,DefaultEdge> graph) {
+		
+//		System.out.println("Starting ocel enhancement using the leading type optimization 1 strategy for type "+leadingType+".");
+		
+		// add new object type
+		OcelObjectType ot = new OcelObjectType(ocel, newTypeLabel);
+		ocel.objectTypes.put(newTypeLabel, ot);
+		
+		// for each object of leading type), create a new object which links to the new object type.
+		HashMap<String,String> idMap = new HashMap<String,String>(); // maps old object id to id of new object in the new type
+		for (OcelObject o : ocel.objectTypes.get(leadingType).objects) {
+			String newID = "PE_Leading_"+leadingType+"_"+o.id;
+			idMap.put(o.id, newID);
+			OcelObject newObject = new OcelObject(ocel);
+			newObject.id = newID;
+			newObject.objectType = ot;
+			ocel.objects.put(newID, newObject);
+		}
+		
+		// breadth first search on each object of leading type
+		// to build a hashmap mapping each object to its closest objects of type leading type
+		HashMap<String,Set<String>> map = new HashMap<>(); // maps object identifier to new object id of leading type/s object it has been assigned to
+		String currentType, vType;
+		int vDepth; 
+		int lastDepth = 0;
+		for (String currentObject : graph.vertexSet()) {
+			currentType = ocel.getObjects().get(currentObject).objectType.name; // TODO too slow?
+			// current object not leading type -> skip
+			if (!currentType.equals(leadingType)) { 
+				continue;
+			}
+			else { // on object of leading type
+				BreadthFirstIteratorWithLevel<String,DefaultEdge> bfIterator = new BreadthFirstIteratorWithLevel<String,DefaultEdge>(graph, currentObject);
+				String v;
+				// for each object type remember if it has been found and at which depth
+				HashMap<String, Integer> foundMap = new HashMap<String, Integer>();
+				foundMap.put(currentType, 0); // leading type has been found at depth 0
+				map.put(currentObject, Collections.singleton(idMap.get(currentObject))); // leading type object will be in its own process execution
+				while (bfIterator.hasNext()) {
+					v = bfIterator.next();
+					vType = ocel.getObjects().get(v).objectType.name;
+					vDepth = bfIterator.getDepth(v);
+					// if all types have been found and new depth is entered quit
+					if (foundMap.keySet().size() == ocel.getObjectTypes().size() && vDepth > lastDepth) {
+						break;
+					}
+					// if node of this type has already been added with a shorter distance discard it
+					if (foundMap.containsKey(vType) && vDepth > foundMap.get(vType)) {
+						continue;
+					}
+					// object of this type already found but this has the same distance
+					else if (foundMap.containsKey(vType)) {
+						if (map.containsKey(v)) { // object is also closest to another of leading type
+							HashSet<String> tmpSet = new HashSet<String>(); 
+							tmpSet.addAll(map.get(v));
+							tmpSet.add(idMap.get(currentObject));
+							map.put(v,tmpSet);
+						}
+						else {
+							map.put(v, Collections.singleton(idMap.get(currentObject)));
+						}
+					}
+					// object of this type is new
+					else {
+						foundMap.put(vType, vDepth);
+						lastDepth = vDepth;
+						if (map.containsKey(v)) { // object is also closest to another of leading type
+							HashSet<String> tmpSet = new HashSet<String>(); 
+							tmpSet.addAll(map.get(v));
+							tmpSet.add(idMap.get(currentObject));
+							map.put(v,tmpSet);
+						}
+						else {
+							map.put(v, Collections.singleton(idMap.get(currentObject)));
+						}
+					}
+				}
+			}
+		}
+		
+		// assign each event the objects which result from putting all the objects 
+		// from all the types of the event into the hashmap
+		// some objects hash to nothing, which is ok. 
+		// If an event has only objects mapping to nothing it will be discarded when flattening.
+		HashSet<String> tmpSet = new HashSet<String>();
+		int minTmpSet = -1;
+		int numEventsAfter = 0;
+		HashMap<String,Set<String>> typeToPEs = new HashMap<String,Set<String>>();
+		String curType;
+		for (OcelEvent event : ocel.getEvents().values()) {
+			// construct map which maps each object type to the process executions of all the objects of that type occurring in this event
+			typeToPEs.clear();
+			for (String obj : event.relatedObjectsIdentifiers) {
+				curType = ocel.getObjects().get(obj).objectType.name;
+				HashSet<String> mapGet = new HashSet<String>(); 
+						map.get(obj);
+				if (map.get(obj) == null) {
+					continue;
+				}
+				mapGet.addAll(map.get(obj));
+				if (typeToPEs.containsKey(curType)) {
+					mapGet.addAll(typeToPEs.get(curType));
+				}
+				typeToPEs.put(curType, mapGet);
+			}
+			
+			// Optimization 1: if leading type object was present, just add the PEs corresponding to those
+			if (typeToPEs.get(leadingType) != null) {
+				tmpSet.addAll(typeToPEs.get(leadingType));
+			}
+			// Optimization 2: otherwise choose the type with the fewest PEs and add only those
+			else {
+				Object[] PeArray = typeToPEs.values().toArray();
+				minTmpSet = -1;
+				int indexMinTmpSet = -1;
+				for (int i = 0; i < PeArray.length; i++) {
+					if (PeArray[i]!=null && (((Set<String>)PeArray[i]).size() < minTmpSet || minTmpSet < 0)) {
+						minTmpSet = ((Set<String>)PeArray[i]).size();
+						indexMinTmpSet = i;
+					}
+				}
+				tmpSet.addAll((Set<String>)PeArray[indexMinTmpSet]);
+			}
+			
+			event.relatedObjectsIdentifiers.addAll(tmpSet); 
+			numEventsAfter += tmpSet.size();
+			tmpSet.clear();
+		}
+		
+		ocel.register();
+		
+		int numEventsBefore = ocel.getEvents().size();
+		System.out.println(
+				"Flattening log for the new type \""+newTypeLabel+"\" lead to an increase of events "
+						+ "by a factor of "+(double) numEventsAfter/numEventsBefore+"."
+						);
+//		System.out.println("Finished ocel enhancement for type "+leadingType+".");
+		
+		return ocel;
+	}
+	
 	public static Graph<String,DefaultEdge> buildObjectGraph (OcelEventLog ocel){
 		Graph<String,DefaultEdge> graph = new SimpleGraph<>(DefaultEdge.class);
 		
