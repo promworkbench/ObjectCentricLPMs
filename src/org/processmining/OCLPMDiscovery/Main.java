@@ -275,7 +275,9 @@ public class Main {
 						case PE_LEADING_O2:
 							ocel = ProcessExecutions.enhanceLeadingTypeOptimized2(ocel, newTypeLabel, currentType, graph);
 							break;
-						//TODO leading relaxed optimized 2
+						case PE_LEADING_RELAXED_O2:
+							ocel = ProcessExecutions.enhanceLeadingTypeRelaxedOptimized2(ocel, newTypeLabel, currentType, graph);
+							break;
 						default:
 							ocel = ProcessExecutions.enhanceLeadingTypeOptimized1(ocel, newTypeLabel, currentType, graph);
 							break;
