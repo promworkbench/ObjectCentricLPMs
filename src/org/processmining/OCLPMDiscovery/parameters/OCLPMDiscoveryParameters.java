@@ -14,7 +14,7 @@ import org.processmining.placebasedlpmdiscovery.plugins.mining.PlaceBasedLPMDisc
 public class OCLPMDiscoveryParameters implements EventLog{
 	private OcelEventLog ocel;
 	private Set<String> activities;
-	private Set<String> objectTypesAll;
+	private Set<String> objectTypesAll; // object types before enriching ocel with new case notion
 	private DefaultListModel<String> objectTypesList = new DefaultListModel<String>();
 	private Set<String> objectTypesPlaceNets; // object types for which the log is flattened and place nets are discovered
 	private Set<String> objectTypesLeadingTypes; // object types which are used as leading types for discovering process executions
@@ -24,9 +24,12 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	private XLogHybridILPMinerParametersImpl ilpParameters;
 	private PlaceBasedLPMDiscoveryParameters PBLPMDiscoveryParameters;
 	
-	//TODO set default when the real strategies work
+	// variable arc identification
+	private float variableArcThreshold = 0.95f; // threshold which the score function is compared against
+	
+	// set defaults
 	private Miner placeDiscoveryAlgorithm 			= Miner.SPECPP;
-	private CaseNotionStrategy caseNotionStrategy 	= CaseNotionStrategy.DUMMY;
+	private CaseNotionStrategy caseNotionStrategy 	= CaseNotionStrategy.PE_LEADING_RELAXED_O2;
 	
 	public OCLPMDiscoveryParameters(OcelEventLog ocel) {
 		this.setOcel(ocel);
@@ -207,5 +210,13 @@ public class OCLPMDiscoveryParameters implements EventLog{
 
 	public void setOcel(OcelEventLog ocel) {
 		this.ocel = ocel;
+	}
+
+	public float getVariableArcThreshold() {
+		return variableArcThreshold;
+	}
+
+	public void setVariableArcThreshold(float variableArcThreshold) {
+		this.variableArcThreshold = variableArcThreshold;
 	}
 }

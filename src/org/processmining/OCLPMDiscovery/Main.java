@@ -11,6 +11,7 @@ import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.processmining.OCLPMDiscovery.model.LPMResultsTagged;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
+import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
 import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.utils.FlatLogProcessing;
@@ -21,7 +22,9 @@ import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.events.Logger.MessageLevel;
 import org.processmining.ocel.flattening.Flattening;
+import org.processmining.ocel.ocelobjects.OcelEvent;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
+import org.processmining.ocel.ocelobjects.OcelObject;
 import org.processmining.placebasedlpmdiscovery.model.Place;
 import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
 import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
@@ -335,8 +338,57 @@ public class Main {
 
 		OCLPMResult oclpmResult = new OCLPMResult(parameters, tlpms, typeMap);
 		
-		// TODO identify variable arcs
+		// identify variable arcs
+		oclpmResult = Main.identifyVariableArcs(parameters, oclpmResult);
 		
+		// reevaluation of OCLPMs
+		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
+		
+		return oclpmResult;
+	}
+	
+	public static OCLPMResult identifyVariableArcs (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult) {
+		
+		// compute score for each activity, objectType pair
+		HashMap<String[],Integer> scoreCountingSingles = new  HashMap<>(); // maps [Activity,ObjectType] to #events of activity and |OT|=1
+		HashMap<String[],Integer> scoreCountingAll = new  HashMap<>(); // maps [Activity,ObjectType] to #events of activity
+		HashMap<String[],Double> score = new HashMap<>(); // maps [Activity,ObjectType] to score (#events of act and |OT|=1 / #events of act)
+		HashMap<String,Integer> scoreCountingTmp = new HashMap<>(); // maps ObjectType to #objects in current event with this type
+		OcelEventLog ocel = parameters.getOcel();
+		String curOT, curAct;
+		for (OcelEvent event : ocel.getEvents().values()) {
+			curAct = event.activity;
+			// count objects present in event
+			for (OcelObject object : event.relatedObjects) {
+				curOT = object.objectType.name;
+				scoreCountingTmp.merge(curOT, 1, Integer::sum); // puts 1 if curOT not present, else adds 1 to it
+			}
+			for (String type : parameters.getObjectTypesAll()) {
+				if (scoreCountingTmp.containsKey(curAct) && scoreCountingTmp.get(curAct) == 1) {
+					scoreCountingSingles.merge(new String[]{curAct, type}, 1, Integer::sum);
+				}
+				scoreCountingAll.merge(new String[]{curAct, type}, 1, Integer::sum);
+			}
+			scoreCountingTmp.clear();
+		}
+		
+		// compute score from counting
+		scoreCountingAll.forEach((key,value) -> {
+			score.put(key, scoreCountingSingles.get(key)/(double)scoreCountingAll.get(key));
+		});
+		
+		// iterate through the models and tag variable arcs
+//		parameters.getVariableArcThreshold(); // threshold for variable arc detection necessary
+		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+			// TODO
+			
+		}
+		
+		return oclpmResult;
+	}
+	
+	public static OCLPMResult evaluateOCLPMs (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult) {
+		// TODO
 		return oclpmResult;
 	}
 	
