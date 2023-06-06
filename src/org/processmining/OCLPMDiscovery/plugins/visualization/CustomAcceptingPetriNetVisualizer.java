@@ -1,6 +1,7 @@
 package org.processmining.OCLPMDiscovery.plugins.visualization;
 
 import java.awt.Color;
+import java.util.Arrays;
 
 import javax.swing.JComponent;
 
@@ -12,6 +13,7 @@ import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.models.graphbased.AttributeMap;
 import org.processmining.models.graphbased.ViewSpecificAttributeMap;
+import org.processmining.models.graphbased.directed.petrinet.PetrinetEdge;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 import org.processmining.models.jgraph.ProMJGraphVisualizer;
@@ -53,8 +55,41 @@ public class CustomAcceptingPetriNetVisualizer {
         		System.out.println("Color map doesn't contain the place id "+p.getLabel());
         	}
         	// p.getId() is a new random id for the petri net node! 
-        	// p.getLabel() is the id that is set when creating the node. 
+        	// p.getLabel() is the id that is set when creating the node.
+        	// p.getLabel() is now the object type...
+        	// This would all be simpler if I could just change the id of a place to any String!
+        	// ah I changed it back again
         	map.putViewSpecific(p, AttributeMap.FILLCOLOR, oclpmResult.getMapIdColor().get(p.getLabel()));
+        }
+        
+        // TODO change appearance of variable arcs
+        String type, activity;
+        for (PetrinetEdge arc : net.getNet().getEdges()) {
+        	// stuff that works:
+//        	map.putViewSpecific(arc, AttributeMap.LINEWIDTH, 2f); // this works!
+//        	map.putViewSpecific(arc, AttributeMap.EDGECOLOR, Color.GREEN); // this works!
+        	
+        	
+        	// stuff that doesn't work:
+//        	map.putViewSpecific(arc, AttributeMap.FILLCOLOR, Color.PINK);
+//        	map.putViewSpecific(arc, AttributeMap.EDGEEND, ArrowType.ARROWTYPE_CIRCLE);
+//        	map.putViewSpecific(arc, AttributeMap.NUMLINES, 3);
+//        	map.putViewSpecific(arc, AttributeMap.SHAPE, ArrowType.ARROWTYPE_DOUBLELINE);
+//        	map.putViewSpecific(arc, AttributeMap.EDGEMIDDLE, ArrowType.ARROWTYPE_DOUBLELINE);
+//        	map.putViewSpecific(arc, AttributeMap.STROKECOLOR, Color.BLUE);
+        	
+        	if (arc.getSource() instanceof Transition) {
+        		activity = ((Transition)(arc.getSource())).getLabel();
+        		type = oclpmResult.getTypeMap().get(((Place)(arc.getTarget())).getLabel());
+        	}
+        	else {
+        		 type = oclpmResult.getTypeMap().get(((Place)(arc.getSource())).getLabel());
+        		 activity = ((Transition)(arc.getTarget())).getLabel();
+        	}
+        	if (	oclpmResult.getVariableArcSet().contains(Arrays.asList(activity,type))) {
+        		map.putViewSpecific(arc, AttributeMap.LINEWIDTH, 2f);
+        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, Color.GRAY);
+        	}
         }
 
         return ProMJGraphVisualizer.instance().visualizeGraph(context, net.getNet(), map);

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.deckfour.xes.model.XLog;
@@ -349,10 +350,12 @@ public class Main {
 	
 	public static OCLPMResult identifyVariableArcs (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult) {
 		
+		HashSet<List<String>> variableArcSet = new HashSet<>(); // saves all variable arcs [Activity,ObjectType]
+		
 		// compute score for each activity, objectType pair
-		HashMap<String[],Integer> scoreCountingSingles = new  HashMap<>(); // maps [Activity,ObjectType] to #events of activity and |OT|=1
-		HashMap<String[],Integer> scoreCountingAll = new  HashMap<>(); // maps [Activity,ObjectType] to #events of activity
-		HashMap<String[],Double> score = new HashMap<>(); // maps [Activity,ObjectType] to score (#events of act and |OT|=1 / #events of act)
+		HashMap<List<String>,Integer> scoreCountingSingles = new  HashMap<>(); // maps [Activity,ObjectType] to #events of activity and |OT|=1
+		HashMap<List<String>,Integer> scoreCountingAll = new  HashMap<>(); // maps [Activity,ObjectType] to #events of activity
+		HashMap<List<String>,Double> score = new HashMap<>(); // maps [Activity,ObjectType] to score (#events of act and |OT|=1 / #events of act)
 		HashMap<String,Integer> scoreCountingTmp = new HashMap<>(); // maps ObjectType to #objects in current event with this type
 		OcelEventLog ocel = parameters.getOcel();
 		String curOT, curAct;
@@ -364,18 +367,31 @@ public class Main {
 				scoreCountingTmp.merge(curOT, 1, Integer::sum); // puts 1 if curOT not present, else adds 1 to it
 			}
 			for (String type : parameters.getObjectTypesAll()) {
-				if (scoreCountingTmp.containsKey(curAct) && scoreCountingTmp.get(curAct) == 1) {
-					scoreCountingSingles.merge(new String[]{curAct, type}, 1, Integer::sum);
+				if (scoreCountingTmp.containsKey(type) && scoreCountingTmp.get(type) == 1) {
+					scoreCountingSingles.merge(Arrays.asList(curAct, type), 1, Integer::sum);
 				}
-				scoreCountingAll.merge(new String[]{curAct, type}, 1, Integer::sum);
+				scoreCountingAll.merge(Arrays.asList(curAct, type), 1, Integer::sum);
 			}
 			scoreCountingTmp.clear();
 		}
 		
 		// compute score from counting
 		scoreCountingAll.forEach((key,value) -> {
-			score.put(key, scoreCountingSingles.get(key)/(double)scoreCountingAll.get(key));
+			if (scoreCountingSingles.containsKey(key)) {
+				score.put(key, scoreCountingSingles.get(key)/(double)value);				
+			}
+			else {
+				score.put(key, 0.0);
+			}
 		});
+		
+		// Store variable arcs by comparing them to a threshold for the score
+		score.forEach((key,value) -> {
+			if ( value < parameters.getVariableArcThreshold()) {
+				variableArcSet.add(key);				
+			}
+		});
+		oclpmResult.setVariableArcSet(variableArcSet);
 		
 		// iterate through the models and tag variable arcs
 //		parameters.getVariableArcThreshold(); // threshold for variable arc detection necessary

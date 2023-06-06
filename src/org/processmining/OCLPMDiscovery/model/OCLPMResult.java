@@ -3,6 +3,7 @@ package org.processmining.OCLPMDiscovery.model;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
@@ -17,8 +18,9 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     private Set<String> lpmDiscoveryTypes; // types which were used as a case notion for LPM discovery
     private String oclpmDiscoverySettings; // settings used for the discovery of this result
     private HashMap<String,String> typeMap; // maps each place.id to an object type
-    private HashMap<String,Color> mapIdColor; // maps each place.id to a color
+    private HashMap<String,Color> mapIdColor; // maps each place.id to a color.
     private HashMap<String,Color> mapTypeColor; // maps each object type to a color
+    private HashSet<List<String>> variableArcSet = new HashSet<>(); // saves all variable arcs [Activity,ObjectType]
     
     public OCLPMResult() {
     	
@@ -111,6 +113,14 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 
 	public void setMapTypeColor(HashMap<String, Color> mapTypeColor) {
 		this.mapTypeColor = mapTypeColor;
+	}
+
+	public HashSet<List<String>> getVariableArcSet() {
+		return variableArcSet;
+	}
+
+	public void setVariableArcSet(HashSet<List<String>> variableArcSet) {
+		this.variableArcSet = variableArcSet;
 	}
 
 }
