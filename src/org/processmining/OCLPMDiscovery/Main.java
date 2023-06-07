@@ -254,10 +254,8 @@ public class Main {
 			case PE_LEADING_O2:
 			case PE_LEADING_RELAXED_O2:
 				newTypeLabels = new ArrayList<String>(parameters.getObjectTypesLeadingTypes().size());
-				graph = buildObjectGraph(ocel);
+				graph = buildObjectGraph(ocel, parameters);
 				// LPM discovery for each new case notion
-				//TODO enhancement with multiple case notions isn't possible like that because the case notion 
-					// discovery algorithm would be including the previously added new case notions 
 				for (String currentType : parameters.getObjectTypesLeadingTypes()) {
 					messageNormal("Starting ocel enhancement using the \""+parameters.getCaseNotionStrategy().getName()+"\" strategy for type \""+currentType+"\".");
 					// enhance log by process executions as case notions
@@ -265,25 +263,25 @@ public class Main {
 					newTypeLabels.add(newTypeLabel);
 					switch (parameters.getCaseNotionStrategy()) {
 						case PE_LEADING:
-							ocel = ProcessExecutions.enhanceLeadingType(ocel, newTypeLabel, currentType, graph);
+							ocel = ProcessExecutions.enhanceLeadingType(ocel, newTypeLabel, currentType, graph, parameters.getObjectTypesCaseNotion());
 							break;
 						case PE_LEADING_RELAXED:
-							ocel = ProcessExecutions.enhanceLeadingTypeRelaxed(ocel, newTypeLabel, currentType, graph);
+							ocel = ProcessExecutions.enhanceLeadingTypeRelaxed(ocel, newTypeLabel, currentType, graph, parameters.getObjectTypesCaseNotion());
 							break;
 						case PE_LEADING_O1:
-							ocel = ProcessExecutions.enhanceLeadingTypeOptimized1(ocel, newTypeLabel, currentType, graph);
+							ocel = ProcessExecutions.enhanceLeadingTypeOptimized1(ocel, newTypeLabel, currentType, graph, parameters.getObjectTypesCaseNotion());
 							break;
 						case PE_LEADING_RELAXED_O1:
-							ocel = ProcessExecutions.enhanceLeadingTypeRelaxedOptimized1(ocel, newTypeLabel, currentType, graph);
+							ocel = ProcessExecutions.enhanceLeadingTypeRelaxedOptimized1(ocel, newTypeLabel, currentType, graph, parameters.getObjectTypesCaseNotion());
 							break;
 						case PE_LEADING_O2:
-							ocel = ProcessExecutions.enhanceLeadingTypeOptimized2(ocel, newTypeLabel, currentType, graph);
+							ocel = ProcessExecutions.enhanceLeadingTypeOptimized2(ocel, newTypeLabel, currentType, graph, parameters.getObjectTypesCaseNotion());
 							break;
 						case PE_LEADING_RELAXED_O2:
-							ocel = ProcessExecutions.enhanceLeadingTypeRelaxedOptimized2(ocel, newTypeLabel, currentType, graph);
+							ocel = ProcessExecutions.enhanceLeadingTypeRelaxedOptimized2(ocel, newTypeLabel, currentType, graph, parameters.getObjectTypesCaseNotion());
 							break;
 						default:
-							ocel = ProcessExecutions.enhanceLeadingTypeOptimized1(ocel, newTypeLabel, currentType, graph);
+							ocel = ProcessExecutions.enhanceLeadingTypeOptimized1(ocel, newTypeLabel, currentType, graph, parameters.getObjectTypesCaseNotion());
 							break;
 					}
 					
@@ -303,7 +301,7 @@ public class Main {
 				break;
 				
 			case PE_CONNECTED:
-				graph = buildObjectGraph(ocel);
+				graph = buildObjectGraph(ocel, parameters);
 				String ot = "ConnectedComponent";
 				ocel = ProcessExecutions.enhanceConnectedComponent(ocel, ot, graph);
 				ProvidingObjects.exportOcel(ocel, new ArrayList<String>(Arrays.asList(ot)));
@@ -494,10 +492,10 @@ public class Main {
 		return lpmResults;
 	}
 	
-	public static Graph<String,DefaultEdge> buildObjectGraph(OcelEventLog ocel){
+	public static Graph<String,DefaultEdge> buildObjectGraph(OcelEventLog ocel, OCLPMDiscoveryParameters parameters){
 		if (!graphProvided) {
 			messageNormal("Starting object graph construction.");
-			Main.graph = ProcessExecutions.buildObjectGraph(ocel);
+			Main.graph = ProcessExecutions.buildObjectGraph(ocel, parameters);
 			ProvidingObjects.exportObjectGraph(graph);
 			updateProgress("Contructed object graph with "+graph.vertexSet().size()+" vertices and "+graph.edgeSet().size()+" edges.");
 		}

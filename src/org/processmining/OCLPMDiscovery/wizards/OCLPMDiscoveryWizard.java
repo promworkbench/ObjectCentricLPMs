@@ -54,6 +54,7 @@ public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, St
 		
 		if (discoverLPMs) {
 			// let user select parameters for LPM discovery
+			// TODO add wizard step where user can select object types to consider in general (set parameters objectTypesCaseNotion)
 			stepMap.put(OCLPMDiscoveryWizard.LPM_NOTION, new OCLPMDiscoveryLPMStep(parameters));
 			stepMap.put(OCLPMDiscoveryWizard.LPM_CONFIG, new LPMDiscoveryWizardStep(parameters));
 		}

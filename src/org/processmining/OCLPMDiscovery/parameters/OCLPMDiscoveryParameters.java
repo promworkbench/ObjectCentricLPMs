@@ -18,6 +18,7 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	private DefaultListModel<String> objectTypesList = new DefaultListModel<String>();
 	private Set<String> objectTypesPlaceNets; // object types for which the log is flattened and place nets are discovered
 	private Set<String> objectTypesLeadingTypes; // object types which are used as leading types for discovering process executions
+	private Set<String> objectTypesCaseNotion; // object types considered when doint case notion discovery
 	
 	// place discovery
 	private SPECppParameters specppParameters;
@@ -38,6 +39,7 @@ public class OCLPMDiscoveryParameters implements EventLog{
 		this.setObjectTypesPlaceNets(objectTypes);
 		this.setObjectTypesLeadingTypes(objectTypes);
 		this.setActivities(OCELUtils.getActivities(ocel));
+		this.setObjectTypesCaseNotion(objectTypes);
 		
 		// list all object types
         for (String curType : this.objectTypesAll) {
@@ -218,5 +220,13 @@ public class OCLPMDiscoveryParameters implements EventLog{
 
 	public void setVariableArcThreshold(float variableArcThreshold) {
 		this.variableArcThreshold = variableArcThreshold;
+	}
+
+	public Set<String> getObjectTypesCaseNotion() {
+		return objectTypesCaseNotion;
+	}
+
+	public void setObjectTypesCaseNotion(Set<String> objectTypesCaseNotion) {
+		this.objectTypesCaseNotion = objectTypesCaseNotion;
 	}
 }

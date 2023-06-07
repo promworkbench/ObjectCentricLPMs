@@ -11,6 +11,7 @@ import org.jgrapht.UndirectedGraph;
 import org.jgrapht.alg.ConnectivityInspector;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleGraph;
+import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.ocel.ocelobjects.OcelEvent;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
 import org.processmining.ocel.ocelobjects.OcelObject;
@@ -72,7 +73,7 @@ public class ProcessExecutions {
 	 * @param graph
 	 * @return
 	 */
-	public static OcelEventLog enhanceLeadingTypeRelaxed (OcelEventLog ocel, String newTypeLabel, String leadingType, Graph<String,DefaultEdge> graph) {
+	public static OcelEventLog enhanceLeadingTypeRelaxed (OcelEventLog ocel, String newTypeLabel, String leadingType, Graph<String,DefaultEdge> graph, Set<String> objectTypesCaseNotion) {
 //		System.out.println("Starting ocel enhancement using the leading type relaxed strategy for type "+leadingType+".");
 		
 		// add new object type
@@ -129,10 +130,13 @@ public class ProcessExecutions {
 		int numEventsAfter = 0;
 		for (OcelEvent event : ocel.getEvents().values()) {
 			// for each event have to check each object of each type
-			for (String obj : event.relatedObjectsIdentifiers) {
-				Set<String> mapGet = map.get(obj);
+			for (OcelObject obj : event.relatedObjects) {
+				if (!objectTypesCaseNotion.contains(obj.objectType.name)) { // object is of ignored type
+					continue;
+				}
+				Set<String> mapGet = map.get(obj.id);
 				if (mapGet != null) {
-					tmpSet.addAll(map.get(obj)); // doesn't work without tmpSet because of concurrent modifications						
+					tmpSet.addAll(map.get(obj.id)); // doesn't work without tmpSet because of concurrent modifications						
 				}
 			}
 			event.relatedObjectsIdentifiers.addAll(tmpSet);
@@ -161,7 +165,7 @@ public class ProcessExecutions {
 	 * @param graph
 	 * @return
 	 */
-	public static OcelEventLog enhanceLeadingType (OcelEventLog ocel, String newTypeLabel, String leadingType, Graph<String,DefaultEdge> graph) {
+	public static OcelEventLog enhanceLeadingType (OcelEventLog ocel, String newTypeLabel, String leadingType, Graph<String,DefaultEdge> graph, Set<String> objectTypesCaseNotion) {
 
 //		System.out.println("Starting ocel enhancement using the leading type strategy for type "+leadingType+".");
 		
@@ -249,10 +253,13 @@ public class ProcessExecutions {
 		int numEventsAfter = 0;
 		for (OcelEvent event : ocel.getEvents().values()) {
 			// for each event have to check each object of each type
-			for (String obj : event.relatedObjectsIdentifiers) {
-				Set<String> mapGet = map.get(obj);
+			for (OcelObject obj : event.relatedObjects) {
+				if (!objectTypesCaseNotion.contains(obj.objectType.name)) { // object is of ignored type
+					continue;
+				}
+				Set<String> mapGet = map.get(obj.id);
 				if (mapGet != null) {
-					tmpSet.addAll(map.get(obj)); // doesn't work without tmpSet because of concurrent modifications						
+					tmpSet.addAll(map.get(obj.id)); // doesn't work without tmpSet because of concurrent modifications						
 				}
 			}
 			event.relatedObjectsIdentifiers.addAll(tmpSet); 
@@ -282,7 +289,7 @@ public class ProcessExecutions {
 	 * @param graph
 	 * @return
 	 */
-	public static OcelEventLog enhanceLeadingTypeOptimized1 (OcelEventLog ocel, String newTypeLabel, String leadingType, Graph<String,DefaultEdge> graph) {
+	public static OcelEventLog enhanceLeadingTypeOptimized1 (OcelEventLog ocel, String newTypeLabel, String leadingType, Graph<String,DefaultEdge> graph, Set<String> objectTypesCaseNotion) {
 		
 //		System.out.println("Starting ocel enhancement using the leading type optimization 1 strategy for type "+leadingType+".");
 		
@@ -372,20 +379,23 @@ public class ProcessExecutions {
 		for (OcelEvent event : ocel.getEvents().values()) {
 			discoveredLeadingObject = false;
 			// for each event have to check each object of each type
-			for (String obj : event.relatedObjectsIdentifiers) {
+			for (OcelObject obj : event.relatedObjects) {
+				if (!objectTypesCaseNotion.contains(obj.objectType.name)) { // object is of ignored type
+					continue;
+				}
 				// if current event has objects of leading type ignore the others
-				if (ocel.getObjects().get(obj).objectType.name.equals(leadingType)) {
+				if (ocel.getObjects().get(obj.id).objectType.name.equals(leadingType)) {
 					if (!discoveredLeadingObject) {
 						tmpSet.clear();
 						discoveredLeadingObject = true;						
 					}
-					tmpSet.addAll(map.get(obj));
+					tmpSet.addAll(map.get(obj.id));
 					continue;
 				}
 				if (!discoveredLeadingObject) {
-					Set<String> mapGet = map.get(obj);
+					Set<String> mapGet = map.get(obj.id);
 					if (mapGet != null) {
-						tmpSet.addAll(map.get(obj)); // doesn't work without tmpSet because of concurrent modifications						
+						tmpSet.addAll(map.get(obj.id)); // doesn't work without tmpSet because of concurrent modifications						
 					}
 				}
 			}
@@ -406,7 +416,7 @@ public class ProcessExecutions {
 		return ocel;
 	}
 	
-	public static OcelEventLog enhanceLeadingTypeRelaxedOptimized1 (OcelEventLog ocel, String newTypeLabel, String leadingType, Graph<String,DefaultEdge> graph) {
+	public static OcelEventLog enhanceLeadingTypeRelaxedOptimized1 (OcelEventLog ocel, String newTypeLabel, String leadingType, Graph<String,DefaultEdge> graph, Set<String> objectTypesCaseNotion) {
 //		System.out.println("Starting ocel enhancement using the leading type relaxed optimized 1 strategy for type "+leadingType+".");
 		
 		// add new object type
@@ -465,20 +475,23 @@ public class ProcessExecutions {
 		for (OcelEvent event : ocel.getEvents().values()) {
 			discoveredLeadingObject = false;
 			// for each event have to check each object of each type
-			for (String obj : event.relatedObjectsIdentifiers) {
+			for (OcelObject obj : event.relatedObjects) {
+				if (!objectTypesCaseNotion.contains(obj.objectType.name)) { // object is of ignored type
+					continue;
+				}
 				// if current event has objects of leading type ignore the others
-				if (ocel.getObjects().get(obj).objectType.name.equals(leadingType)) {
+				if (ocel.getObjects().get(obj.id).objectType.name.equals(leadingType)) {
 					if (!discoveredLeadingObject) {
 						tmpSet.clear();
 						discoveredLeadingObject = true;						
 					}
-					tmpSet.addAll(map.get(obj));
+					tmpSet.addAll(map.get(obj.id));
 					continue;
 				}
 				if (!discoveredLeadingObject) {
-					Set<String> mapGet = map.get(obj);
+					Set<String> mapGet = map.get(obj.id);
 					if (mapGet != null) {
-						tmpSet.addAll(map.get(obj)); // doesn't work without tmpSet because of concurrent modifications						
+						tmpSet.addAll(map.get(obj.id)); // doesn't work without tmpSet because of concurrent modifications						
 					}
 				}
 			}
@@ -510,7 +523,7 @@ public class ProcessExecutions {
 	 * @param graph
 	 * @return
 	 */
-	public static OcelEventLog enhanceLeadingTypeOptimized2 (OcelEventLog ocel, String newTypeLabel, String leadingType, Graph<String,DefaultEdge> graph) {
+	public static OcelEventLog enhanceLeadingTypeOptimized2 (OcelEventLog ocel, String newTypeLabel, String leadingType, Graph<String,DefaultEdge> graph, Set<String> objectTypesCaseNotion) {
 		
 //		System.out.println("Starting ocel enhancement using the leading type optimization 1 strategy for type "+leadingType+".");
 		
@@ -602,14 +615,17 @@ public class ProcessExecutions {
 		for (OcelEvent event : ocel.getEvents().values()) {
 			// construct map which maps each object type to the process executions of all the objects of that type occurring in this event
 			typeToPEs.clear();
-			for (String obj : event.relatedObjectsIdentifiers) {
-				curType = ocel.getObjects().get(obj).objectType.name;
-				HashSet<String> mapGet = new HashSet<String>(); 
-						map.get(obj);
-				if (map.get(obj) == null) {
+			for (OcelObject obj : event.relatedObjects) {
+				if (!objectTypesCaseNotion.contains(obj.objectType.name)) { // object is of ignored type
 					continue;
 				}
-				mapGet.addAll(map.get(obj));
+				curType = obj.objectType.name;
+				HashSet<String> mapGet = new HashSet<String>(); 
+						map.get(obj.id);
+				if (map.get(obj.id) == null) {
+					continue;
+				}
+				mapGet.addAll(map.get(obj.id));
 				if (typeToPEs.containsKey(curType)) {
 					mapGet.addAll(typeToPEs.get(curType));
 				}
@@ -661,7 +677,7 @@ public class ProcessExecutions {
 	 * @param graph
 	 * @return
 	 */
-	public static OcelEventLog enhanceLeadingTypeRelaxedOptimized2 (OcelEventLog ocel, String newTypeLabel, String leadingType, Graph<String,DefaultEdge> graph) {
+	public static OcelEventLog enhanceLeadingTypeRelaxedOptimized2 (OcelEventLog ocel, String newTypeLabel, String leadingType, Graph<String,DefaultEdge> graph, Set<String> objectTypesCaseNotion) {
 //		System.out.println("Starting ocel enhancement using the leading type relaxed optimized 1 strategy for type "+leadingType+".");
 		
 		// add new object type
@@ -722,14 +738,17 @@ public class ProcessExecutions {
 		for (OcelEvent event : ocel.getEvents().values()) {
 			// construct map which maps each object type to the process executions of all the objects of that type occurring in this event
 			typeToPEs.clear();
-			for (String obj : event.relatedObjectsIdentifiers) {
-				curType = ocel.getObjects().get(obj).objectType.name;
-				HashSet<String> mapGet = new HashSet<String>(); 
-						map.get(obj);
-				if (map.get(obj) == null) {
+			for (OcelObject obj : event.relatedObjects) {
+				if (!objectTypesCaseNotion.contains(obj.objectType.name)) { // object is of ignored type
 					continue;
 				}
-				mapGet.addAll(map.get(obj));
+				curType = obj.objectType.name;
+				HashSet<String> mapGet = new HashSet<String>(); 
+						map.get(obj.id);
+				if (map.get(obj.id) == null) {
+					continue;
+				}
+				mapGet.addAll(map.get(obj.id));
 				if (typeToPEs.containsKey(curType)) {
 					mapGet.addAll(typeToPEs.get(curType));
 				}
@@ -772,21 +791,31 @@ public class ProcessExecutions {
 		return ocel;
 	}
 	
-	public static Graph<String,DefaultEdge> buildObjectGraph (OcelEventLog ocel){
+	public static Graph<String,DefaultEdge> buildObjectGraph (OcelEventLog ocel, OCLPMDiscoveryParameters parameters){
 		Graph<String,DefaultEdge> graph = new SimpleGraph<>(DefaultEdge.class);
 		
-		for (String object : ocel.getObjects().keySet()) {
-			graph.addVertex(object);
+		for (String type : parameters.getObjectTypesCaseNotion()) {
+			for (OcelObject o : ocel.objectTypes.get(type).objects) {
+				graph.addVertex(o.id);
+			}
 		}
 		
 		for (OcelEvent event : ocel.getEvents().values()) {
-			for (String o1 : event.relatedObjectsIdentifiers) {
-				for (String o2 : event.relatedObjectsIdentifiers) {
+			for (OcelObject o1 : event.relatedObjects) {
+				// check if type should be ignored
+				if (!parameters.getObjectTypesCaseNotion().contains(o1.objectType.name)) {
+					continue;
+				}
+				for (OcelObject o2 : event.relatedObjects) {
+					// check if type should be ignored
+					if (!parameters.getObjectTypesCaseNotion().contains(o2.objectType.name)) {
+						continue;
+					}
 					// simple graph cannot contain graph loops or multi-edges 
 					// so we don't need to check this here
 					// uff, actually have to check because otherwise it stops throwing an exception
-					if (!o1.equals(o2)) {
-						graph.addEdge(o1, o2);						
+					if (!o1.id.equals(o2.id)) {
+						graph.addEdge(o1.id, o2.id);						
 					}
 				}
 			}
