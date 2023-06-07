@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.wizards.steps.LPMDiscoveryWizardStep;
+import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryCaseNotionFilterStep;
 import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryDummyFinishStep;
 import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryILPStep;
 import org.processmining.OCLPMDiscovery.wizards.steps.OCLPMDiscoveryLPMStep;
@@ -20,6 +21,7 @@ public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, St
 	public static final String INITIAL_KEY = "OCLPMDiscoverySettings"; // has place discovery settings
 	public static final String PD_ILP = "OCLPMDiscoveryILP";
 	public static final String PD_SPECPP = "OCLPMDiscoverySPECpp";
+	public static final String LPM_TYPE_FILTER = "OCLPMDiscoveryLPMCaseNotionTypeFilter";
 	public static final String LPM_NOTION = "OCLPMDiscoveryLPMCaseNotion";
 	public static final String LPM_CONFIG = "OCLPMDiscoveryLPMDiscoveryConfig";
 	public static final String FINISH = "OCLPMDiscoveryDummyFinish"; // because I failed to make it work without it 
@@ -54,13 +56,14 @@ public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, St
 		
 		if (discoverLPMs) {
 			// let user select parameters for LPM discovery
-			// TODO add wizard step where user can select object types to consider in general (set parameters objectTypesCaseNotion)
+			stepMap.put(OCLPMDiscoveryWizard.LPM_TYPE_FILTER, new OCLPMDiscoveryCaseNotionFilterStep(parameters));
 			stepMap.put(OCLPMDiscoveryWizard.LPM_NOTION, new OCLPMDiscoveryLPMStep(parameters));
 			stepMap.put(OCLPMDiscoveryWizard.LPM_CONFIG, new LPMDiscoveryWizardStep(parameters));
 		}
 		
 		// when users only wants to convert LPMs + HashMap to OCLPMResult they need to specify the used LPM notion
 		if (!discoverPlaces && !discoverLPMs) {
+			stepMap.put(OCLPMDiscoveryWizard.LPM_TYPE_FILTER, new OCLPMDiscoveryCaseNotionFilterStep(parameters));
 			stepMap.put(OCLPMDiscoveryWizard.LPM_NOTION, new OCLPMDiscoveryLPMStep(parameters));
 		}
 			
@@ -80,7 +83,7 @@ public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, St
 			return INITIAL_KEY;
 		}
 		else {
-			return LPM_NOTION;
+			return LPM_TYPE_FILTER; //TODO do LPM_NOTION directly if object graph is provided
 		}
 	}
 
@@ -103,6 +106,13 @@ public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, St
 		}
 		
 		if (this.discoverLPMs) {
+			if ( !wizard.getCurrent().equals(LPM_TYPE_FILTER)
+					&& !wizard.getCurrent().equals(LPM_NOTION)
+					&& !wizard.getCurrent().equals(LPM_CONFIG)
+					){
+				return LPM_TYPE_FILTER;
+			}
+				
 			// check if LPM case notion discovery needs a wizard step
 			if ( !wizard.getCurrent().equals(LPM_NOTION)
 					&& !wizard.getCurrent().equals(LPM_CONFIG)

@@ -303,7 +303,7 @@ public class Main {
 			case PE_CONNECTED:
 				graph = buildObjectGraph(ocel, parameters);
 				String ot = "ConnectedComponent";
-				ocel = ProcessExecutions.enhanceConnectedComponent(ocel, ot, graph);
+				ocel = ProcessExecutions.enhanceConnectedComponent(ocel, ot, graph, parameters.getObjectTypesCaseNotion());
 				ProvidingObjects.exportOcel(ocel, new ArrayList<String>(Arrays.asList(ot)));
 				messageNormal("Discovered "+ocel.objectTypes.get(ot).objects.size()+" connected components.");
 				log = Main.flattenOCEL(ocel, ot);
@@ -497,7 +497,7 @@ public class Main {
 			messageNormal("Starting object graph construction.");
 			Main.graph = ProcessExecutions.buildObjectGraph(ocel, parameters);
 			ProvidingObjects.exportObjectGraph(graph);
-			updateProgress("Contructed object graph with "+graph.vertexSet().size()+" vertices and "+graph.edgeSet().size()+" edges.");
+			updateProgress("Constructed object graph with "+graph.vertexSet().size()+" vertices and "+graph.edgeSet().size()+" edges.");
 		}
 		else {
 			updateProgress("Object graph provided with "+graph.vertexSet().size()+" vertices and "+graph.edgeSet().size()+" edges.");

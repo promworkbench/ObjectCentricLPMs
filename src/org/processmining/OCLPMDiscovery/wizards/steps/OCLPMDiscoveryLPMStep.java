@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
-import javax.swing.event.ListSelectionListener;
 
 import org.processmining.OCLPMDiscovery.gui.OCLPMList;
 import org.processmining.OCLPMDiscovery.gui.OCLPMPropertiesPanel;
@@ -24,7 +24,6 @@ public class OCLPMDiscoveryLPMStep extends OCLPMPropertiesPanel implements ProMW
 	OCLPMList<String> list_LeadingTypes;
 	
 	List<CaseNotionStrategy> caseNotionListEnums;
-	ListSelectionListener caseNotionListener;
 
     public OCLPMDiscoveryLPMStep(OCLPMDiscoveryParameters parameters) {
         super(TITLE);
@@ -40,7 +39,11 @@ public class OCLPMDiscoveryLPMStep extends OCLPMPropertiesPanel implements ProMW
         
         
         // scrollable list with all object types where each can be ticked off or on
-        this.list_LeadingTypes = new OCLPMList<String>("Select Object Types used as Leading Types",parameters.getObjectTypesList()); 
+        DefaultListModel<String> caseNotionTypes = new DefaultListModel<String>();
+        for (String type : parameters.getObjectTypesCaseNotion()) {
+        	caseNotionTypes.addElement(type);        	
+        }
+        this.list_LeadingTypes = new OCLPMList<String>("Select Object Types used as Leading Types",caseNotionTypes);
         addProperty("Process Executions", this.list_LeadingTypes);
         
         // set initial state to be all selected
@@ -71,7 +74,20 @@ public class OCLPMDiscoveryLPMStep extends OCLPMPropertiesPanel implements ProMW
 
     @Override
     public JComponent getComponent(OCLPMDiscoveryParameters parameters) {
+        // refresh object types that can be selected depending on the object type filter in the previous step
+        DefaultListModel<String> caseNotionTypes = new DefaultListModel<String>();
+        for (String type : parameters.getObjectTypesCaseNotion()) {
+        	caseNotionTypes.addElement(type);
+        }
         
+        list_LeadingTypes.getList().setModel(caseNotionTypes);
+        
+        // set initial state to be all selected
+        int start = 0;
+        int end = this.list_LeadingTypes.getList().getModel().getSize() - 1;
+        if (end >= 0) {
+        	this.list_LeadingTypes.getList().setSelectionInterval(start, end);
+        }
         return this;
     }
 

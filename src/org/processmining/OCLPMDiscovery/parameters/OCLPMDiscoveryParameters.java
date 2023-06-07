@@ -98,8 +98,18 @@ public class OCLPMDiscoveryParameters implements EventLog{
         	else otherParams+="\n";
         }
         
+        otherParams += "LPM Case Notion Object Types: ";
+        s = this.getObjectTypesCaseNotion().size();
+        i = 0;
+        for (String current : this.getObjectTypesCaseNotion()) {
+        	otherParams += current;
+        	i++;
+        	if (i<s) otherParams+=", ";
+        	else otherParams+="\n";
+        }
+        
         if (CaseNotionStrategy.typeSelectionNeeded.contains(this.getCaseNotionStrategy())) {
-        	otherParams += "LPM Case Notion Object Types: ";
+        	otherParams += "LPM Case Notion Leading Types: ";
             s = this.getObjectTypesLeadingTypes().size();
             i = 0;
             for (String current : this.getObjectTypesLeadingTypes()) {

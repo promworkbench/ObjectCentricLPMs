@@ -25,7 +25,7 @@ public class ProcessExecutions {
 	 * @param otName Name of the new object type.
 	 * @return ocel with a new object type for the process executions.
 	 */
-	public static OcelEventLog enhanceConnectedComponent (OcelEventLog ocel, String otName, Graph<String,DefaultEdge> graph) {
+	public static OcelEventLog enhanceConnectedComponent (OcelEventLog ocel, String otName, Graph<String,DefaultEdge> graph, Set<String> objectTypesCaseNotion) {
 //		System.out.println("Starting process execution enhancement using connected components.");
 		
 		// add new object type
@@ -54,8 +54,14 @@ public class ProcessExecutions {
 		// assign each event an object corresponding to the connected component it is in
 		String currentComponent;
 		for (OcelEvent event : ocel.getEvents().values()) {
-			currentComponent = mapComponent.get(event.relatedObjectsIdentifiers.iterator().next());
-			event.relatedObjectsIdentifiers.add(currentComponent);
+			for (OcelObject o : event.relatedObjects) {
+				// get one of the considered objects
+				if (objectTypesCaseNotion.contains(o.objectType.name)) {
+					currentComponent = mapComponent.get(o.id);
+					event.relatedObjectsIdentifiers.add(currentComponent);
+					break;
+				}
+			}
 		}
 		
 		ocel.register();
