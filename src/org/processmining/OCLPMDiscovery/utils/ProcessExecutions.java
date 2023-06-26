@@ -43,13 +43,16 @@ public class ProcessExecutions {
 			for (String o : components.get(i_component)) {
 				mapComponent.put(o, objectID);				
 			}
-			System.out.println("Component "+i_component+" consists of "+components.get(i_component).size()+" objects.");
+			if (components.get(i_component).size()>1) {
+				System.out.println("Component "+i_component+" consists of "+components.get(i_component).size()+" objects.");
+			}
 			// create object for the component
 			OcelObject curObject = new OcelObject(ocel);
 			curObject.objectType = ot;
 			curObject.id = objectID;
 			ocel.objects.put(curObject.id,curObject);
 		}
+		System.out.println("Components not printed have size 1.");
 		
 		// assign each event an object corresponding to the connected component it is in
 		String currentComponent;

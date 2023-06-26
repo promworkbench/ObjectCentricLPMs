@@ -5,7 +5,6 @@ import java.awt.Toolkit;
 
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JSplitPane;
 
 import org.processmining.OCLPMDiscovery.gui.OCLPMColors;
@@ -54,10 +53,11 @@ public class OCLPMVisualizer {
         JComponent evalComponent = new OCLPMPanel(theme);
         OCLPMScrollPane evalPane = new OCLPMScrollPane(evalComponent, theme);
         evalComponent.setLayout(new BoxLayout(evalComponent, BoxLayout.Y_AXIS));
+        //TODO add for which leading type this model has been discovered
         evalComponent.add(ComponentFactory.getComplexEvaluationResultComponent(oclpm.getAdditionalInfo().getEvaluationResult()));
         
         // ?
-        evalComponent.add(new JLabel("Histogram"));
+//        evalComponent.add(new JLabel("Histogram"));
         
         // Component on the right
         OCLPMSplitPane componentRight = new OCLPMSplitPane(JSplitPane.VERTICAL_SPLIT, theme);

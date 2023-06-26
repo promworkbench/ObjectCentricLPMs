@@ -38,7 +38,7 @@ public class Main {
 	public static boolean UsingContext = false;
 	public static Graph<String,DefaultEdge> graph;
 	public static boolean graphProvided = false;
-	
+	public static long startTime = System.currentTimeMillis();
 	
 	
 	//===================================================================
@@ -65,7 +65,8 @@ public class Main {
 		
 		// OCLPM conversion
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
-
+		
+		Main.printExecutionTime();
         return new Object[] {oclpmResult, tlpms, placeSet, typeMap};
     }
 	
@@ -81,6 +82,7 @@ public class Main {
 		
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
 
+		Main.printExecutionTime();
         return new Object[] {oclpmResult, tlpms};
     }
 	
@@ -96,6 +98,7 @@ public class Main {
 		
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
 
+		Main.printExecutionTime();
         return new Object[] {oclpmResult, tlpms};
     }
 	
@@ -109,6 +112,7 @@ public class Main {
         		
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
 
+		Main.printExecutionTime();
         return new Object[] {oclpmResult};
     }
 	
@@ -123,6 +127,7 @@ public class Main {
         ProvidingObjects.exportTlpms(tlpms);
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
 
+		Main.printExecutionTime();
         return new Object[] {oclpmResult, tlpms};
     }
 	
@@ -141,6 +146,7 @@ public class Main {
 		
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
 
+		Main.printExecutionTime();
         return tlpms;
     }
 	
@@ -155,6 +161,7 @@ public class Main {
         	
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
 
+		Main.printExecutionTime();
         return tlpms;
     }
 	
@@ -411,7 +418,8 @@ public class Main {
 	//===================================================================
 	
 	public static void setUp(PluginContext context) {
-        Main.Context = context;
+		Main.startTime = System.currentTimeMillis();
+		Main.Context = context;
         if (context != null) {
         	Main.UsingContext = true;
         }
@@ -515,10 +523,17 @@ public class Main {
 	}
 	
 	public static XLog flattenOCEL(OcelEventLog ocel, String newTypeLabel) {
-		XLog log = Flattening.flatten(ocel, newTypeLabel);
+		XLog log = Flattening.flatten(ocel, newTypeLabel); //TODO this pastes a lot of useless stuff in the console
 //		int numEventsBefore = ocel.getEvents().size();
 //		int numEventsAfter = log.size();
 //		System.out.println("Flattening log for the new type \""+newTypeLabel+"\" lead to an increase of events by a factor of "+(double) numEventsAfter/numEventsBefore+".");
 		return log;
+	}
+	
+	public static void printExecutionTime() {
+		long endTime = System.currentTimeMillis();
+		long elapsedTime = endTime - Main.startTime;
+		
+		System.out.println("OCLPM Discovery Execution time: "+Math.round((elapsedTime/1000.0/60.0) * 1000.0)/1000.0+" Minutes");
 	}
 }
