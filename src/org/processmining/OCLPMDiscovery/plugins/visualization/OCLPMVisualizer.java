@@ -11,6 +11,7 @@ import org.processmining.OCLPMDiscovery.gui.OCLPMColors;
 import org.processmining.OCLPMDiscovery.gui.OCLPMPanel;
 import org.processmining.OCLPMDiscovery.gui.OCLPMScrollPane;
 import org.processmining.OCLPMDiscovery.gui.OCLPMSplitPane;
+import org.processmining.OCLPMDiscovery.gui.OCLPMTextArea;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
 import org.processmining.OCLPMDiscovery.utils.OCLPMUtils;
@@ -56,18 +57,28 @@ public class OCLPMVisualizer {
         //TODO add for which leading type this model has been discovered
         evalComponent.add(ComponentFactory.getComplexEvaluationResultComponent(oclpm.getAdditionalInfo().getEvaluationResult()));
         
+        
+        //show OCLPMDiscovery settings used to obtain the OCLPMResult
+        JComponent settingsComponent = new OCLPMPanel(theme);
+        OCLPMScrollPane settingsPane = new OCLPMScrollPane(settingsComponent, theme);
+        OCLPMTextArea ta_discoverySettings = new OCLPMTextArea(oclpmResult.getOclpmDiscoverySettings(), false, false, theme);
+        settingsComponent.add(ta_discoverySettings);
+        
         // ?
 //        evalComponent.add(new JLabel("Histogram"));
         
         // Component on the right
-        OCLPMSplitPane componentRight = new OCLPMSplitPane(JSplitPane.VERTICAL_SPLIT, theme);
-        componentRight.setTopComponent(colorPane);
-        componentRight.setBottomComponent(evalPane);
+        OCLPMSplitPane sp_R1 = new OCLPMSplitPane(JSplitPane.VERTICAL_SPLIT, theme, 0);
+        OCLPMSplitPane sp_R2 = new OCLPMSplitPane(JSplitPane.VERTICAL_SPLIT, theme, 0);
+        sp_R1.setTopComponent(colorPane);
+        sp_R1.setBottomComponent(sp_R2);
+        sp_R2.setTopComponent(evalPane);
+        sp_R2.setBottomComponent(settingsPane);
         
         // outer Component
         OCLPMSplitPane componentOuter = new OCLPMSplitPane(JSplitPane.HORIZONTAL_SPLIT, theme);
         componentOuter.setLeftComponent(petriNetPane);
-        componentOuter.setRightComponent(componentRight);
+        componentOuter.setRightComponent(sp_R1);
         
         //===============
         // set sizes
@@ -79,8 +90,9 @@ public class OCLPMVisualizer {
         petriNetPane.setPreferredSize(new Dimension(80 * windowWidth / 100, windowHeight));
         
         // right component
-        componentRight.setPreferredSize(new Dimension(20 * windowWidth / 100, windowHeight));
-        componentRight.setResizeWeight(0.3);
+        sp_R1.setPreferredSize(new Dimension(20 * windowWidth / 100, windowHeight));
+        sp_R1.setResizeWeight(0.3);
+        sp_R2.setResizeWeight(0.5);
         
         // stuff inside the right component
         colorPane.setPreferredSize(new Dimension(windowWidth, 20 * windowHeight / 100));

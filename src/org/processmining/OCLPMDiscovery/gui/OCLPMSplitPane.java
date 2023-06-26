@@ -225,19 +225,28 @@ public class OCLPMSplitPane extends BorderPanel{
 	
 	public OCLPMSplitPane(int orientation, OCLPMColors theme, int border) {
 		super(border, border);
-		init(theme, orientation);
+		if (border == 0) {
+			init(theme, orientation, 0); // otherwise there are empty spots in the corners
+		}
+		else {
+			init(theme, orientation);			
+		}
 	}
 	
 	public void init(OCLPMColors theme, int orientation) {
+		init(theme, orientation, 10);
+	}
+	
+	public void init(OCLPMColors theme, int orientation, int roundingRadius) {
 		setLayout(new BorderLayout());
 		setBackground(theme.ELEMENTS);
 		setForeground(theme.ELEMENTS);
 		setOpaque(true);
-		top = new RoundedPanel(10);
+		top = new RoundedPanel(roundingRadius);
 		top.setLayout(new BorderLayout());
 		top.setBackground(theme.BACKGROUND);
 		top.setOpaque(true);
-		bottom = new RoundedPanel(10);
+		bottom = new RoundedPanel(roundingRadius);
 		bottom.setLayout(new BorderLayout());
 		bottom.setBackground(theme.BACKGROUND);
 		bottom.setOpaque(true);
