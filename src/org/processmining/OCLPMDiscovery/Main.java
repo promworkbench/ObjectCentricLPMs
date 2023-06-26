@@ -1,5 +1,6 @@
 package org.processmining.OCLPMDiscovery;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
 import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.utils.FlatLogProcessing;
+import org.processmining.OCLPMDiscovery.utils.NullOutputStream;
 import org.processmining.OCLPMDiscovery.utils.OCELUtils;
 import org.processmining.OCLPMDiscovery.utils.ProcessExecutions;
 import org.processmining.OCLPMDiscovery.utils.ProvidingObjects;
@@ -523,7 +525,10 @@ public class Main {
 	}
 	
 	public static XLog flattenOCEL(OcelEventLog ocel, String newTypeLabel) {
-		XLog log = Flattening.flatten(ocel, newTypeLabel); //TODO this pastes a lot of useless stuff in the console
+		PrintStream out = System.out;
+		System.setOut(new PrintStream(new NullOutputStream()));
+		XLog log = Flattening.flatten(ocel, newTypeLabel); // this pastes a lot of useless stuff in the console
+		System.setOut(out);
 //		int numEventsBefore = ocel.getEvents().size();
 //		int numEventsAfter = log.size();
 //		System.out.println("Flattening log for the new type \""+newTypeLabel+"\" lead to an increase of events by a factor of "+(double) numEventsAfter/numEventsBefore+".");

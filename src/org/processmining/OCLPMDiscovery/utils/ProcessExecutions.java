@@ -1,5 +1,6 @@
 package org.processmining.OCLPMDiscovery.utils;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,24 +36,28 @@ public class ProcessExecutions {
 		// detect connected components
 		ConnectivityInspector<String,DefaultEdge> inspector = new ConnectivityInspector<String,DefaultEdge>((UndirectedGraph) graph);
 		List<Set<String>> components = inspector.connectedSets();
-		System.out.println("Discovered "+components.size()+" connected components.");
+//		System.out.println("Discovered "+components.size()+" connected components.");
 		HashMap<String,String> mapComponent = new HashMap<>(); // maps object identifier to corresponding connected component
 		String objectID = new String();
+		int[] sizes = new int[components.size()];
 		for (int i_component = 0; i_component<components.size(); i_component++) {
+			sizes[i_component] = components.get(i_component).size();
 			objectID = "ConnectedComponent-"+i_component;
 			for (String o : components.get(i_component)) {
 				mapComponent.put(o, objectID);				
 			}
-			if (components.get(i_component).size()>1) {
-				System.out.println("Component "+i_component+" consists of "+components.get(i_component).size()+" objects.");
-			}
+//			if (components.get(i_component).size()>1) {
+//				System.out.println("Component "+i_component+" consists of "+components.get(i_component).size()+" objects.");
+//			}
 			// create object for the component
 			OcelObject curObject = new OcelObject(ocel);
 			curObject.objectType = ot;
 			curObject.id = objectID;
 			ocel.objects.put(curObject.id,curObject);
 		}
-		System.out.println("Components not printed have size 1.");
+//		System.out.println("Components not printed have size 1.");
+		
+		printProcessExecutionStatistics(sizes);
 		
 		// assign each event an object corresponding to the connected component it is in
 		String currentComponent;
@@ -72,7 +77,7 @@ public class ProcessExecutions {
 //		System.out.println("Finished ocel enhancement using connected components.");
 		return ocel;
 	}
-	
+
 	/**
 	 * Process Execution "Leading Type" strategy alteration by assigning each object to the closest objects of leading type.
 	 * !Exploding memory consumption when more "abstract" objects are used which are close to many objects of leading type.
@@ -831,5 +836,34 @@ public class ProcessExecutions {
 		}
 		System.out.println("Contructed object graph with "+graph.vertexSet().size()+" vertices and "+graph.edgeSet().size()+" edges.");
 		return graph;
+	}
+	
+	private static void printProcessExecutionStatistics(int[] sizes) {
+
+		Arrays.sort(sizes); // sorts ascending
+		System.out.println("______________________________");
+		System.out.println("Process executions statistics:");
+		System.out.println("Number of process executions: "+sizes.length);
+		System.out.println("Maximum: "+sizes[sizes.length-1]+ " objects.");
+		if (sizes.length > 4) {
+			System.out.println("2nd largest: "+sizes[sizes.length-2]+ " objects.");
+			System.out.println("3rd largest: "+sizes[sizes.length-3]+ " objects.");
+		}
+		System.out.println("Third Quartile: "+sizes[(int) Math.floor(sizes.length * 0.75)] + " objects.");
+		System.out.println("Median: "+sizes[(int) Math.floor(sizes.length * 0.5)] + " objects.");
+		System.out.println("First Quartile: "+sizes[(int) Math.floor(sizes.length * 0.25)] + " objects.");
+//		double median;
+//		if (sizes.length %2 == 1) {
+//			median = sizes[(sizes.length-1)/2];
+//		}
+//		else {
+//			median = (sizes[(sizes.length)/2] + sizes[(sizes.length)/2-1]) / 2.0;
+//		}
+//		System.out.println("Median: "+median);
+		System.out.println("Minimum: "+sizes[0]+ " object.");
+		int sum = 0;
+		for (int d : sizes) sum += d;
+		System.out.println("Average: "+1.0d * sum / sizes.length);
+		System.out.println("______________________________");
 	}
 }
