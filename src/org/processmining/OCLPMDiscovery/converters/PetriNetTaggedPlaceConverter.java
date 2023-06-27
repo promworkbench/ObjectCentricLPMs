@@ -12,7 +12,6 @@ import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.placebasedlpmdiscovery.model.Place;
 import org.processmining.placebasedlpmdiscovery.model.Transition;
 import org.processmining.placebasedlpmdiscovery.placediscovery.converters.place.AbstractPlaceConverter;
-import org.processmining.placebasedlpmdiscovery.utils.PlaceUtils;
 import org.processmining.placebasedlpmdiscovery.utils.TransitionUtils;
 
 
@@ -71,7 +70,7 @@ public class PetriNetTaggedPlaceConverter extends AbstractPlaceConverter<Accepti
                     });
             discoveredPlaces.add(place);
         }
-        PlaceUtils.print(discoveredPlaces);
+//        PlaceUtils.print(discoveredPlaces);
         return discoveredPlaces;
     }
     
@@ -122,7 +121,7 @@ public class PetriNetTaggedPlaceConverter extends AbstractPlaceConverter<Accepti
                     });
             discoveredPlaces.add(place);
         }
-        PlaceUtils.print(discoveredPlaces);
+//        PlaceUtils.print(discoveredPlaces);
         return new Object[] {discoveredPlaces, map};
     }
     
@@ -174,7 +173,7 @@ public class PetriNetTaggedPlaceConverter extends AbstractPlaceConverter<Accepti
                     });
             discoveredPlaces.add(place);
         }
-        PlaceUtils.print(discoveredPlaces);
+//        PlaceUtils.print(discoveredPlaces);
         return discoveredPlaces;
     }
     
@@ -220,7 +219,7 @@ public class PetriNetTaggedPlaceConverter extends AbstractPlaceConverter<Accepti
             discoveredTaggedPlaces.add(place);
             discoveredPlaces.add(place);
         }
-        PlaceUtils.print(discoveredPlaces);
+//        PlaceUtils.print(discoveredPlaces);
         return discoveredTaggedPlaces;
     }
     

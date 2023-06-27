@@ -1,6 +1,5 @@
 package org.processmining.OCLPMDiscovery;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,7 +16,6 @@ import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
 import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.utils.FlatLogProcessing;
-import org.processmining.OCLPMDiscovery.utils.NullOutputStream;
 import org.processmining.OCLPMDiscovery.utils.OCELUtils;
 import org.processmining.OCLPMDiscovery.utils.ProcessExecutions;
 import org.processmining.OCLPMDiscovery.utils.ProvidingObjects;
@@ -185,7 +183,7 @@ public class Main {
 			Main.messageNormal("Starting flattening and place net discovery for type "+currentType+".");
 			// flatten ocel
 			XLog flatLog = Main.flattenOCEL(ocel, currentType);
-			System.out.println("Flattened ocel for type "+currentType);
+			Main.messageNormal("Flattened ocel for type "+currentType);
 			
 			// discover petri net using est-miner (use specpp)
 			// split petri net into place nets
@@ -195,7 +193,6 @@ public class Main {
 			Set<Place> placeNets = (Set<Place>) results[0];
 			assert(results[1] instanceof HashMap);
 			HashMap<String,String> newMap = (HashMap<String,String>) results[1];
-			System.out.println("Finished discovery of place nets for object type "+currentType);
 			Main.updateProgress("Finished discovery of place nets for object type "+currentType+".");
 
 			// unite place nets
@@ -247,6 +244,8 @@ public class Main {
 	 */
 	public static LPMResultsTagged discoverLPMs(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet) {
 
+		messageNormal("Obtained "+placeSet.size()+" place nets for LPM discovery.");
+		
 		LPMResultsTagged lpmsTagged = new LPMResultsTagged();
 		XLog log;
 		Object[] lpmResults;
@@ -525,10 +524,11 @@ public class Main {
 	}
 	
 	public static XLog flattenOCEL(OcelEventLog ocel, String newTypeLabel) {
-		PrintStream out = System.out;
-		System.setOut(new PrintStream(new NullOutputStream()));
+//		PrintStream out = System.out;
+//		System.setOut(new PrintStream(new NullOutputStream()));
 		XLog log = Flattening.flatten(ocel, newTypeLabel); // this pastes a lot of useless stuff in the console
-		System.setOut(out);
+//		System.setOut(out);
+		
 //		int numEventsBefore = ocel.getEvents().size();
 //		int numEventsAfter = log.size();
 //		System.out.println("Flattening log for the new type \""+newTypeLabel+"\" lead to an increase of events by a factor of "+(double) numEventsAfter/numEventsBefore+".");

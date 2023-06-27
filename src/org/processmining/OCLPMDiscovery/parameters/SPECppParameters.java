@@ -106,10 +106,19 @@ public class SPECppParameters {
 		double tau = this.tau;
 		boolean permitNegativeMarkingsDuringReplay = this.permitNegativeMarkingsDuringReplay;
 		
-		ExecutionParameters exp = new ExecutionParameters(
-				new ExecutionParameters.ExecutionTimeLimits(this.discoveryTimeLimit, null, this.totalTimeLimit), 
-				ExecutionParameters.ParallelizationTarget.Moderate, 
-				ExecutionParameters.PerformanceFocus.Balanced);
+		ExecutionParameters exp;
+		if (this.discoveryTimeLimit.getSeconds() < this.totalTimeLimit.getSeconds()) {
+			exp = new ExecutionParameters(
+					new ExecutionParameters.ExecutionTimeLimits(this.discoveryTimeLimit, this.totalTimeLimit.minus(this.discoveryTimeLimit), this.totalTimeLimit), 
+					ExecutionParameters.ParallelizationTarget.Moderate, 
+					ExecutionParameters.PerformanceFocus.Balanced);
+		}
+		else {
+			exp = new ExecutionParameters(
+					new ExecutionParameters.ExecutionTimeLimits(this.discoveryTimeLimit, null, this.totalTimeLimit), 
+					ExecutionParameters.ParallelizationTarget.Moderate, 
+					ExecutionParameters.PerformanceFocus.Balanced);
+		}
 		this.setExecutionParameters(exp);
 		
 //        PlaceGeneratorParameters pgp = new PlaceGeneratorParameters(pc.depth < 0 ? Integer.MAX_VALUE : pc.depth, true, pc.respectWiring, false, false);
@@ -122,8 +131,8 @@ public class SPECppParameters {
             	// combine default parameters with new parameters
                 currentAPC.registerAlgorithmParameters(globalComponentSystem());
                 
-                System.out.println("SPECpp registering total time limit: "+exp.getTimeLimits().getTotalTimeLimit().getSeconds()+" seconds.");
-                System.out.println("SPECpp registering discovery time limit: "+exp.getTimeLimits().getDiscoveryTimeLimit().getSeconds()+" seconds.");
+//                System.out.println("SPECpp registering total time limit: "+exp.getTimeLimits().getTotalTimeLimit().getSeconds()+" seconds.");
+//                System.out.println("SPECpp registering discovery time limit: "+exp.getTimeLimits().getDiscoveryTimeLimit().getSeconds()+" seconds.");
             	globalComponentSystem()
                 .provide(ParameterRequirements.EXECUTION_PARAMETERS.fulfilWithStatic(exp))
                 .provide(ParameterRequirements.TAU_FITNESS_THRESHOLDS.fulfilWithStatic(TauFitnessThresholds.tau(tau)))

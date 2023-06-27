@@ -76,8 +76,18 @@ public class OCLPMDiscoverySPECppStep extends OCLPMPropertiesPanel implements Pr
         if (!canApply(parameters, jComponent)) {
             return parameters;
         }
-        parameters.getSpecppParameters().setDiscoveryTimeLimit(this.stringToDuration(this.discoveryTimeLimitInput.getText()));
-        parameters.getSpecppParameters().setTotalTimeLimit(this.stringToDuration(this.totalTimeLimitInput.getText()));
+        if (this.totalTimeLimitInput.getCheckBox().isSelected()) {
+        	parameters.getSpecppParameters().setTotalTimeLimit(this.stringToDuration(this.totalTimeLimitInput.getText()));
+        }
+        else {
+        	parameters.getSpecppParameters().setTotalTimeLimit(Duration.ofDays(8));
+        }
+        if (this.discoveryTimeLimitInput.getCheckBox().isSelected()) {
+        	parameters.getSpecppParameters().setDiscoveryTimeLimit(this.stringToDuration(this.discoveryTimeLimitInput.getText()));
+        }
+        else {
+        	parameters.getSpecppParameters().setDiscoveryTimeLimit(Duration.ofDays(8));
+        }
         parameters.getSpecppParameters().setPermitNegativeMarkingsDuringReplay(this.permitNegativeMarkingsDuringReplayBox.isSelected());
         double tau = Double.parseDouble(this.tauTextField.getText());
         if (0 <= tau && tau <= 1)
