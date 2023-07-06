@@ -81,9 +81,6 @@ public class ColorMapPanel extends JPanel implements Scrollable {
         int[] yPoints = {arrowYPos, arrowYPos};
         g.drawPolyline(xPoints, yPoints, xPoints.length);
         // Arrowhead
-//        int[] xPoints2 = {apex, apex-10, apex, apex-10};
-//        int[] yPoints2 = {arrowYPos, arrowYPos-10, arrowYPos, arrowYPos+10};
-//        g.drawPolyline(xPoints2, yPoints2, xPoints2.length);
         int[] xTriangle = {apex-20, apex, apex-20};
         int[] yTriangle = {arrowYPos-10, arrowYPos, arrowYPos+10};
         g.fillPolygon(xTriangle, yTriangle, xTriangle.length);

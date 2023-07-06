@@ -8,7 +8,6 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.JToggleButton;
 import javax.swing.RowFilter;
 import javax.swing.RowSorter;
 import javax.swing.table.TableModel;
@@ -17,6 +16,7 @@ import javax.swing.table.TableRowSorter;
 import org.processmining.OCLPMDiscovery.gui.OCLPMColors;
 import org.processmining.OCLPMDiscovery.gui.OCLPMPanel;
 import org.processmining.OCLPMDiscovery.gui.OCLPMScrollPane;
+import org.processmining.OCLPMDiscovery.gui.OCLPMToggleButton;
 import org.processmining.OCLPMDiscovery.visualization.components.ComponentId;
 import org.processmining.OCLPMDiscovery.visualization.components.ICommunicativePanel;
 import org.processmining.OCLPMDiscovery.visualization.components.tables.factories.AbstractPluginVisualizerTableFactory;
@@ -73,9 +73,10 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         filterForm.setVisible(false);
 
         // make it expandable
-        JToggleButton expandBtn = new JToggleButton(); // create an expand/shrink button
+        OCLPMToggleButton expandBtn = new OCLPMToggleButton(this.theme); // create an expand/shrink button
         expandBtn.setText("Expand"); // in the beginning set the text to Expand
         expandBtn.setSelected(false); // and selected to false
+        expandBtn.setCornerRadius(0);
         // when the button state is selected the table is shown entirely and the text is Shrink,
         // and when is not selected only the first column is shown and the text is Expand
         expandBtn.addActionListener(actionEvent -> {

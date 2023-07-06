@@ -1,5 +1,6 @@
 package org.processmining.tests;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -16,12 +17,14 @@ import org.processmining.OCLPMDiscovery.gui.OCLPMColors;
 import org.processmining.OCLPMDiscovery.gui.OCLPMPanel;
 import org.processmining.OCLPMDiscovery.gui.OCLPMScrollPane;
 import org.processmining.OCLPMDiscovery.gui.OCLPMSplitPane;
+import org.processmining.OCLPMDiscovery.gui.OCLPMToggleButton;
 import org.processmining.OCLPMDiscovery.visualization.components.ColorMapPanel;
 
 public class TestColorMapPanel {
 	public static void main(String[] args) {
 		HashMap<String, Color> colorMap = new HashMap<>();
 		OCLPMColors colorTheme = OCLPMColors.getLightMode();
+		OCLPMColors theme = colorTheme;
 //		colorTheme = OCLPMColors.getDarkMode();
 		Boolean useLaF = false;
 		
@@ -68,6 +71,12 @@ public class TestColorMapPanel {
 //		colorMap.put("Green", Color.GREEN);
 //		colorMap.put("Blue", Color.BLUE);
 		ColorMapPanel colorMapPanel = new ColorMapPanel(colorMap, colorTheme);
+		
+		
+		// ToggleButton
+		OCLPMToggleButton expandBtn = new OCLPMToggleButton(theme); // create an expand/shrink button
+        expandBtn.setText("Expand"); // in the beginning set the text to Expand
+        expandBtn.setSelected(false); // and selected to false
 
 		// set the preferred dimension of the two containers
         int windowHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
@@ -91,6 +100,7 @@ public class TestColorMapPanel {
 		
 		OCLPMPanel panelRightBottom = new OCLPMPanel(colorTheme);
 		panelRightBottom.setPreferredSize(new Dimension(20 * windowWidth / 100, 80 * windowHeight / 100));
+		panelRightBottom.add(expandBtn, BorderLayout.PAGE_END);
 		
 		// Right split pane
 		OCLPMSplitPane splitPaneRight = new OCLPMSplitPane(JSplitPane.VERTICAL_SPLIT, colorTheme);
