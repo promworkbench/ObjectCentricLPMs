@@ -13,7 +13,6 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import org.jgraph.graph.BasicMarqueeHandler;
-import org.processmining.framework.util.ui.scalableview.ScalableViewPanel;
 import org.processmining.models.graphbased.directed.DirectedGraphEdge;
 import org.processmining.models.graphbased.directed.DirectedGraphElement;
 import org.processmining.models.graphbased.directed.DirectedGraphNode;
@@ -24,7 +23,7 @@ import org.processmining.models.jgraph.elements.ProMGraphEdge;
 /*
  * Altered version of the org.processmining.models.jgraph.visualization.ProMJGraphPanel
  */
-public class OCLPMGraphPanel extends ScalableViewPanel {
+public class OCLPMGraphPanel extends OCLPMScalableViewPanel {
 
 	/**
 	 * 
@@ -32,7 +31,7 @@ public class OCLPMGraphPanel extends ScalableViewPanel {
 	private static final long serialVersionUID = 8937461038820086748L;
 
 	public OCLPMGraphPanel(final ProMJGraph graph, OCLPMColors theme) {
-		super(graph);
+		super(graph, theme);
 
 		JLabel label = new JLabel("<html>&#8629;</html>");
 

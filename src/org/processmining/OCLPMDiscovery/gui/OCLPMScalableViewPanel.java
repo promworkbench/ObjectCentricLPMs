@@ -89,13 +89,17 @@ public class OCLPMScalableViewPanel extends JLayeredPane implements Cleanable, C
 
 	protected SlickerDecorator decorator;
 
+	public OCLPMScalableViewPanel(final ScalableComponent scalableComponent) {
+		this(scalableComponent, OCLPMColors.getLightMode());
+	}
+	
 	/**
 	 * Create a panel for visualizing the given view.
 	 * 
 	 * @param scalableComponent
 	 *            The given graph
 	 */
-	public OCLPMScalableViewPanel(final ScalableComponent scalableComponent) {
+	public OCLPMScalableViewPanel(final ScalableComponent scalableComponent, OCLPMColors theme) {
 		/*
 		 * We will not use a layout manager, instead we will set the bounds of
 		 * every panel.

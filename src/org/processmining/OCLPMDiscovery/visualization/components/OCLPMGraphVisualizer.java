@@ -7,15 +7,15 @@ import javax.swing.SwingConstants;
 
 import org.processmining.OCLPMDiscovery.gui.OCLPMColors;
 import org.processmining.OCLPMDiscovery.gui.OCLPMGraphPanel;
+import org.processmining.OCLPMDiscovery.gui.graphVisualizer.ExportInteractionPanel;
+import org.processmining.OCLPMDiscovery.gui.graphVisualizer.PIPInteractionPanel;
+import org.processmining.OCLPMDiscovery.gui.graphVisualizer.ZoomInteractionPanel;
 import org.processmining.framework.connections.Connection;
 import org.processmining.framework.connections.ConnectionCannotBeObtained;
 import org.processmining.framework.connections.ConnectionID;
 import org.processmining.framework.connections.ConnectionManager;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.util.ui.scalableview.ScalableViewPanel;
-import org.processmining.framework.util.ui.scalableview.interaction.ExportInteractionPanel;
-import org.processmining.framework.util.ui.scalableview.interaction.PIPInteractionPanel;
-import org.processmining.framework.util.ui.scalableview.interaction.ZoomInteractionPanel;
 import org.processmining.models.connections.GraphLayoutConnection;
 import org.processmining.models.graphbased.AttributeMap;
 import org.processmining.models.graphbased.ViewSpecificAttributeMap;
