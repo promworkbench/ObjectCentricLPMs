@@ -147,7 +147,7 @@ public class OCLPMGraphVisualizer {
 		OCLPMGraphPanel panel = new OCLPMGraphPanel(jgraph, theme);
 
 		panel.addViewInteractionPanel(new PIPInteractionPanel(panel), SwingConstants.NORTH);
-		panel.addViewInteractionPanel(new ZoomInteractionPanel(panel, ScalableViewPanel.MAX_ZOOM), SwingConstants.WEST);
+		panel.addViewInteractionPanel(new ZoomInteractionPanel(panel, ScalableViewPanel.MAX_ZOOM, theme), SwingConstants.WEST);
 		panel.addViewInteractionPanel(new ExportInteractionPanel(panel), SwingConstants.SOUTH);
 
 		layoutConnection.updated();

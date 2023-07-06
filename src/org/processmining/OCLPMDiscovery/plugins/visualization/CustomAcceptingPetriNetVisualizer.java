@@ -69,7 +69,6 @@ public class CustomAcceptingPetriNetVisualizer {
         	map.putViewSpecific(p, AttributeMap.FILLCOLOR, oclpmResult.getMapIdColor().get(p.getLabel()));
         }
         
-        // TODO change appearance of variable arcs
         String type, activity;
         for (PetrinetEdge arc : net.getNet().getEdges()) {
         	// stuff that works:
@@ -100,7 +99,7 @@ public class CustomAcceptingPetriNetVisualizer {
         }
         
         // change general color theme
-        OCLPMGraphPanel panel = OCLPMGraphVisualizer.instance().visualizeGraph(context, net.getNet(), map); 
+        OCLPMGraphPanel panel = OCLPMGraphVisualizer.instance().visualizeGraph(context, net.getNet(), map, theme); 
 //        panel.getComponent().setBackground(theme.BACKGROUND);
 
         return panel;

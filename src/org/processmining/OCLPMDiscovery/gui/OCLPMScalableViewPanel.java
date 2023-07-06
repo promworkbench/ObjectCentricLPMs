@@ -21,7 +21,6 @@ import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JViewport;
 import javax.swing.SwingConstants;
@@ -30,7 +29,6 @@ import javax.swing.event.ChangeListener;
 
 import org.processmining.framework.util.Cleanable;
 import org.processmining.framework.util.Pair;
-import org.processmining.framework.util.ui.scalableview.DashedBorder;
 import org.processmining.framework.util.ui.scalableview.ScalableComponent;
 import org.processmining.framework.util.ui.scalableview.ScalableComponent.UpdateListener;
 import org.processmining.framework.util.ui.scalableview.VerticalLabelUI;
@@ -70,7 +68,9 @@ public class OCLPMScalableViewPanel extends JLayeredPane implements Cleanable, C
 	/**
 	 * The scroll pane containing the primary view on the transition system.
 	 */
-	protected JScrollPane scroll;
+	protected OCLPMScrollPane scroll;
+	
+	public OCLPMColors theme = OCLPMColors.getLightMode();
 
 	private OCLPMViewInteractionPanel visiblePanel = null;
 	private Map<OCLPMViewInteractionPanel, Pair<JPanel, JPanel>> panels = new HashMap<OCLPMViewInteractionPanel, Pair<JPanel, JPanel>>();
@@ -100,6 +100,7 @@ public class OCLPMScalableViewPanel extends JLayeredPane implements Cleanable, C
 	 *            The given graph
 	 */
 	public OCLPMScalableViewPanel(final ScalableComponent scalableComponent, OCLPMColors theme) {
+		this.theme = theme;
 		/*
 		 * We will not use a layout manager, instead we will set the bounds of
 		 * every panel.
@@ -111,6 +112,7 @@ public class OCLPMScalableViewPanel extends JLayeredPane implements Cleanable, C
 		 */
 		this.scalable = scalableComponent;
 		component = scalableComponent.getComponent();
+		component.setBackground(theme.BACKGROUND);
 		/*
 		 * Get some Slickerbox stuff, required by the Look+Feel of some objects.
 		 */
@@ -121,15 +123,15 @@ public class OCLPMScalableViewPanel extends JLayeredPane implements Cleanable, C
 		 * Create the scroll panel containing the primary view, and register the
 		 * created adjustment and mouse listener.
 		 */
-		scroll = new JScrollPane(getComponent());
+		scroll = new OCLPMScrollPane(getComponent(), theme);
 		/*
 		 * Adjust Look+Feel of scrollbar to Slicker.
 		 */
-		decorator.decorate(scroll, Color.WHITE, Color.GRAY, Color.DARK_GRAY);
+//		decorator.decorate(scroll, Color.WHITE, Color.GRAY, Color.DARK_GRAY);
 		/*
 		 * Create a dashed border for the primary view.
 		 */
-		scroll.setBorder(new DashedBorder(Color.LIGHT_GRAY));
+//		scroll.setBorder(new DashedBorder(theme.ELEMENTS));
 
 		/*
 		 * Add primary view to the layered pane. The special panels are added to
@@ -208,9 +210,11 @@ public class OCLPMScalableViewPanel extends JLayeredPane implements Cleanable, C
 	public synchronized void addViewInteractionPanel(OCLPMViewInteractionPanel panel, int location) {
 		panel.setScalableComponent(scalable);
 		panel.setParent(this);
+		
+		panel.getComponent().setBackground(theme.BACKGROUND);
 
-		JPanel panelOn = factory.createRoundedPanel(15, Color.LIGHT_GRAY);
-		JPanel panelOff = factory.createRoundedPanel(15, Color.DARK_GRAY);
+		JPanel panelOn = factory.createRoundedPanel(15, theme.ELEMENTS);
+		JPanel panelOff = factory.createRoundedPanel(15, theme.ELEMENTS);
 		panelOn.setLayout(null);
 		panelOff.setLayout(null);
 
@@ -222,7 +226,7 @@ public class OCLPMScalableViewPanel extends JLayeredPane implements Cleanable, C
 		JLabel panelTitle = factory.createLabel(panel.getPanelName());
 		panelTitle.setHorizontalTextPosition(SwingConstants.CENTER);
 		panelTitle.setVerticalTextPosition(SwingConstants.CENTER);
-		panelTitle.setForeground(Color.WHITE);
+		panelTitle.setForeground(theme.TEXT);
 		panelTitle.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 16));
 		panelOff.add(panelTitle);
 

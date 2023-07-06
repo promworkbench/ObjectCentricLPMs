@@ -1,6 +1,5 @@
 package org.processmining.OCLPMDiscovery.gui.graphVisualizer;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,6 +13,7 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.processmining.OCLPMDiscovery.gui.OCLPMColors;
 import org.processmining.OCLPMDiscovery.gui.OCLPMScalableViewPanel;
 import org.processmining.OCLPMDiscovery.gui.OCLPMViewInteractionPanel;
 import org.processmining.framework.util.ui.scalableview.ScalableComponent;
@@ -35,10 +35,16 @@ public class ZoomInteractionPanel extends JPanel implements OCLPMViewInteraction
 	protected ScalableComponent scalable;
 	protected final OCLPMScalableViewPanel panel;
 	protected boolean recalculateFit = true;
+	
+	public OCLPMColors theme = OCLPMColors.getLightMode();
 
 	public ZoomInteractionPanel(OCLPMScalableViewPanel panel, int maximumZoom) {
-
+		this(panel, maximumZoom, OCLPMColors.getLightMode());
+	}
+	public ZoomInteractionPanel(OCLPMScalableViewPanel panel, int maximumZoom, OCLPMColors theme) {
 		super(null);
+		
+		this.theme = theme;
 		this.panel = panel;
 
 		this.slider = SlickerFactory.instance().createSlider(1);
@@ -73,11 +79,11 @@ public class ZoomInteractionPanel extends JPanel implements OCLPMViewInteraction
 		this.sliderMaxValue.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
 		this.sliderFitValue.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
 		this.sliderValue.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 14));
-
-		this.sliderMinValue.setForeground(Color.GRAY);
-		this.sliderMaxValue.setForeground(Color.GRAY);
-		this.sliderFitValue.setForeground(Color.GRAY);
-		this.sliderValue.setForeground(Color.DARK_GRAY);
+		
+		this.sliderMinValue.setForeground(theme.TEXT);
+		this.sliderMaxValue.setForeground(theme.TEXT);
+		this.sliderFitValue.setForeground(theme.FOCUS);
+		this.sliderValue.setForeground(theme.ACCENT);
 
 		this.add(this.slider);
 		this.add(this.sliderMinValue);
@@ -85,7 +91,7 @@ public class ZoomInteractionPanel extends JPanel implements OCLPMViewInteraction
 		this.add(this.sliderFitValue);
 		this.add(this.sliderValue);
 
-		this.setBackground(Color.LIGHT_GRAY);
+		this.setBackground(theme.ELEMENTS);
 	}
 
 	public void setSize(int width, int height) {
