@@ -60,9 +60,7 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         this.setLayout(new BorderLayout());
 
         // create the table
-        GenericTextDescribableTableComponent<T> table = this.tableFactory.getPluginVisualizerTable(this.result, controller);
-        //TODO make this work with OCLPM tables
-//        OCLPMTextDescribableTableComponent<T> table = this.tableFactory.getOCLPMPluginVisualizerTable(this.result, controller);
+        GenericTextDescribableTableComponent<T> table = this.tableFactory.getPluginVisualizerTable(this.result, controller, this.theme);
         OCLPMScrollPane scrollPane = new OCLPMScrollPane(table, theme); // add the table in a scroll pane
 
         // create the filter form

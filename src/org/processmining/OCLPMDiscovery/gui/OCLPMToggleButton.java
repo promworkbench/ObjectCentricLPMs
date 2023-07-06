@@ -57,8 +57,10 @@ public class OCLPMToggleButton extends JToggleButton{
         else {
 	        if (isSelected()) {
 	            g2.setColor(this.theme.FOCUS);
+	            this.setForeground(this.theme.TEXT_INVERS);
 	        } else {
 	            g2.setColor(this.theme.NON_FOCUS);
+	            this.setForeground(this.theme.TEXT);
 	        }
         }
 

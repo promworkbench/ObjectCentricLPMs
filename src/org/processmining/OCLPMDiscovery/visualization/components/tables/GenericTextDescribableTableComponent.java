@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.swing.JTable;
 import javax.swing.table.JTableHeader;
 
+import org.processmining.OCLPMDiscovery.gui.OCLPMColors;
 import org.processmining.placebasedlpmdiscovery.model.TextDescribable;
 
 public class GenericTextDescribableTableComponent<T extends TextDescribable> extends JTable {
@@ -19,6 +20,17 @@ public class GenericTextDescribableTableComponent<T extends TextDescribable> ext
 
     public Map<Integer, T> getIndexMap() {
         return indexMap;
+    }
+    
+    public GenericTextDescribableTableComponent(Map<Integer, T> indexMap, OCLPMColors theme) {
+        this.indexMap = indexMap;
+        this.setBackground(theme.BACKGROUND);
+        this.setForeground(theme.TEXT);
+        this.setGridColor(theme.ELEMENTS);
+        this.setSelectionBackground(theme.FOCUS);
+        this.setSelectionForeground(theme.TEXT_INVERS);
+        this.getTableHeader().setBackground(theme.ELEMENTS);
+        this.getTableHeader().setForeground(theme.TEXT);
     }
 
     @Override
