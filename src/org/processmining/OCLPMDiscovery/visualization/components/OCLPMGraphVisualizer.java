@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.swing.SwingConstants;
 
+import org.processmining.OCLPMDiscovery.gui.OCLPMColors;
 import org.processmining.OCLPMDiscovery.gui.OCLPMGraphPanel;
 import org.processmining.framework.connections.Connection;
 import org.processmining.framework.connections.ConnectionCannotBeObtained;
@@ -77,12 +78,21 @@ public class OCLPMGraphVisualizer {
 		return visualizeGraph(findConnection(context, graph), context, graph, new ViewSpecificAttributeMap());
 	}
 
+	public OCLPMGraphPanel visualizeGraph(PluginContext context, DirectedGraph<?, ?> graph, ViewSpecificAttributeMap map, OCLPMColors theme) {
+		return visualizeGraph(findConnection(context, graph), context, graph, map, theme);
+	}
+	
 	public OCLPMGraphPanel visualizeGraph(PluginContext context, DirectedGraph<?, ?> graph, ViewSpecificAttributeMap map) {
 		return visualizeGraph(findConnection(context, graph), context, graph, map);
 	}
 
 	private OCLPMGraphPanel visualizeGraph(GraphLayoutConnection layoutConnection, PluginContext context,
 			DirectedGraph<?, ?> graph, ViewSpecificAttributeMap map) {
+		return visualizeGraph(layoutConnection, context, graph, map, OCLPMColors.getLightMode());
+	}
+	
+	private OCLPMGraphPanel visualizeGraph(GraphLayoutConnection layoutConnection, PluginContext context,
+			DirectedGraph<?, ?> graph, ViewSpecificAttributeMap map, OCLPMColors theme) {
 		boolean newConnection = false;
 		if (layoutConnection == null) {
 			layoutConnection = createLayoutConnection(graph);
@@ -134,7 +144,7 @@ public class OCLPMGraphVisualizer {
 
 		jgraph.setUpdateLayout(layout);
 
-		OCLPMGraphPanel panel = new OCLPMGraphPanel(jgraph);
+		OCLPMGraphPanel panel = new OCLPMGraphPanel(jgraph, theme);
 
 		panel.addViewInteractionPanel(new PIPInteractionPanel(panel), SwingConstants.NORTH);
 		panel.addViewInteractionPanel(new ZoomInteractionPanel(panel, ScalableViewPanel.MAX_ZOOM), SwingConstants.WEST);

@@ -31,7 +31,7 @@ public class OCLPMGraphPanel extends ScalableViewPanel {
 	 */
 	private static final long serialVersionUID = 8937461038820086748L;
 
-	public OCLPMGraphPanel(final ProMJGraph graph) {
+	public OCLPMGraphPanel(final ProMJGraph graph, OCLPMColors theme) {
 		super(graph);
 
 		JLabel label = new JLabel("<html>&#8629;</html>");
@@ -43,6 +43,10 @@ public class OCLPMGraphPanel extends ScalableViewPanel {
 				updated();
 			}
 		}, SwingConstants.NORTH_WEST);
+	}
+	
+	public OCLPMGraphPanel(final ProMJGraph graph) {
+		this(graph, OCLPMColors.getLightMode());
 	}
 
 	@Override
