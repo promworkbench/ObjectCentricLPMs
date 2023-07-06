@@ -1,10 +1,12 @@
 package org.processmining.OCLPMDiscovery.visualization.components;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +30,7 @@ public class ColorMapPanel extends JPanel implements Scrollable {
 
     public ColorMapPanel(HashMap<String, Color> colorMap) {
         this.colorMap = colorMap;
-        setPreferredSize(new Dimension(200, (colorMap.size()+1) * cellHeight)); // +1 for the legend
+        setPreferredSize(new Dimension(200, (colorMap.size()+2) * cellHeight)); // +1 for the legend, +1 for variable arc
         this.setBackground(this.theme.BACKGROUND);
         this.setForeground(this.theme.BACKGROUND);
         for (Component component : this.getComponents()) {
@@ -54,7 +56,7 @@ public class ColorMapPanel extends JPanel implements Scrollable {
         // paint title
         g.setColor(theme.TEXT);
         g.setFont(fontBold);
-        g.drawString("Place Object Type Legend", rowSeparation*2+textDistance, (i + 1) * cellHeight - 10);
+        g.drawString("Legend", rowSeparation*2+textDistance, (i + 1) * cellHeight - 10);
         g.setFont(font);
         i++;
         // paint entries
@@ -68,6 +70,26 @@ public class ColorMapPanel extends JPanel implements Scrollable {
             g.setColor(Color.BLACK);
             i++;
         }
+        // paint variable arc
+        g.setColor(Color.GRAY);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setStroke(new BasicStroke(4, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
+        int arrowYPos = (i*cellHeight)+rowSeparation+cellHeight/2;
+        int apex = rowSeparation + diameter + 10;
+        // Arrowshaft
+        int[] xPoints = {rowSeparation, apex-5};
+        int[] yPoints = {arrowYPos, arrowYPos};
+        g.drawPolyline(xPoints, yPoints, xPoints.length);
+        // Arrowhead
+//        int[] xPoints2 = {apex, apex-10, apex, apex-10};
+//        int[] yPoints2 = {arrowYPos, arrowYPos-10, arrowYPos, arrowYPos+10};
+//        g.drawPolyline(xPoints2, yPoints2, xPoints2.length);
+        int[] xTriangle = {apex-20, apex, apex-20};
+        int[] yTriangle = {arrowYPos-10, arrowYPos, arrowYPos+10};
+        g.fillPolygon(xTriangle, yTriangle, xTriangle.length);
+        // ArrowText
+        g.setColor(theme.TEXT);
+        g.drawString("Variable Arc", apex+textDistance, (i + 1) * cellHeight - 10);
     }
 
     // Scrollable implementation
