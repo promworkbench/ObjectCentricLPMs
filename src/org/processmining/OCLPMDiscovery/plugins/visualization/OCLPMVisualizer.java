@@ -44,7 +44,7 @@ public class OCLPMVisualizer {
         int windowWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
         
         // Petri Net on the left
-        OCLPMScrollPane petriNetPane = new OCLPMScrollPane((new CustomAcceptingPetriNetVisualizer()).visualize(context, net, oclpmResult), theme);
+        OCLPMScrollPane petriNetPane = new OCLPMScrollPane((new CustomAcceptingPetriNetVisualizer()).visualize(context, net, oclpmResult, theme), theme);
 //        component.add((new CustomAcceptingPetriNetVisualizer()).visualize(context, net, oclpmResult));
         
         // Color Legend

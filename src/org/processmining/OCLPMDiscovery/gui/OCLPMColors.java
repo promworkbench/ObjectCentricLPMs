@@ -5,7 +5,7 @@ import java.awt.Color;
 import org.processmining.framework.util.ui.widgets.WidgetColors;
 
 public class OCLPMColors {
-	// colors originally used by ProM widgets
+	// colors originally used by ProM widgets (i hope)
 	public Color BACKGROUND = WidgetColors.COLOR_ENCLOSURE_BG;
 	public Color ELEMENTS = WidgetColors.COLOR_LIST_BG; // idk if this was the correct one
 	// Textcolor should be readable on BACKGROUND and ELEMENTS
@@ -16,6 +16,19 @@ public class OCLPMColors {
 	public Color TEXT_INVERS = Color.WHITE;
 	public Color NON_FOCUS = WidgetColors.COLOR_NON_FOCUS;
 	public Color ACCENT = Color.RED;
+	
+	// Guide
+	// ELEMENTS:
+		// should be only a little different (darker/lighter) than the background
+		// The text should be easily legible on both elements and background
+		// Used for elements like buttons, scrollbars and some borders
+	// FOCUS:
+		// Significantly different from the ELEMENTS color
+		// Used for selected table entries, pressed buttons, focussed scrollbars
+	// TEXT:
+		// Should be legible on BACKGROUND and ELEMENTS colors
+	// TEXT_INVERS:
+		// Should be legible on FOCUS color
 	
 	/**
 	 * colors originally used by ProM widgets
@@ -31,6 +44,7 @@ public class OCLPMColors {
 		colors.TEXT_INVERS = Color.WHITE;
 		colors.NON_FOCUS = new Color(200, 200, 200);
 		colors.FOCUS =  new Color(90, 90, 90);
+		colors.ACCENT = Color.RED;
 		return colors;
 	}
 	
@@ -42,6 +56,42 @@ public class OCLPMColors {
 		colors.TEXT_INVERS = Color.BLACK;
 		colors.NON_FOCUS = new Color(110, 110, 110);
 		colors.FOCUS = new Color(160, 160, 160);
+		colors.ACCENT = Color.ORANGE;
+		return colors;
+	}
+	
+	/*
+	 * Just to know which color does what.
+	 */
+	public static OCLPMColors getClownMode() {
+		OCLPMColors colors = new OCLPMColors();
+		colors.BACKGROUND = Color.RED;
+		colors.ELEMENTS = Color.GREEN;
+		colors.TEXT = Color.BLUE;
+		colors.TEXT_INVERS = Color.YELLOW;
+		colors.NON_FOCUS = Color.PINK;
+		colors.FOCUS = Color.CYAN;
+		colors.ACCENT = Color.ORANGE;
+		return colors;
+	}
+	
+	public static OCLPMColors getCustomMode(
+			Color background,
+			Color elements,
+			Color text,
+			Color text_invers,
+			Color focus,
+			Color non_focus,
+			Color accent
+			) {
+		OCLPMColors colors = new OCLPMColors();
+		colors.BACKGROUND = Color.RED;
+		colors.ELEMENTS = Color.GREEN;
+		colors.TEXT = Color.BLUE;
+		colors.TEXT_INVERS = Color.YELLOW;
+		colors.FOCUS = Color.CYAN;
+		colors.NON_FOCUS = Color.PINK;
+		colors.ACCENT = Color.ORANGE;
 		return colors;
 	}
 	

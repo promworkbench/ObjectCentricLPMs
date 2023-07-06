@@ -5,7 +5,10 @@ import java.util.Arrays;
 
 import javax.swing.JComponent;
 
+import org.processmining.OCLPMDiscovery.gui.OCLPMColors;
+import org.processmining.OCLPMDiscovery.gui.OCLPMGraphPanel;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
+import org.processmining.OCLPMDiscovery.visualization.components.OCLPMGraphVisualizer;
 import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.contexts.uitopia.annotations.Visualizer;
 import org.processmining.framework.plugin.PluginContext;
@@ -16,7 +19,6 @@ import org.processmining.models.graphbased.ViewSpecificAttributeMap;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetEdge;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
-import org.processmining.models.jgraph.ProMJGraphVisualizer;
 import org.processmining.models.semantics.petrinet.Marking;
 
 public class CustomAcceptingPetriNetVisualizer {
@@ -29,7 +31,12 @@ public class CustomAcceptingPetriNetVisualizer {
     @Visualizer
     @PluginVariant(requiredParameterLabels = {0})
     public JComponent visualize(PluginContext context, AcceptingPetriNet net, OCLPMResult oclpmResult) {
-        ViewSpecificAttributeMap map = new ViewSpecificAttributeMap();
+    	return this.visualize(context, net, oclpmResult, OCLPMColors.getLightMode());
+    }
+    
+    public JComponent visualize(PluginContext context, AcceptingPetriNet net, OCLPMResult oclpmResult, OCLPMColors theme) {
+        ViewSpecificAttributeMap map = new ViewSpecificAttributeMap();        
+        
         for (Place place : net.getInitialMarking().baseSet()) {
             map.putViewSpecific(place, AttributeMap.FILLCOLOR, new Color(127, 0, 0));
         }
@@ -91,7 +98,11 @@ public class CustomAcceptingPetriNetVisualizer {
         		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, Color.GRAY);
         	}
         }
+        
+        // change general color theme
+        OCLPMGraphPanel panel = OCLPMGraphVisualizer.instance().visualizeGraph(context, net.getNet(), map); 
+//        panel.getComponent().setBackground(theme.BACKGROUND);
 
-        return ProMJGraphVisualizer.instance().visualizeGraph(context, net.getNet(), map);
+        return panel;
     }
 }

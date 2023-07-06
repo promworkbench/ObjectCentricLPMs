@@ -28,7 +28,8 @@ public class OCLPMResultVisualizer {
         
         result.refreshColors();
         
-        OCLPMColors theme = OCLPMColors.getLightMode();
+        OCLPMColors theme = OCLPMColors.getClownMode();
+//        OCLPMColors theme = OCLPMColors.getLightMode();
         
         OCLPMResultPluginVisualizerTableFactory factory = new OCLPMResultPluginVisualizerTableFactory();
         SimpleCollectionOfElementsComponent scoec = new SimpleCollectionOfElementsComponent<>(context, result, factory, theme);
