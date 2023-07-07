@@ -7,11 +7,10 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import org.freehep.graphicsbase.util.export.ExportDialog;
+import org.processmining.OCLPMDiscovery.gui.OCLPMButton;
 import org.processmining.OCLPMDiscovery.gui.OCLPMScalableViewPanel;
 import org.processmining.OCLPMDiscovery.gui.OCLPMViewInteractionPanel;
 import org.processmining.framework.util.ui.scalableview.ScalableComponent;
-
-import com.fluxicon.slickerbox.components.SlickerButton;
 
 import info.clearthought.layout.TableLayout;
 import info.clearthought.layout.TableLayoutConstants;
@@ -24,13 +23,14 @@ public class ExportInteractionPanel extends JPanel implements OCLPMViewInteracti
 	private static final long serialVersionUID = 1036741994786060955L;
 	protected final OCLPMScalableViewPanel panel;
 	private ScalableComponent scalable;
-	private SlickerButton exportButton;
+	private OCLPMButton exportButton;
 
 	public ExportInteractionPanel(OCLPMScalableViewPanel panel) {
 		this.panel = panel;
 		double size[][] = { { 10, TableLayoutConstants.FILL, 10 }, { 10, TableLayoutConstants.FILL, 10 } };
 		setLayout(new TableLayout(size));
-		exportButton = new SlickerButton("Export view...");
+//		exportButton = new SlickerButton("Export view...");
+		exportButton = new OCLPMButton("Export view...");
 		exportButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				export();

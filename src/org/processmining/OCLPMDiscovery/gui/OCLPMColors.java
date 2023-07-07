@@ -8,28 +8,28 @@ public class OCLPMColors {
 	// colors originally used by ProM widgets (i hope)
 	public Color BACKGROUND = WidgetColors.COLOR_ENCLOSURE_BG;
 	public Color ELEMENTS = WidgetColors.COLOR_LIST_BG; // idk if this was the correct one
-	// Textcolor should be readable on BACKGROUND and ELEMENTS
-	public Color TEXT = WidgetColors.TEXT_COLOR;
-	// Focus color should be very different from ELEMENTS, text is not well readable on the focus color 
+	public Color TEXT = WidgetColors.TEXT_COLOR; 
 	public Color FOCUS = new Color(160, 160, 160);
-	// Textcolor that is readable on focused elements
 	public Color TEXT_INVERS = Color.WHITE;
 	public Color NON_FOCUS = WidgetColors.COLOR_NON_FOCUS;
 	public Color ACCENT = Color.RED;
 	
 	// Guide
+	// BACKGROUND:
+		// main color
 	// ELEMENTS:
 		// should be only a little different (darker/lighter) than the background
 		// The text should be easily legible on both elements and background
 		// Used for elements like buttons, scrollbars and some borders
 	// FOCUS:
 		// Significantly different from the ELEMENTS color
-		// Used for selected table entries, pressed buttons, focussed scrollbars
+		// Used e.g. for selected table entries, pressed buttons
 	// TEXT:
 		// Should be legible on BACKGROUND and ELEMENTS colors
 	// TEXT_INVERS:
 		// Should be legible on FOCUS color
-	
+	// ACCENT
+		// Color splash, used e.g., when hovering over scrollbar or button
 	/**
 	 * colors originally used by ProM widgets
 	 */
@@ -44,7 +44,7 @@ public class OCLPMColors {
 		colors.TEXT_INVERS = Color.WHITE;
 		colors.NON_FOCUS = new Color(200, 200, 200);
 		colors.FOCUS =  new Color(90, 90, 90);
-		colors.ACCENT = Color.RED;
+		colors.ACCENT = new Color(189, 8, 47); // bit darker red with pink tint
 		return colors;
 	}
 	

@@ -71,7 +71,7 @@ public class ColorMapPanel extends JPanel implements Scrollable {
             i++;
         }
         // paint variable arc
-        g.setColor(Color.GRAY);
+        g.setColor(theme.ELEMENTS);
         Graphics2D g2d = (Graphics2D) g;
         g2d.setStroke(new BasicStroke(4, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
         int arrowYPos = (i*cellHeight)+rowSeparation+cellHeight/2;

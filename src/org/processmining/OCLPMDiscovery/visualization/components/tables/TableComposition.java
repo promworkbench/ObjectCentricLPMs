@@ -119,6 +119,9 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
 
         final JTextField tf = new JTextField(50);
         tf.setToolTipText("Available operators are: 'and', 'or' and '{}'. It doesn't support nested parenthesis.");
+        
+        tf.setBackground(this.theme.BACKGROUND);
+        tf.setForeground(this.theme.TEXT);
 
         tf.addActionListener(actionEvent -> {
             String text = tf.getText();

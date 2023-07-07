@@ -37,6 +37,7 @@ public class CustomAcceptingPetriNetVisualizer {
     public JComponent visualize(PluginContext context, AcceptingPetriNet net, OCLPMResult oclpmResult, OCLPMColors theme) {
         ViewSpecificAttributeMap map = new ViewSpecificAttributeMap();        
         
+        //! this Marking-Color part doesn't work because the place color is changed again below to fit the theme
         for (Place place : net.getInitialMarking().baseSet()) {
             map.putViewSpecific(place, AttributeMap.FILLCOLOR, new Color(127, 0, 0));
         }
@@ -54,6 +55,9 @@ public class CustomAcceptingPetriNetVisualizer {
                 // map.putViewSpecific(t, AttributeMap.LABEL, lpm.getTransitions().get(t.getLabel()).getLabel());
                 map.putViewSpecific(t, AttributeMap.LABEL, t.getLabel());
             }
+            map.putViewSpecific(t, AttributeMap.STROKECOLOR, theme.TEXT); // color of border
+            map.putViewSpecific(t, AttributeMap.LABELCOLOR, theme.TEXT); // doesn't do anything
+            // TODO change text color to theme.TEXT
         }
         
         // color places based on object type
@@ -67,6 +71,7 @@ public class CustomAcceptingPetriNetVisualizer {
         	// This would all be simpler if I could just change the id of a place to any String!
         	// ah I changed it back again
         	map.putViewSpecific(p, AttributeMap.FILLCOLOR, oclpmResult.getMapIdColor().get(p.getLabel()));
+        	map.putViewSpecific(p, AttributeMap.STROKECOLOR, theme.TEXT);
         }
         
         String type, activity;
@@ -83,6 +88,7 @@ public class CustomAcceptingPetriNetVisualizer {
 //        	map.putViewSpecific(arc, AttributeMap.SHAPE, ArrowType.ARROWTYPE_DOUBLELINE);
 //        	map.putViewSpecific(arc, AttributeMap.EDGEMIDDLE, ArrowType.ARROWTYPE_DOUBLELINE);
 //        	map.putViewSpecific(arc, AttributeMap.STROKECOLOR, Color.BLUE);
+//        	map.putViewSpecific(arc, AttributeMap.LABELALONGEDGE, "variable arc");
         	
         	if (arc.getSource() instanceof Transition) {
         		activity = ((Transition)(arc.getSource())).getLabel();
@@ -94,7 +100,11 @@ public class CustomAcceptingPetriNetVisualizer {
         	}
         	if (	oclpmResult.getVariableArcSet().contains(Arrays.asList(activity,type))) {
         		map.putViewSpecific(arc, AttributeMap.LINEWIDTH, 2f);
-        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, Color.GRAY);
+//        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, Color.GRAY);
+        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, theme.ELEMENTS); // color of variable arcs
+        	}
+        	else {
+        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, theme.TEXT); // color of other arcs
         	}
         }
         

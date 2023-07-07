@@ -49,13 +49,13 @@ public class OCLPMScrollPane extends JScrollPane {
 		setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		JScrollBar vBar = getVerticalScrollBar();
-		vBar.setUI(new SlickerScrollBarUI(vBar, new Color(0, 0, 0, 0), colors.FOCUS,
-				colors.NON_FOCUS, 4, 12));
+		vBar.setUI(new SlickerScrollBarUI(vBar, new Color(0, 0, 0, 0), colors.ACCENT,
+				colors.ELEMENTS, 4, 12));
 		vBar.setOpaque(true);
 		vBar.setBackground(colors.BACKGROUND);
 		vBar = getHorizontalScrollBar();
-		vBar.setUI(new SlickerScrollBarUI(vBar, new Color(0, 0, 0, 0), colors.FOCUS,
-				colors.NON_FOCUS, 4, 12));
+		vBar.setUI(new SlickerScrollBarUI(vBar, new Color(0, 0, 0, 0), colors.ACCENT,
+				colors.ELEMENTS, 4, 12));
 		vBar.setOpaque(true);
 		vBar.setBackground(colors.BACKGROUND);
 		this.getViewport().setBackground(colors.BACKGROUND);

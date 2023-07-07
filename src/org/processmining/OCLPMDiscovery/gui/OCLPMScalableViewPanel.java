@@ -1,6 +1,5 @@
 package org.processmining.OCLPMDiscovery.gui;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Point;
@@ -113,6 +112,7 @@ public class OCLPMScalableViewPanel extends JLayeredPane implements Cleanable, C
 		this.scalable = scalableComponent;
 		component = scalableComponent.getComponent();
 		component.setBackground(theme.BACKGROUND);
+		component.setForeground(theme.TEXT);
 		/*
 		 * Get some Slickerbox stuff, required by the Look+Feel of some objects.
 		 */
@@ -426,13 +426,15 @@ public class OCLPMScalableViewPanel extends JLayeredPane implements Cleanable, C
 	 * @param location
 	 */
 	public void addButton(JLabel label, ActionListener listener, int location) {
-		JButton button = factory.createButton("");
+//		JButton button = factory.createButton("");
+		JButton button = new OCLPMButton("",this.theme);
+				
 		label.setHorizontalTextPosition(SwingConstants.CENTER);
 		label.setVerticalTextPosition(SwingConstants.CENTER);
 		label.setHorizontalAlignment(SwingConstants.CENTER);
 		label.setVerticalAlignment(SwingConstants.CENTER);
 		label.setFont(new java.awt.Font("Dialog", java.awt.Font.BOLD, 18));
-		label.setForeground(Color.WHITE);
+		label.setForeground(this.theme.TEXT);
 		label.setBorder(BorderFactory.createEmptyBorder());
 		label.setOpaque(false);
 
