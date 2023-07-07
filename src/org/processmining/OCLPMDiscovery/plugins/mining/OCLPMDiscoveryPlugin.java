@@ -2,7 +2,6 @@ package org.processmining.OCLPMDiscovery.plugins.mining;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
@@ -86,14 +85,11 @@ public class OCLPMDiscoveryPlugin {
 	)
 	@PluginVariant(
 			variantLabel = "Object-Centric Local Process Model Discovery",
-			requiredParameterLabels = {0,1,2}
+			requiredParameterLabels = {0,1}
 	)
-	public static OCLPMResult mineOCLPMs(UIPluginContext context, OcelEventLog ocel, PlaceSet placeSet, HashMap<String,String> typeMap) {
+	public static OCLPMResult mineOCLPMs(UIPluginContext context, OcelEventLog ocel, PlaceSet placeSet) {
 		
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
-		
-		// just for printing settings...
-		parameters.setObjectTypesPlaceNets(new HashSet<String>(typeMap.values()));
 
 		OCLPMDiscoveryWizard wizard = OCLPMDiscoveryWizard.setUp(parameters, false, true);
 		
@@ -104,7 +100,7 @@ public class OCLPMDiscoveryPlugin {
 			return null;		
 		
 		Main.setUp(context, parameters, false, true);
-		Object[] result = Main.run(ocel, parameters, placeSet, typeMap);
+		Object[] result = Main.run(ocel, parameters, placeSet);
 		return (OCLPMResult) result[0];
 	}
 	
@@ -117,17 +113,13 @@ public class OCLPMDiscoveryPlugin {
 		)
 		@PluginVariant(
 				variantLabel = "Object-Centric Local Process Model Discovery",
-				requiredParameterLabels = {0,1,2,5}
+				requiredParameterLabels = {0,1,5}
 		)
 		public static OCLPMResult mineOCLPMs (
-				UIPluginContext context, OcelEventLog ocel, PlaceSet placeSet, 
-				HashMap<String,String> typeMap, Graph<String,DefaultEdge> graph
+				UIPluginContext context, OcelEventLog ocel, PlaceSet placeSet, Graph<String,DefaultEdge> graph
 				) {
 			
 			OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
-			
-			// just for printing settings...
-			parameters.setObjectTypesPlaceNets(new HashSet<String>(typeMap.values()));
 
 			OCLPMDiscoveryWizard wizard = OCLPMDiscoveryWizard.setUp(parameters, false, true);
 			
@@ -139,7 +131,7 @@ public class OCLPMDiscoveryPlugin {
 			
 			Main.setUp(context, parameters, false, true);
 			Main.setGraph(graph);
-			Object[] result = Main.run(ocel, parameters, placeSet, typeMap);
+			Object[] result = Main.run(ocel, parameters, placeSet);
 			return (OCLPMResult) result[0];
 		}
 	
@@ -170,17 +162,13 @@ public class OCLPMDiscoveryPlugin {
 	)
 	@PluginVariant(
 			variantLabel = "Object-Centric Local Process Model Discovery given place set, hashmap, object graph and OCEL with desired case notions.",
-			requiredParameterLabels = {0,1,2,5,6}
+			requiredParameterLabels = {0,1,5,6}
 	)
 	public static OCLPMResult mineOCLPMs (
-			UIPluginContext context, OcelEventLog ocel, ArrayList<String> labels, PlaceSet placeSet, 
-			HashMap<String,String> typeMap, Graph<String,DefaultEdge> graph
+			UIPluginContext context, OcelEventLog ocel, ArrayList<String> labels, PlaceSet placeSet, Graph<String,DefaultEdge> graph
 			) {
 		
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
-		
-		// just for printing settings...
-		parameters.setObjectTypesPlaceNets(new HashSet<String>(typeMap.values()));
 
 		//TODO adjust for this case where new case notion already given
 		OCLPMDiscoveryWizard wizard = OCLPMDiscoveryWizard.setUp(parameters, false, true);
@@ -193,7 +181,7 @@ public class OCLPMDiscoveryPlugin {
 		
 		Main.setUp(context, parameters, false, true);
 		Main.setGraph(graph);
-		Object[] result = Main.run(ocel, parameters, placeSet, typeMap, labels);
+		Object[] result = Main.run(ocel, parameters, placeSet, labels);
 		return (OCLPMResult) result[0];
 	}
 	
@@ -205,8 +193,8 @@ public class OCLPMDiscoveryPlugin {
 		return (OCLPMResult) result[0];
 	}
 	
-	public static OCLPMResult mineOCLPMs(OCLPMDiscoveryParameters parameters, OcelEventLog ocel, PlaceSet placeSet, HashMap<String,String> typeMap) {
-		Object[] result = Main.run(ocel, parameters, placeSet, typeMap);
+	public static OCLPMResult mineOCLPMs(OCLPMDiscoveryParameters parameters, OcelEventLog ocel, PlaceSet placeSet) {
+		Object[] result = Main.run(ocel, parameters, placeSet);
 		return (OCLPMResult) result[0];
 	}
 }

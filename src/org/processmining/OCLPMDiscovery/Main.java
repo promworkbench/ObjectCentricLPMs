@@ -13,6 +13,7 @@ import org.jgrapht.graph.DefaultEdge;
 import org.processmining.OCLPMDiscovery.model.LPMResultsTagged;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
+import org.processmining.OCLPMDiscovery.model.TaggedPlace;
 import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.utils.FlatLogProcessing;
@@ -53,21 +54,18 @@ public class Main {
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
 		
 		// place discovery
-		Object[] results = discoverPlaceSet(ocel,parameters);
-		PlaceSet placeSet = (PlaceSet) results[0];
+		PlaceSet placeSet = discoverPlaceSet(ocel,parameters);
 		ProvidingObjects.exportPlaceSet(placeSet);
-		HashMap<String,String> typeMap = (HashMap<String,String>) results[1];
-		ProvidingObjects.exportHashMap(typeMap);
 		
 		// LPM discovery
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
 		ProvidingObjects.exportTlpms(tlpms);
 		
 		// OCLPM conversion
-		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
 		
 		Main.printExecutionTime();
-        return new Object[] {oclpmResult, tlpms, placeSet, typeMap};
+        return new Object[] {oclpmResult, tlpms, placeSet};
     }
 	
 	/**
@@ -76,11 +74,11 @@ public class Main {
 	 * @param parameters
 	 * @return {oclpmResult, tlpms}
 	 */
-	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet, HashMap<String,String> typeMap) {
+	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet) {
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
 		ProvidingObjects.exportTlpms(tlpms);
 		
-		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
 
 		Main.printExecutionTime();
         return new Object[] {oclpmResult, tlpms};
@@ -92,11 +90,11 @@ public class Main {
 	 * @param parameters
 	 * @return {oclpmResult, tlpms}
 	 */
-	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet, HashMap<String,String> typeMap, ArrayList<String> labels) {
+	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet, ArrayList<String> labels) {
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet, labels);
 		ProvidingObjects.exportTlpms(tlpms);
 		
-		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
 
 		Main.printExecutionTime();
         return new Object[] {oclpmResult, tlpms};
@@ -108,9 +106,9 @@ public class Main {
 	 * @param parameters
 	 * @return {oclpmResult}
 	 */
-	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, HashMap<String,String> typeMap, LPMResultsTagged tlpms) {
+	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, LPMResultsTagged tlpms) {
         		
-		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
 
 		Main.printExecutionTime();
         return new Object[] {oclpmResult};
@@ -125,7 +123,7 @@ public class Main {
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, HashMap<String,String> typeMap, LPMResult lpms) {
         LPMResultsTagged tlpms = new LPMResultsTagged(lpms,"Single Case Notion");
         ProvidingObjects.exportTlpms(tlpms);
-		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
 
 		Main.printExecutionTime();
         return new Object[] {oclpmResult, tlpms};
@@ -139,10 +137,8 @@ public class Main {
 	 */
 	public static LPMResultsTagged runLPMDiscovery(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
         
-		Object[] result = discoverPlaceSet(ocel,parameters);
-		PlaceSet placeSet = (PlaceSet) result[0];
+		PlaceSet placeSet = discoverPlaceSet(ocel,parameters);
 		ProvidingObjects.exportPlaceSet(placeSet);
-		ProvidingObjects.exportHashMap((HashMap<String,String>) result[1]);
 		
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
 
@@ -172,9 +168,9 @@ public class Main {
 	 * Returns a PlaceSet and a map which maps each Place.id to the ObjectType of the flat log on which it has been discovered
 	 * @param ocel
 	 * @param parameters
-	 * @return {PlaceSet, HashMap<String,String>}
+	 * @return PlaceSet
 	 */
-	public static Object[] discoverPlaceSet(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
+	public static PlaceSet discoverPlaceSet(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
 		Set<Place> placeNetsUnion = new HashSet<>();
 		HashMap<String,String> typeMap = new HashMap<String,String>();
 		
@@ -188,22 +184,17 @@ public class Main {
 			// discover petri net using est-miner (use specpp)
 			// split petri net into place nets
 			// tag places with current object type
-			Object[] results = FlatLogProcessing.processFlatLog(Context, flatLog, currentType, parameters); //TODO what happens if Context==null?
-			assert(results[0] instanceof Set);
-			Set<Place> placeNets = (Set<Place>) results[0];
-			assert(results[1] instanceof HashMap);
-			HashMap<String,String> newMap = (HashMap<String,String>) results[1];
+			Set<TaggedPlace> placeNets = FlatLogProcessing.processFlatLog(Context, flatLog, currentType, parameters); //TODO what happens if Context==null?
 			Main.updateProgress("Finished discovery of place nets for object type "+currentType+".");
 
 			// unite place nets
 			placeNetsUnion.addAll(placeNets);
-			typeMap.putAll(newMap);
 		}
 		
 		// convert set of places to PlaceSet
 		PlaceSet placeSet = new PlaceSet(placeNetsUnion);
 		
-		return new Object[] {placeSet, typeMap};
+		return placeSet;
 	}
 	
 	/**
@@ -341,9 +332,9 @@ public class Main {
 		return lpmsTagged;
 	}
 	
-	public static OCLPMResult convertLPMstoOCLPMs (OCLPMDiscoveryParameters parameters, LPMResultsTagged tlpms, HashMap<String,String> typeMap) {
+	public static OCLPMResult convertLPMstoOCLPMs (OCLPMDiscoveryParameters parameters, LPMResultsTagged tlpms) {
 
-		OCLPMResult oclpmResult = new OCLPMResult(parameters, tlpms, typeMap);
+		OCLPMResult oclpmResult = new OCLPMResult(parameters, tlpms);
 		
 		// identify variable arcs
 		oclpmResult = Main.identifyVariableArcs(parameters, oclpmResult);

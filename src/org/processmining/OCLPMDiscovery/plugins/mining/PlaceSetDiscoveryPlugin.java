@@ -1,6 +1,5 @@
 package org.processmining.OCLPMDiscovery.plugins.mining;
 
-import java.util.HashMap;
 import java.util.Set;
 
 import org.processmining.OCLPMDiscovery.Main;
@@ -22,7 +21,7 @@ import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 		name = "Discovery of Place Set on OCEL", // not shown anywhere anymore because overwritten by uiLabel?
 		parameterLabels = {"OCEL", "Parameters", "Petri Net"},
 		returnLabels = { "Place Set", "Object Type Map"},
-		returnTypes = { PlaceSet.class, HashMap.class },
+		returnTypes = { PlaceSet.class},
 		help = "Discovers a Place Set from an object-centric event log (OCEL standard)."
 )
 public class PlaceSetDiscoveryPlugin {
@@ -36,7 +35,7 @@ public class PlaceSetDiscoveryPlugin {
 			variantLabel = "Discovery of Place Set on OCEL",
 			requiredParameterLabels = {0}
 	)
-	public static Object[] minePlaceSet (UIPluginContext context, OcelEventLog ocel) {
+	public static PlaceSet minePlaceSet (UIPluginContext context, OcelEventLog ocel) {
 		
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
 

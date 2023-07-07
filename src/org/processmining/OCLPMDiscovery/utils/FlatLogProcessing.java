@@ -24,10 +24,16 @@ public class FlatLogProcessing {
 	 * @param parameters
 	 * @return {Set<Place>, HashMap<String,String>}
 	 */
-	public static Object[] processFlatLog (PluginContext context, XLog log, String objectType, OCLPMDiscoveryParameters parameters){
+//	public static Object[] processFlatLog (PluginContext context, XLog log, String objectType, OCLPMDiscoveryParameters parameters){
+//		Petrinet petrinet = discoverPetriNet (context, log, parameters);
+//		Object[] results = convertPetriNetToPlaceNetsWithMap (context, petrinet, objectType);
+//		return results;
+//	}
+	
+	public static Set<TaggedPlace> processFlatLog (PluginContext context, XLog log, String objectType, OCLPMDiscoveryParameters parameters){
 		Petrinet petrinet = discoverPetriNet (context, log, parameters);
-		Object[] results = convertPetriNetToPlaceNetsWithMap (context, petrinet, objectType);
-		return results;
+		Set<TaggedPlace> result = convertPetriNetToTaggedPlaceNets (context, petrinet, objectType);
+		return result;
 	}
 
 	public static Petrinet discoverPetriNet (PluginContext context, XLog log, OCLPMDiscoveryParameters parameters) {

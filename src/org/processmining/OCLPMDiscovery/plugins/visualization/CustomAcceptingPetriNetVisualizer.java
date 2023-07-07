@@ -62,6 +62,8 @@ public class CustomAcceptingPetriNetVisualizer {
         
         // color places based on object type
         for (Place p: net.getNet().getPlaces()) {
+        	//! cannot convert from this place to taggedPlace so I need a Map from id to color for this.
+        	
         	if (!oclpmResult.getMapIdColor().containsKey(p.getLabel())) {
         		System.out.println("Color map doesn't contain the place id "+p.getLabel());
         	}

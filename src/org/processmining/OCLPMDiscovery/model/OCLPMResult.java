@@ -26,8 +26,10 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     	
     }
     
-    public OCLPMResult (OCLPMDiscoveryParameters discoveryParameters, LPMResultsTagged tlpms, HashMap<String,String> typeMap) {
+    public OCLPMResult (OCLPMDiscoveryParameters discoveryParameters, LPMResultsTagged tlpms) {
     	super();
+    	
+    	//TODO initialize map type color or something here?
     	HashSet<ObjectCentricLocalProcessModel> oclpms = new HashSet<ObjectCentricLocalProcessModel>(tlpms.totalLPMs());
     	// convert LPM objects into OCLPM objects
     	for (LPMResult res : tlpms.getTypeMap().keySet()) { // for all used case notions
@@ -37,7 +39,6 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 	    	}
     	}
     	this.addAll(oclpms);
-    	this.typeMap = typeMap;
     	copyDiscoveryParameters(discoveryParameters);
     	this.refreshColors();
     }
@@ -58,10 +59,6 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 
 	public String getOclpmDiscoverySettings() {
 		return oclpmDiscoverySettings;
-	}
-
-	public HashMap<String,String> getTypeMap() {
-		return typeMap;
 	}
 	
 	public void refreshColors() {
@@ -88,6 +85,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 		}
 		this.setMapTypeColor(mapTypeColor);
 		
+		//TODO change this to use the tagged places and create the id color map
 		// assign place ids to colors
 		HashMap<String,Color> mapIdColor = new HashMap<String,Color>();
 		HashMap<String,String> mapIdType = this.getTypeMap();
@@ -107,6 +105,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 		this.mapIdColor = mapIdColor;
 	}
 
+
 	public HashMap<String, Color> getMapTypeColor() {
 		return mapTypeColor;
 	}
@@ -121,6 +120,14 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 
 	public void setVariableArcSet(HashSet<List<String>> variableArcSet) {
 		this.variableArcSet = variableArcSet;
+	}
+
+	public HashMap<String,String> getTypeMap() {
+		return typeMap;
+	}
+
+	public void setTypeMap(HashMap<String,String> typeMap) {
+		this.typeMap = typeMap;
 	}
 
 }
