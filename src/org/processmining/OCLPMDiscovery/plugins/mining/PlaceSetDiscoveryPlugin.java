@@ -73,7 +73,7 @@ public class PlaceSetDiscoveryPlugin {
 	public static Object[] convertToPlaceSet (UIPluginContext context, Petrinet petriNet) {
 		Main.setUp(context);
 		
-		Set<Place> places = FlatLogProcessing.convertPetriNetToPlaceNets(context, petriNet, "");
+		Set<Place> places = FlatLogProcessing.convertPetriNetToPlaceNetsHiddenTagging(context, petriNet, "");
 		PlaceSet placeSet = new PlaceSet(places);
 
 		return new Object[] {placeSet, null};

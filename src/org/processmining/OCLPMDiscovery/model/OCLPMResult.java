@@ -29,7 +29,6 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     public OCLPMResult (OCLPMDiscoveryParameters discoveryParameters, LPMResultsTagged tlpms) {
     	super();
     	
-    	//TODO initialize map type color or something here?
     	HashSet<ObjectCentricLocalProcessModel> oclpms = new HashSet<ObjectCentricLocalProcessModel>(tlpms.totalLPMs());
     	// convert LPM objects into OCLPM objects
     	for (LPMResult res : tlpms.getTypeMap().keySet()) { // for all used case notions
@@ -85,14 +84,12 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 		}
 		this.setMapTypeColor(mapTypeColor);
 		
-		//TODO change this to use the tagged places and create the id color map
 		// assign place ids to colors
 		HashMap<String,Color> mapIdColor = new HashMap<String,Color>();
-		HashMap<String,String> mapIdType = this.getTypeMap();
-		Color color;
-		for (String id : this.getTypeMap().keySet()) {
-			color = mapTypeColor.get(mapIdType.get(id)); 
-			mapIdColor.put(id, color);
+		for (ObjectCentricLocalProcessModel oclpm : this.elements) {
+			for (TaggedPlace tp : oclpm.getPlaces()) {
+				mapIdColor.put(tp.getId(), mapTypeColor.get(tp.getObjectType()));
+			}
 		}
 		this.setMapIdColor(mapIdColor);
 	}

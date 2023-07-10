@@ -13,7 +13,6 @@ import org.jgrapht.graph.DefaultEdge;
 import org.processmining.OCLPMDiscovery.model.LPMResultsTagged;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
-import org.processmining.OCLPMDiscovery.model.TaggedPlace;
 import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.utils.FlatLogProcessing;
@@ -184,7 +183,9 @@ public class Main {
 			// discover petri net using est-miner (use specpp)
 			// split petri net into place nets
 			// tag places with current object type
-			Set<TaggedPlace> placeNets = FlatLogProcessing.processFlatLog(Context, flatLog, currentType, parameters); //TODO what happens if Context==null?
+			Set<Place> placeNets = FlatLogProcessing.processFlatLogHiddenTagging(Context, flatLog, currentType, parameters); //TODO what happens if Context==null?
+			// testing if it does work when not creating places from casted taggedPlaces: Yes it works! :(
+//			Set<Place> placeNets = FlatLogProcessing.processFlatLogNoTagging(Context, flatLog, currentType, parameters);
 			Main.updateProgress("Finished discovery of place nets for object type "+currentType+".");
 
 			// unite place nets

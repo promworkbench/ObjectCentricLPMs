@@ -61,9 +61,9 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
         this.lpm = lpm;
         
         this.id = lpm.getId();
-        //TODO change places to tagged places
         Set<TaggedPlace> tplaces = new HashSet<TaggedPlace>();
         for (Place p : lpm.getPlaces()) {
+        	//TODO cast place back to tagged place
         	tplaces.add(new TaggedPlace(p));
         }
         this.addAllPlaces(tplaces); // adds also the transitions, places, arcs
