@@ -1,5 +1,7 @@
 package org.processmining.OCLPMDiscovery.model;
 
+import java.util.HashSet;
+
 import org.processmining.placebasedlpmdiscovery.model.Place;
 import org.processmining.placebasedlpmdiscovery.model.Transition;
 
@@ -9,6 +11,7 @@ public class TaggedPlace extends Place{
 	 */
 	private static final long serialVersionUID = 3783671545908492239L;
 	private String objectType;
+	private HashSet<String> variableArcActivities = new HashSet<String>();
 	
 	public TaggedPlace(String objectType) {
 		super();
@@ -87,5 +90,13 @@ public class TaggedPlace extends Place{
 
 	public void setObjectType(String objectType) {
 		this.objectType = objectType;
+	}
+
+	public HashSet<String> getVariableArcActivities() {
+		return variableArcActivities;
+	}
+
+	public void setVariableArcActivities(HashSet<String> variableArcActivities) {
+		this.variableArcActivities = variableArcActivities;
 	}
 }

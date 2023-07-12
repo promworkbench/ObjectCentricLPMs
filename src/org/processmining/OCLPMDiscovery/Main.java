@@ -490,11 +490,26 @@ public class Main {
 		});
 		oclpmResult.setVariableArcSet(variableArcSet);
 		
-		// iterate through the models and tag variable arcs
-//		parameters.getVariableArcThreshold(); // threshold for variable arc detection necessary
-		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
-			// TODO
+		// for each object type store which activities have variable arcs
+		HashMap<String,HashSet<String>> typeToActivities = new  HashMap<>();
+		String curType, curActivity;
+		for (List<String> activity_type : variableArcSet) {
+			curType = activity_type.get(1);
+			curActivity = activity_type.get(0);
+			if (!typeToActivities.containsKey(curType)) {
+				typeToActivities.put(curType, new HashSet<>(Arrays.asList(curActivity)));
+			}
+			else {
+				typeToActivities.get(curType).add(curActivity);
+			}
 			
+		}
+		
+		// iterate through the models and tag variable arcs
+		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+			for (TaggedPlace tp : oclpm.getPlaces()) {
+				tp.setVariableArcActivities(typeToActivities.get(tp.getObjectType()));
+			}
 		}
 		
 		return oclpmResult;
