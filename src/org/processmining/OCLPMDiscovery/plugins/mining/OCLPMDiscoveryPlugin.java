@@ -70,6 +70,8 @@ public class OCLPMDiscoveryPlugin {
 			default:
 		}
 		
+		parameters.setPlaceCompletion(true);
+		
 		Main.setUp(context, parameters, true, true);
 		
 		Object[] result = Main.run(ocel, parameters); 
@@ -98,7 +100,8 @@ public class OCLPMDiscoveryPlugin {
 
 		if (parameters == null)
 			return null;		
-		
+
+		parameters.setPlaceCompletion(true);
 		Main.setUp(context, parameters, false, true);
 		Object[] result = Main.run(ocel, parameters, placeSet);
 		return (OCLPMResult) result[0];
@@ -128,7 +131,8 @@ public class OCLPMDiscoveryPlugin {
 
 			if (parameters == null)
 				return null;		
-			
+
+			parameters.setPlaceCompletion(true);
 			Main.setUp(context, parameters, false, true);
 			Main.setGraph(graph);
 			Object[] result = Main.run(ocel, parameters, placeSet);
@@ -178,7 +182,8 @@ public class OCLPMDiscoveryPlugin {
 
 		if (parameters == null)
 			return null;		
-		
+
+		parameters.setPlaceCompletion(true);
 		Main.setUp(context, parameters, false, true);
 		Main.setGraph(graph);
 		Object[] result = Main.run(ocel, parameters, placeSet, labels);

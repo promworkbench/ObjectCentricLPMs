@@ -13,6 +13,7 @@ import org.jgrapht.graph.DefaultEdge;
 import org.processmining.OCLPMDiscovery.model.LPMResultsTagged;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
+import org.processmining.OCLPMDiscovery.model.TaggedPlace;
 import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.utils.FlatLogProcessing;
@@ -63,6 +64,15 @@ public class Main {
 		// OCLPM conversion
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
 		
+		// OCLPM place completion
+		oclpmResult = Main.completePlaces(parameters, oclpmResult, placeSet);
+		
+		// identify variable arcs
+		oclpmResult = Main.identifyVariableArcs(parameters, oclpmResult);
+		
+		// reevaluation of OCLPMs
+		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
+		
 		Main.printExecutionTime();
         return new Object[] {oclpmResult, tlpms, placeSet};
     }
@@ -78,6 +88,15 @@ public class Main {
 		ProvidingObjects.exportTlpms(tlpms);
 		
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
+		
+		// OCLPM place completion
+		oclpmResult = Main.completePlaces(parameters, oclpmResult, placeSet);
+		
+		// identify variable arcs
+		oclpmResult = Main.identifyVariableArcs(parameters, oclpmResult);
+		
+		// reevaluation of OCLPMs
+		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
 
 		Main.printExecutionTime();
         return new Object[] {oclpmResult, tlpms};
@@ -94,6 +113,15 @@ public class Main {
 		ProvidingObjects.exportTlpms(tlpms);
 		
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
+		
+		// OCLPM place completion
+		oclpmResult = Main.completePlaces(parameters, oclpmResult, placeSet);
+		
+		// identify variable arcs
+		oclpmResult = Main.identifyVariableArcs(parameters, oclpmResult);
+		
+		// reevaluation of OCLPMs
+		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
 
 		Main.printExecutionTime();
         return new Object[] {oclpmResult, tlpms};
@@ -108,6 +136,14 @@ public class Main {
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, LPMResultsTagged tlpms) {
         		
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
+		
+		// OCLPM place completion not possible as the place nets aren't available.
+		
+		// identify variable arcs
+		oclpmResult = Main.identifyVariableArcs(parameters, oclpmResult);
+		
+		// reevaluation of OCLPMs
+		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
 
 		Main.printExecutionTime();
         return new Object[] {oclpmResult};
@@ -123,6 +159,14 @@ public class Main {
         LPMResultsTagged tlpms = new LPMResultsTagged(lpms,"Single Case Notion");
         ProvidingObjects.exportTlpms(tlpms);
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
+		
+		// OCLPM place completion not possible as the place nets aren't available.
+		
+		// identify variable arcs
+		oclpmResult = Main.identifyVariableArcs(parameters, oclpmResult);
+		
+		// reevaluation of OCLPMs
+		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
 
 		Main.printExecutionTime();
         return new Object[] {oclpmResult, tlpms};
@@ -337,11 +381,66 @@ public class Main {
 
 		OCLPMResult oclpmResult = new OCLPMResult(parameters, tlpms);
 		
-		// identify variable arcs
-		oclpmResult = Main.identifyVariableArcs(parameters, oclpmResult);
+//		// identify variable arcs
+//		oclpmResult = Main.identifyVariableArcs(parameters, oclpmResult);
+//		
+//		// reevaluation of OCLPMs
+//		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
 		
-		// reevaluation of OCLPMs
-		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
+		return oclpmResult;
+	}
+	
+	/**
+	 * For each place adds all isomorphic places of different object types.
+	 * Completes the model such that the object flow is not interrupted if possible.
+	 * (Object flow = Tokens of a type entering a transition should also exit)
+	 * @param parameters
+	 * @param oclpmResult
+	 * @return
+	 */
+	public static OCLPMResult completePlaces (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult, PlaceSet placeSet) {
+		Main.messageNormal("Starting place completion.");
+		
+		// Identify equal OCLPMs (ignoring object type of places and variable arcs)
+		HashSet<Integer> deletionSet = new HashSet<Integer>(oclpmResult.getElements().size());
+		for (int i1 = 0; i1<oclpmResult.getElements().size(); i1++) {
+			if (deletionSet.contains(i1)) {
+				continue; // model is already tagged to be deleted
+			}
+			for (int i2 = i1+1; i2<oclpmResult.getElements().size(); i2++) {
+				if (deletionSet.contains(i2)) {
+					continue; // model is already tagged to be deleted
+				}
+				ObjectCentricLocalProcessModel oclpm1 = oclpmResult.getElement(i1);
+				ObjectCentricLocalProcessModel oclpm2 = oclpmResult.getElement(i2);
+				if (oclpm1.isIsomorphic(oclpm2)) {
+					deletionSet.add(i2);
+				}
+			}
+		}
+		// delete equal OCLPMs
+		HashSet<ObjectCentricLocalProcessModel> deleteModels = new HashSet<ObjectCentricLocalProcessModel>(deletionSet.size());
+		for (int i : deletionSet) {
+			deleteModels.add(oclpmResult.getElement(i));
+		}
+		for (ObjectCentricLocalProcessModel o : deleteModels) {
+			oclpmResult.remove(o);			
+		}
+		
+		// add places of other types to model if equal place already is in there
+		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+			for (TaggedPlace tp : oclpm.getPlaces()) {
+				for (Place pNet : placeSet.getElements()) {
+					if (!tp.getObjectType().equals(((TaggedPlace) pNet).getObjectType())) { // different type?
+						if (tp.isIsomorphic((TaggedPlace)pNet)) { // exactly the same transitions?
+							oclpm.addPlace((TaggedPlace)pNet);
+						}
+					}
+				}
+			}
+		}
+		
+		Main.updateProgress("Finished place completion.");
 		
 		return oclpmResult;
 	}
@@ -457,6 +556,10 @@ public class Main {
 			else {
 				numSteps += 1;
 			}
+		}
+		
+		if (parameters.getPlaceCompletion()) {
+			numSteps += 1;
 		}
 		Main.setUp(context, 0, numSteps);
 	}

@@ -28,6 +28,8 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	// variable arc identification
 	private float variableArcThreshold = 0.95f; // threshold which the score function is compared against
 	
+	private Boolean placeCompletion = false; // adds equal places to models but of different types
+	
 	// set defaults
 	private Miner placeDiscoveryAlgorithm 			= Miner.SPECPP;
 	private CaseNotionStrategy caseNotionStrategy 	= CaseNotionStrategy.PE_LEADING_RELAXED_O2;
@@ -238,5 +240,13 @@ public class OCLPMDiscoveryParameters implements EventLog{
 
 	public void setObjectTypesCaseNotion(Set<String> objectTypesCaseNotion) {
 		this.objectTypesCaseNotion = objectTypesCaseNotion;
+	}
+
+	public Boolean getPlaceCompletion() {
+		return placeCompletion;
+	}
+
+	public void setPlaceCompletion(Boolean placeCompletion) {
+		this.placeCompletion = placeCompletion;
 	}
 }

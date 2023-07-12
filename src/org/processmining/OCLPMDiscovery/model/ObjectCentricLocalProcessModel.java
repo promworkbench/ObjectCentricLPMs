@@ -263,4 +263,29 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		this.lpm = lpm;
 	}
 
+	/**
+	 * Check if the OCLPMs have equal places (ignoring object type of places and variable arcs)
+	 * @param oclpm2
+	 * @return
+	 */
+	public boolean isIsomorphic(ObjectCentricLocalProcessModel oclpm2) {
+		if (this.getPlaces().size() != oclpm2.getPlaces().size()) {
+			return false;
+		}
+		Boolean found = false;
+		for (TaggedPlace p1 : this.getPlaces()) {
+			for (TaggedPlace p2 : oclpm2.getPlaces()) {
+				if (p1.isIsomorphic(p2)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				return false;
+			}
+			found = false;
+		}
+		return true;
+	}
+
 }

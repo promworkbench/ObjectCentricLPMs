@@ -32,6 +32,54 @@ public class TaggedPlace extends Place{
 		this.setAdditionalInfo(place.getAdditionalInfo());
 		this.setFinal(place.isFinal());
 	}
+	
+	/**
+	 * Checks if all the transition are equal (doesn't check object-type or variable arcs)
+	 * @param tp
+	 * @return
+	 */
+	public Boolean isIsomorphic(TaggedPlace other) {
+		if (
+				this.getInputTransitions().size() != other.getInputTransitions().size()
+				|| this.getOutputTransitions().size() != other.getOutputTransitions().size()
+			) {
+			return false; // number of transitions doesn't even match
+		}
+		// check if input transitions are equal
+		Boolean found_this = false;
+		for (Transition transition_this : this.getInputTransitions()) {
+			for (Transition transition_other : other.getInputTransitions()) {
+				if (transition_this.equals(transition_other)) {
+					found_this = true;
+					break; // transition is in both places
+				}
+			}
+			if (!found_this) {
+				return false; // found a transition which is not in the other net
+			}
+			found_this = false;
+		}
+		/*
+		 * At this point all input transitions of this place have been found in the other place.
+		 * Here both places have the same number of input transitions.
+		 * If we assume that there are no duplicate transitions in this place then the two sets are identical.
+		 */
+		// check if output transitions are equal
+		for (Transition transition_this : this.getOutputTransitions()) {
+			for (Transition transition_other : other.getOutputTransitions()) {
+				if (transition_this.equals(transition_other)) {
+					found_this = true;
+					break; // transition is in both places
+				}
+			}
+			if (!found_this) {
+				return false; // found a transition which is not in the other net
+			}
+			found_this = false;
+		}
+		
+		return true;
+	}
 
 	public String getObjectType() {
 		return objectType;
