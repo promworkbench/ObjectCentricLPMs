@@ -103,11 +103,12 @@ public class CustomAcceptingPetriNetVisualizer {
         	if (	oclpmResult.getVariableArcSet().contains(Arrays.asList(activity,type))) {
         		map.putViewSpecific(arc, AttributeMap.LINEWIDTH, 2f);
 //        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, Color.GRAY);
-        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, theme.ELEMENTS); // color of variable arcs
+//        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, theme.ELEMENTS); // color of variable arcs
         	}
-        	else {
-        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, theme.TEXT); // color of other arcs
-        	}
+//        	else {
+//        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, theme.TEXT); // color of other arcs
+//        	}
+        	map.putViewSpecific(arc, AttributeMap.EDGECOLOR, oclpmResult.getMapIdColor().get(type)); // color arc according to connected place
         }
         
         // change general color theme
