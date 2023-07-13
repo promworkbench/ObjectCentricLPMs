@@ -71,6 +71,7 @@ public class OCLPMDiscoveryPlugin {
 		}
 		
 		parameters.setPlaceCompletion(true);
+//		parameters.setVariableArcIdentification(VariableArcIdentification.PER_PLACE); //TODO test if this works
 		
 		Main.setUp(context, parameters, true, true);
 		

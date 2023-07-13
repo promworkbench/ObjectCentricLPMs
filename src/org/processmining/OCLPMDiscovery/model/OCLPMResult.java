@@ -21,6 +21,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     private HashMap<String,Color> mapIdColor; // maps each place.id to a color.
     private HashMap<String,Color> mapTypeColor; // maps each object type to a color
     private HashSet<List<String>> variableArcSet = new HashSet<>(); // saves all variable arcs [Activity,ObjectType]
+    private HashMap<String,HashSet<String>> variableArcActivities = new HashMap<>(); // saves for each place id the activities with which the place forms variable arcs
     
     public OCLPMResult() {
     	
@@ -125,6 +126,28 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 
 	public void setTypeMap(HashMap<String,String> typeMap) {
 		this.typeMap = typeMap;
+	}
+
+	public HashMap<String,HashSet<String>> getVariableArcActivities() {
+		return variableArcActivities;
+	}
+
+	public void setVariableArcActivities(HashMap<String,HashSet<String>> variableArcActivities) {
+		this.variableArcActivities = variableArcActivities;
+	}
+
+	/**
+	 * Fetches the variable arc activities from the tagged places and stores them in a map
+	 * mapping from the place id to the activities which have variable arcs for the corresponding
+	 * object type.
+	 * Use in case it isn't possible for the visualizer to access the tagged places.
+	 */
+	public void storeVariableArcs() {
+		for (ObjectCentricLocalProcessModel oclpm : this.elements) {
+			for (TaggedPlace tp : oclpm.getPlaces()) {
+				this.variableArcActivities.put(tp.getId(), tp.getVariableArcActivities());
+			}
+		}
 	}
 
 }

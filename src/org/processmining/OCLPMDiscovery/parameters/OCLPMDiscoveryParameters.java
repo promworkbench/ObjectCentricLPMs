@@ -26,6 +26,8 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	private PlaceBasedLPMDiscoveryParameters PBLPMDiscoveryParameters;
 	
 	// variable arc identification
+	private boolean doVariableArcIdentification = true;
+	private VariableArcIdentification variableArcIdentification = VariableArcIdentification.WHOLE_LOG;
 	private float variableArcThreshold = 0.95f; // threshold which the score function is compared against
 	
 	private Boolean placeCompletion = false; // adds equal places to models but of different types
@@ -242,11 +244,27 @@ public class OCLPMDiscoveryParameters implements EventLog{
 		this.objectTypesCaseNotion = objectTypesCaseNotion;
 	}
 
-	public Boolean getPlaceCompletion() {
+	public Boolean doPlaceCompletion() {
 		return placeCompletion;
 	}
 
 	public void setPlaceCompletion(Boolean placeCompletion) {
 		this.placeCompletion = placeCompletion;
+	}
+
+	public VariableArcIdentification getVariableArcIdentification() {
+		return variableArcIdentification;
+	}
+
+	public void setVariableArcIdentification(VariableArcIdentification variableArcIdentification) {
+		this.variableArcIdentification = variableArcIdentification;
+	}
+
+	public boolean doVariableArcIdentification() {
+		return this.doVariableArcIdentification;
+	}
+	
+	public void setVariableArcIdentification (boolean doIt) {
+		this.doVariableArcIdentification = doIt;
 	}
 }
