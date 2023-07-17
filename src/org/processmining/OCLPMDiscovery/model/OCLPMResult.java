@@ -56,6 +56,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     		ObjectCentricLocalProcessModel oclpm = new ObjectCentricLocalProcessModel(tp);
     		this.add(oclpm);
     	}
+    	this.storeVariableArcs();
     	this.refreshColors();
     }
     
