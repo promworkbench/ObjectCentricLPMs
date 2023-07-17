@@ -76,6 +76,15 @@ public class OCLPMTextArea extends RoundedPanel {
 		this.setText(text);
 	}
 	
+	/**
+	 * Non-editable, scrollable text-area
+	 * @param text
+	 * @param theme
+	 */
+	public OCLPMTextArea(String text, OCLPMColors theme) {
+		this(text, false, false, theme);
+	}
+	
 	public OCLPMTextArea(OCLPMColors theme) {
 		this("", true, true, theme);
 	}

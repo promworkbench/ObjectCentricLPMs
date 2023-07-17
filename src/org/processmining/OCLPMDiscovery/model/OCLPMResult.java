@@ -8,7 +8,9 @@ import java.util.Set;
 
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.placebasedlpmdiscovery.model.LocalProcessModel;
+import org.processmining.placebasedlpmdiscovery.model.Place;
 import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
+import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableList;
 
 public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel> {
@@ -40,6 +42,17 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     	}
     	this.addAll(oclpms);
     	copyDiscoveryParameters(discoveryParameters);
+    	this.refreshColors();
+    }
+    
+    public OCLPMResult (PlaceSet placeSet) {
+    	super();
+    	for (Place p : placeSet.getElements()) {
+    		TaggedPlace tp = (TaggedPlace)p;
+    		this.objectTypes.add(tp.getObjectType());
+    		ObjectCentricLocalProcessModel oclpm = new ObjectCentricLocalProcessModel(tp);
+    		this.add(oclpm);
+    	}
     	this.refreshColors();
     }
     
