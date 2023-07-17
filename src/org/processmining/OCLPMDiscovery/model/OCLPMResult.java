@@ -47,9 +47,12 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     
     public OCLPMResult (PlaceSet placeSet) {
     	super();
+    	this.objectTypes = new HashSet<String>();
+    	this.typeMap = new HashMap<String,String>();
     	for (Place p : placeSet.getElements()) {
     		TaggedPlace tp = (TaggedPlace)p;
     		this.objectTypes.add(tp.getObjectType());
+    		this.typeMap.put(tp.getId(), tp.getObjectType());
     		ObjectCentricLocalProcessModel oclpm = new ObjectCentricLocalProcessModel(tp);
     		this.add(oclpm);
     	}

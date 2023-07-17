@@ -110,7 +110,7 @@ public class CustomAcceptingPetriNetVisualizer {
 //        	else {
 //        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, theme.TEXT); // color of other arcs
 //        	}
-        	map.putViewSpecific(arc, AttributeMap.EDGECOLOR, oclpmResult.getMapIdColor().get(type)); // color arc according to connected place
+        	map.putViewSpecific(arc, AttributeMap.EDGECOLOR, oclpmResult.getMapTypeColor().get(type)); // color arc according to connected place
         }
         
         // change general color theme
