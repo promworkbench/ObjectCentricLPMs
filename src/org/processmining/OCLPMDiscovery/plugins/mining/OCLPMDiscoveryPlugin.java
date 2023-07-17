@@ -9,6 +9,7 @@ import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
+import org.processmining.OCLPMDiscovery.parameters.VariableArcIdentification;
 import org.processmining.OCLPMDiscovery.wizards.OCLPMDiscoveryWizard;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
@@ -71,7 +72,7 @@ public class OCLPMDiscoveryPlugin {
 		}
 		
 		parameters.setPlaceCompletion(true);
-//		parameters.setVariableArcIdentification(VariableArcIdentification.PER_PLACE); //TODO test if this works
+		parameters.setVariableArcIdentification(VariableArcIdentification.PER_PLACE);
 		
 		Main.setUp(context, parameters, true, true);
 		

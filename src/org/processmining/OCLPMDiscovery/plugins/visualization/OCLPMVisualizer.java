@@ -54,7 +54,18 @@ public class OCLPMVisualizer {
         JComponent evalComponent = new OCLPMPanel(theme);
         OCLPMScrollPane evalPane = new OCLPMScrollPane(evalComponent, theme);
         evalComponent.setLayout(new BoxLayout(evalComponent, BoxLayout.Y_AXIS));
-        //TODO add for which leading type this model has been discovered
+        // add for which leading type this model has been discovered
+        if (oclpm.getDiscoveryTypes().size() == 1) {
+        	OCLPMTextArea ta_discoveryType = new OCLPMTextArea("Discovered using the leading type:\n "+oclpm.getDiscoveryTypes().toArray()[0], false, false, theme);
+        	evalComponent.add(ta_discoveryType);
+        }
+        else if (oclpm.getDiscoveryTypes().size() > 1) {
+        	OCLPMTextArea ta_discoveryType = new OCLPMTextArea("Discovered using the leading type:\n ", false, false, theme);
+        	for (Object curType : oclpm.getDiscoveryTypes().toArray()) {
+        		ta_discoveryType.append((String) curType+"\n");
+        	}
+        	evalComponent.add(ta_discoveryType);
+        }
         evalComponent.add(ComponentFactory.getComplexEvaluationResultComponent(oclpm.getAdditionalInfo().getEvaluationResult()));
         
         

@@ -40,7 +40,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
     private OCLPMAdditionalInfo additionalInfo;
 	
 	// leading types for which this OCLPM has been discovered
-	private final HashSet<String> discoveryTypes = new HashSet<String>();;
+	private final HashSet<String> discoveryTypes = new HashSet<String>();
 	
 	public ObjectCentricLocalProcessModel() {
         // setup oclpm
