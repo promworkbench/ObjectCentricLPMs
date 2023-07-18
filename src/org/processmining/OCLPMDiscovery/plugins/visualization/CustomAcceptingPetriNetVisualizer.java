@@ -106,6 +106,9 @@ public class CustomAcceptingPetriNetVisualizer {
         		activity = ((Transition)(arc.getTarget())).getLabel();
         	}
         	
+        	// show object type of place when hovering over it
+        	map.putViewSpecific(p, AttributeMap.TOOLTIP, type);
+        	
         	// variable arcs
         	if (oclpmResult.getVariableArcActivities().get(p.getLabel()).contains(activity)) {
         		map.putViewSpecific(arc, AttributeMap.TOOLTIP, "Variable Arc of type "+type);

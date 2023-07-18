@@ -162,8 +162,11 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 	public void storeVariableArcs() {
 		for (ObjectCentricLocalProcessModel oclpm : this.elements) {
 			for (TaggedPlace tp : oclpm.getPlaces()) {
-				if (!(tp.getVariableArcActivities().isEmpty())) {
+				if (!(tp.getVariableArcActivities().isEmpty()) && !(tp.getVariableArcActivities() == null)) {
 					this.variableArcActivities.put(tp.getId(), tp.getVariableArcActivities());
+				}
+				else {
+					this.variableArcActivities.put(tp.getId(), new HashSet<String>(1));
 				}
 			}
 		}
