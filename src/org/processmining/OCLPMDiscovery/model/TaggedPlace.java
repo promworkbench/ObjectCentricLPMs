@@ -97,6 +97,11 @@ public class TaggedPlace extends Place{
 	}
 
 	public void setVariableArcActivities(HashSet<String> variableArcActivities) {
-		this.variableArcActivities = variableArcActivities;
+		if (variableArcActivities == null) {
+			this.variableArcActivities.clear();
+		}
+		else {
+			this.variableArcActivities = variableArcActivities;
+		}
 	}
 }

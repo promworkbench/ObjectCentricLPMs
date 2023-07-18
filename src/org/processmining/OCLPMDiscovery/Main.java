@@ -105,6 +105,9 @@ public class Main {
 		
 		// reevaluation of OCLPMs
 		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
+		
+		// post processing
+		oclpmResult = Main.postProcessing(parameters, oclpmResult);
 
 		Main.printExecutionTime();
         return new Object[] {oclpmResult, tlpms};
@@ -131,6 +134,9 @@ public class Main {
 		
 		// reevaluation of OCLPMs
 		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
+		
+		// post processing
+		oclpmResult = Main.postProcessing(parameters, oclpmResult);
 
 		Main.printExecutionTime();
         return new Object[] {oclpmResult, tlpms};
@@ -153,6 +159,9 @@ public class Main {
 		
 		// reevaluation of OCLPMs
 		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
+		
+		// post processing
+		oclpmResult = Main.postProcessing(parameters, oclpmResult);
 
 		Main.printExecutionTime();
         return new Object[] {oclpmResult};
@@ -176,6 +185,9 @@ public class Main {
 		
 		// reevaluation of OCLPMs
 		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
+		
+		// post processing
+		oclpmResult = Main.postProcessing(parameters, oclpmResult);
 
 		Main.printExecutionTime();
         return new Object[] {oclpmResult, tlpms};
@@ -438,15 +450,17 @@ public class Main {
 		
 		// add places of other types to model if equal place already is in there
 		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+			Set<TaggedPlace> tmpPlaceSet = new HashSet<>(oclpm.getPlaces().size());
 			for (TaggedPlace tp : oclpm.getPlaces()) {
 				for (Place pNet : placeSet.getElements()) {
 					if (!tp.getObjectType().equals(((TaggedPlace) pNet).getObjectType())) { // different type?
 						if (tp.isIsomorphic((TaggedPlace)pNet)) { // exactly the same transitions?
-							oclpm.addPlace((TaggedPlace)pNet);
+							tmpPlaceSet.add((TaggedPlace)pNet);
 						}
 					}
 				}
 			}
+			oclpm.addAllPlaces(tmpPlaceSet);
 		}
 		
 		Main.updateProgress("Finished place completion.");
@@ -462,6 +476,7 @@ public class Main {
 	 */
 	public static PlaceSet identifyVariableArcs (OCLPMDiscoveryParameters parameters, PlaceSet placeSet) {
 		switch (parameters.getVariableArcIdentification()) {
+			//TODO make it possible to skip variable arc identification (in case it has already been done or is not wanted)
 			case PER_PLACE:
 				Main.messageNormal("Starting variable arc identification per place.");
 				String type;
@@ -600,6 +615,9 @@ public class Main {
 	}
 	
 	public static OCLPMResult postProcessing (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult) {
+		
+		// store place id -> object type map to use in visualizer
+		oclpmResult.createTypeMap();
 		
 		// write variable arcs into result map to use in visualizer
 		oclpmResult.storeVariableArcs();

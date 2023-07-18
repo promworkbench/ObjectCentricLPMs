@@ -162,7 +162,23 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 	public void storeVariableArcs() {
 		for (ObjectCentricLocalProcessModel oclpm : this.elements) {
 			for (TaggedPlace tp : oclpm.getPlaces()) {
-				this.variableArcActivities.put(tp.getId(), tp.getVariableArcActivities());
+				if (!(tp.getVariableArcActivities().isEmpty())) {
+					this.variableArcActivities.put(tp.getId(), tp.getVariableArcActivities());
+				}
+			}
+		}
+	}
+
+	/**
+	 * Stores for each place id the object type of that place.
+	 * Used in the visualizer because after the conversion to Petri nets for the visualization
+	 * the tagged places aren't accessible anymore.
+	 */
+	public void createTypeMap() {
+		this.typeMap = new HashMap<String,String>();
+		for (ObjectCentricLocalProcessModel oclpm : this.elements) {
+			for (TaggedPlace tp : oclpm.getPlaces()) {
+				this.typeMap.put(tp.getId(), tp.getObjectType());
 			}
 		}
 	}
