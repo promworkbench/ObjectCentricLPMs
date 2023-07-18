@@ -1,7 +1,6 @@
 package org.processmining.OCLPMDiscovery.plugins.visualization;
 
 import java.awt.Color;
-import java.util.Arrays;
 
 import javax.swing.JComponent;
 
@@ -62,6 +61,8 @@ public class CustomAcceptingPetriNetVisualizer {
         
         // color places based on object type
         for (Place p: net.getNet().getPlaces()) {
+        	//! cannot convert from this place to taggedPlace so I need a Map from id to color for this.
+        	
         	if (!oclpmResult.getMapIdColor().containsKey(p.getLabel())) {
         		System.out.println("Color map doesn't contain the place id "+p.getLabel());
         	}
@@ -76,9 +77,13 @@ public class CustomAcceptingPetriNetVisualizer {
         
         String type, activity;
         for (PetrinetEdge arc : net.getNet().getEdges()) {
+        	Place p;
         	// stuff that works:
 //        	map.putViewSpecific(arc, AttributeMap.LINEWIDTH, 2f); // this works!
 //        	map.putViewSpecific(arc, AttributeMap.EDGECOLOR, Color.GREEN); // this works!
+//        	map.putViewSpecific(arc, AttributeMap.TOOLTIP, "Variable Arc of type "+type);
+//        	map.putViewSpecific(arc, AttributeMap.LABEL, "variable");
+//        	map.putViewSpecific(arc, AttributeMap.SHOWLABEL, true);
         	
         	
         	// stuff that doesn't work:
@@ -92,20 +97,49 @@ public class CustomAcceptingPetriNetVisualizer {
         	
         	if (arc.getSource() instanceof Transition) {
         		activity = ((Transition)(arc.getSource())).getLabel();
-        		type = oclpmResult.getTypeMap().get(((Place)(arc.getTarget())).getLabel());
+        		p = (Place) arc.getTarget();
+        		type = oclpmResult.getTypeMap().get(p.getLabel());
         	}
         	else {
-        		 type = oclpmResult.getTypeMap().get(((Place)(arc.getSource())).getLabel());
-        		 activity = ((Transition)(arc.getTarget())).getLabel();
+        		p = (Place) arc.getSource();
+        		type = oclpmResult.getTypeMap().get(p.getLabel());
+        		activity = ((Transition)(arc.getTarget())).getLabel();
         	}
-        	if (	oclpmResult.getVariableArcSet().contains(Arrays.asList(activity,type))) {
+        	
+        	// variable arcs
+        	if (oclpmResult.getVariableArcActivities().get(p.getLabel()).contains(activity)) {
+        		map.putViewSpecific(arc, AttributeMap.TOOLTIP, "Variable Arc of type "+type);
         		map.putViewSpecific(arc, AttributeMap.LINEWIDTH, 2f);
-//        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, Color.GRAY);
-        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, theme.ELEMENTS); // color of variable arcs
+        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, Color.GRAY);
+        		map.putViewSpecific(arc, AttributeMap.LABEL, "variable");
+        		map.putViewSpecific(arc, AttributeMap.SHOWLABEL, true);
+//        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, theme.ELEMENTS); // color of variable arcs
+        		
+        		//TODO change the variable edge to be recognizable
+
+        		// doesn't work:
+//        		map.putViewSpecific(arc, AttributeMap.SHAPE, ArrowType.ARROWTYPE_DOUBLELINE);
+//        		map.putViewSpecific(arc, AttributeMap.SHAPEDECORATOR, true);
+//        		map.putViewSpecific(arc, AttributeMap.STYLE, ArrowType.ARROWTYPE_DOUBLELINE);
+//        		map.putViewSpecific(arc, AttributeMap.BORDERWIDTH, 4.2f);
+//        		map.putViewSpecific(arc, AttributeMap.STROKECOLOR, Color.PINK);
+//        		map.putViewSpecific(arc, AttributeMap.STROKE, 4);
+//        		map.putViewSpecific(arc, AttributeMap.DASHPATTERN, 4);
+//        		map.putViewSpecific(arc, AttributeMap.INSET, 4);
+//        		map.putViewSpecific(arc, AttributeMap.DASHOFFSET, 4);
+//        		map.putViewSpecific(arc, AttributeMap.EDGESTART, ArrowType.ARROWTYPE_DOUBLELINE);
+//        		map.putViewSpecific(arc, AttributeMap.EDGESTARTFILLED, false);
+//        		map.putViewSpecific(arc, AttributeMap.EDGEMIDDLEFILLED, false);
+//        		map.putViewSpecific(arc, AttributeMap.EDGEENDFILLED, false);
+//        		map.putViewSpecific(arc, AttributeMap.ICON, ArrowType.ARROWTYPE_DOUBLELINE);
+//        		map.putViewSpecific(arc, AttributeMap.LABELVERTICALALIGNMENT, true);
+//        		map.putViewSpecific(arc, AttributeMap.LABELALONGEDGE, "testing");
+//        		map.putViewSpecific(arc, AttributeMap.POLYGON_POINTS, 5);
         	}
-        	else {
-        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, theme.TEXT); // color of other arcs
-        	}
+//        	else {
+//        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, theme.TEXT); // color of other arcs
+//        	}
+        	map.putViewSpecific(arc, AttributeMap.EDGECOLOR, oclpmResult.getMapTypeColor().get(type)); // color arc according to connected place
         }
         
         // change general color theme

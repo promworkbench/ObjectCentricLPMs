@@ -1,9 +1,10 @@
 package org.processmining.OCLPMDiscovery.plugins.visualization;
 
 import javax.swing.JComponent;
-import javax.swing.JPanel;
 
 import org.processmining.OCLPMDiscovery.gui.OCLPMColors;
+import org.processmining.OCLPMDiscovery.gui.OCLPMPanel;
+import org.processmining.OCLPMDiscovery.gui.OCLPMTextArea;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.visualization.components.SimpleCollectionOfElementsComponent;
 import org.processmining.OCLPMDiscovery.visualization.components.tables.factories.OCLPMResultPluginVisualizerTableFactory;
@@ -32,8 +33,11 @@ public class OCLPMResultVisualizer {
     @PluginVariant(variantLabel = "OCLPM Visualizer Light", requiredParameterLabels = {0})
     public JComponent visualize(UIPluginContext context, OCLPMResult result) {
 
-        if (result.size() < 1)
-            return new JPanel();
+        if (result.size() < 1) {
+        	OCLPMPanel panel = new OCLPMPanel(theme);
+	    	panel.add(new OCLPMTextArea("The given OCLPMResult doesn't contain any models.",theme));
+	        return panel;
+        }
         
         result.refreshColors();
         

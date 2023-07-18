@@ -8,7 +8,9 @@ import java.util.Set;
 
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.placebasedlpmdiscovery.model.LocalProcessModel;
+import org.processmining.placebasedlpmdiscovery.model.Place;
 import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
+import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableList;
 
 public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel> {
@@ -21,13 +23,15 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     private HashMap<String,Color> mapIdColor; // maps each place.id to a color.
     private HashMap<String,Color> mapTypeColor; // maps each object type to a color
     private HashSet<List<String>> variableArcSet = new HashSet<>(); // saves all variable arcs [Activity,ObjectType]
+    private HashMap<String,HashSet<String>> variableArcActivities = new HashMap<>(); // saves for each place id the activities with which the place forms variable arcs
     
     public OCLPMResult() {
     	
     }
     
-    public OCLPMResult (OCLPMDiscoveryParameters discoveryParameters, LPMResultsTagged tlpms, HashMap<String,String> typeMap) {
+    public OCLPMResult (OCLPMDiscoveryParameters discoveryParameters, LPMResultsTagged tlpms) {
     	super();
+    	
     	HashSet<ObjectCentricLocalProcessModel> oclpms = new HashSet<ObjectCentricLocalProcessModel>(tlpms.totalLPMs());
     	// convert LPM objects into OCLPM objects
     	for (LPMResult res : tlpms.getTypeMap().keySet()) { // for all used case notions
@@ -37,8 +41,22 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 	    	}
     	}
     	this.addAll(oclpms);
-    	this.typeMap = typeMap;
     	copyDiscoveryParameters(discoveryParameters);
+    	this.refreshColors();
+    }
+    
+    public OCLPMResult (PlaceSet placeSet) {
+    	super();
+    	this.objectTypes = new HashSet<String>();
+    	this.typeMap = new HashMap<String,String>();
+    	for (Place p : placeSet.getElements()) {
+    		TaggedPlace tp = (TaggedPlace)p;
+    		this.objectTypes.add(tp.getObjectType());
+    		this.typeMap.put(tp.getId(), tp.getObjectType());
+    		ObjectCentricLocalProcessModel oclpm = new ObjectCentricLocalProcessModel(tp);
+    		this.add(oclpm);
+    	}
+    	this.storeVariableArcs();
     	this.refreshColors();
     }
     
@@ -58,10 +76,6 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 
 	public String getOclpmDiscoverySettings() {
 		return oclpmDiscoverySettings;
-	}
-
-	public HashMap<String,String> getTypeMap() {
-		return typeMap;
 	}
 	
 	public void refreshColors() {
@@ -90,11 +104,10 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 		
 		// assign place ids to colors
 		HashMap<String,Color> mapIdColor = new HashMap<String,Color>();
-		HashMap<String,String> mapIdType = this.getTypeMap();
-		Color color;
-		for (String id : this.getTypeMap().keySet()) {
-			color = mapTypeColor.get(mapIdType.get(id)); 
-			mapIdColor.put(id, color);
+		for (ObjectCentricLocalProcessModel oclpm : this.elements) {
+			for (TaggedPlace tp : oclpm.getPlaces()) {
+				mapIdColor.put(tp.getId(), mapTypeColor.get(tp.getObjectType()));
+			}
 		}
 		this.setMapIdColor(mapIdColor);
 	}
@@ -106,6 +119,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 	public void setMapIdColor(HashMap<String, Color> mapIdColor) {
 		this.mapIdColor = mapIdColor;
 	}
+
 
 	public HashMap<String, Color> getMapTypeColor() {
 		return mapTypeColor;
@@ -121,6 +135,52 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 
 	public void setVariableArcSet(HashSet<List<String>> variableArcSet) {
 		this.variableArcSet = variableArcSet;
+	}
+
+	public HashMap<String,String> getTypeMap() {
+		return typeMap;
+	}
+
+	public void setTypeMap(HashMap<String,String> typeMap) {
+		this.typeMap = typeMap;
+	}
+
+	public HashMap<String,HashSet<String>> getVariableArcActivities() {
+		return variableArcActivities;
+	}
+
+	public void setVariableArcActivities(HashMap<String,HashSet<String>> variableArcActivities) {
+		this.variableArcActivities = variableArcActivities;
+	}
+
+	/**
+	 * Fetches the variable arc activities from the tagged places and stores them in a map
+	 * mapping from the place id to the activities which have variable arcs for the corresponding
+	 * object type.
+	 * Use in case it isn't possible for the visualizer to access the tagged places.
+	 */
+	public void storeVariableArcs() {
+		for (ObjectCentricLocalProcessModel oclpm : this.elements) {
+			for (TaggedPlace tp : oclpm.getPlaces()) {
+				if (!(tp.getVariableArcActivities().isEmpty())) {
+					this.variableArcActivities.put(tp.getId(), tp.getVariableArcActivities());
+				}
+			}
+		}
+	}
+
+	/**
+	 * Stores for each place id the object type of that place.
+	 * Used in the visualizer because after the conversion to Petri nets for the visualization
+	 * the tagged places aren't accessible anymore.
+	 */
+	public void createTypeMap() {
+		this.typeMap = new HashMap<String,String>();
+		for (ObjectCentricLocalProcessModel oclpm : this.elements) {
+			for (TaggedPlace tp : oclpm.getPlaces()) {
+				this.typeMap.put(tp.getId(), tp.getObjectType());
+			}
+		}
 	}
 
 }

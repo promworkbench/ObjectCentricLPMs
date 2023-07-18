@@ -13,8 +13,10 @@ import org.jgrapht.graph.DefaultEdge;
 import org.processmining.OCLPMDiscovery.model.LPMResultsTagged;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
+import org.processmining.OCLPMDiscovery.model.TaggedPlace;
 import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
+import org.processmining.OCLPMDiscovery.parameters.VariableArcIdentification;
 import org.processmining.OCLPMDiscovery.utils.FlatLogProcessing;
 import org.processmining.OCLPMDiscovery.utils.OCELUtils;
 import org.processmining.OCLPMDiscovery.utils.ProcessExecutions;
@@ -27,6 +29,7 @@ import org.processmining.ocel.ocelobjects.OcelEvent;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
 import org.processmining.ocel.ocelobjects.OcelObject;
 import org.processmining.placebasedlpmdiscovery.model.Place;
+import org.processmining.placebasedlpmdiscovery.model.Transition;
 import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
 import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 import org.processmining.placebasedlpmdiscovery.plugins.mining.PlaceBasedLPMDiscoveryPlugin;
@@ -45,72 +48,120 @@ public class Main {
 	//		Variants
 	//===================================================================
 	/**
-	 * Full OCLPMs discovery starting from ocel
+	 * Full OCLPM discovery starting from ocel
 	 * @param ocel
 	 * @param parameters
-	 * @return {oclpmResult, tlpms, placeSet, typeMap}
+	 * @return {oclpmResult, tlpms, placeSet}
 	 */
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
 		
 		// place discovery
-		Object[] results = discoverPlaceSet(ocel,parameters);
-		PlaceSet placeSet = (PlaceSet) results[0];
+		PlaceSet placeSet = discoverPlaceSet(ocel,parameters);
 		ProvidingObjects.exportPlaceSet(placeSet);
-		HashMap<String,String> typeMap = (HashMap<String,String>) results[1];
-		ProvidingObjects.exportHashMap(typeMap);
+		
+		// identify variable arcs
+		placeSet = Main.identifyVariableArcs(parameters, placeSet);
 		
 		// LPM discovery
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
 		ProvidingObjects.exportTlpms(tlpms);
 		
 		// OCLPM conversion
-		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
+		
+		// OCLPM place completion
+		if (parameters.doPlaceCompletion()) {
+			oclpmResult = Main.completePlaces(parameters, oclpmResult, placeSet);
+		}
+		
+		// reevaluation of OCLPMs
+		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
+		
+		// post processing
+		oclpmResult = Main.postProcessing(parameters, oclpmResult);
 		
 		Main.printExecutionTime();
-        return new Object[] {oclpmResult, tlpms, placeSet, typeMap};
+        return new Object[] {oclpmResult, tlpms, placeSet};
     }
 	
 	/**
-	 * Full OCLPMs discovery starting from place nets
+	 * Full OCLPM discovery starting from place nets
 	 * @param ocel
 	 * @param parameters
 	 * @return {oclpmResult, tlpms}
 	 */
-	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet, HashMap<String,String> typeMap) {
+	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet) {
+		// identify variable arcs
+		placeSet = Main.identifyVariableArcs(parameters, placeSet);
+		
+		// discover LPMs
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
 		ProvidingObjects.exportTlpms(tlpms);
 		
-		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
+		
+		// OCLPM place completion
+		oclpmResult = Main.completePlaces(parameters, oclpmResult, placeSet);
+		
+		// reevaluation of OCLPMs
+		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
+		
+		// post processing
+		oclpmResult = Main.postProcessing(parameters, oclpmResult);
 
 		Main.printExecutionTime();
         return new Object[] {oclpmResult, tlpms};
     }
 	
 	/**
-	 * Full OCLPMs discovery starting from place nets with enhanced OCEL input
+	 * Full OCLPM discovery starting from place nets with enhanced OCEL input
 	 * @param ocel
 	 * @param parameters
 	 * @return {oclpmResult, tlpms}
 	 */
-	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet, HashMap<String,String> typeMap, ArrayList<String> labels) {
+	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet, ArrayList<String> labels) {
+		// identify variable arcs
+		placeSet = Main.identifyVariableArcs(parameters, placeSet);
+		
+		// discover LPMs
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet, labels);
 		ProvidingObjects.exportTlpms(tlpms);
 		
-		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
+		
+		// OCLPM place completion
+		oclpmResult = Main.completePlaces(parameters, oclpmResult, placeSet);
+		
+		// reevaluation of OCLPMs
+		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
+		
+		// post processing
+		oclpmResult = Main.postProcessing(parameters, oclpmResult);
 
 		Main.printExecutionTime();
         return new Object[] {oclpmResult, tlpms};
     }
 	
 	/**
-	 * OCLPMs discovery starting from Tagged LPMs
+	 * OCLPM discovery starting from Tagged LPMs
 	 * @param ocel
 	 * @param parameters
 	 * @return {oclpmResult}
 	 */
-	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, HashMap<String,String> typeMap, LPMResultsTagged tlpms) {
+	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, LPMResultsTagged tlpms) {
         		
-		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
+		
+		// OCLPM place completion not possible as the place nets aren't available.
+		
+		// identify variable arcs
+		oclpmResult = Main.identifyVariableArcs(parameters, oclpmResult);
+		
+		// reevaluation of OCLPMs
+		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
+		
+		// post processing
+		oclpmResult = Main.postProcessing(parameters, oclpmResult);
 
 		Main.printExecutionTime();
         return new Object[] {oclpmResult};
@@ -125,7 +176,18 @@ public class Main {
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, HashMap<String,String> typeMap, LPMResult lpms) {
         LPMResultsTagged tlpms = new LPMResultsTagged(lpms,"Single Case Notion");
         ProvidingObjects.exportTlpms(tlpms);
-		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, typeMap);
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
+		
+		// OCLPM place completion not possible as the place nets aren't available.
+		
+		// identify variable arcs
+		oclpmResult = Main.identifyVariableArcs(parameters, oclpmResult);
+		
+		// reevaluation of OCLPMs
+		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
+		
+		// post processing
+		oclpmResult = Main.postProcessing(parameters, oclpmResult);
 
 		Main.printExecutionTime();
         return new Object[] {oclpmResult, tlpms};
@@ -139,10 +201,8 @@ public class Main {
 	 */
 	public static LPMResultsTagged runLPMDiscovery(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
         
-		Object[] result = discoverPlaceSet(ocel,parameters);
-		PlaceSet placeSet = (PlaceSet) result[0];
+		PlaceSet placeSet = discoverPlaceSet(ocel,parameters);
 		ProvidingObjects.exportPlaceSet(placeSet);
-		ProvidingObjects.exportHashMap((HashMap<String,String>) result[1]);
 		
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
 
@@ -172,9 +232,9 @@ public class Main {
 	 * Returns a PlaceSet and a map which maps each Place.id to the ObjectType of the flat log on which it has been discovered
 	 * @param ocel
 	 * @param parameters
-	 * @return {PlaceSet, HashMap<String,String>}
+	 * @return PlaceSet
 	 */
-	public static Object[] discoverPlaceSet(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
+	public static PlaceSet discoverPlaceSet(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
 		Set<Place> placeNetsUnion = new HashSet<>();
 		HashMap<String,String> typeMap = new HashMap<String,String>();
 		
@@ -188,22 +248,19 @@ public class Main {
 			// discover petri net using est-miner (use specpp)
 			// split petri net into place nets
 			// tag places with current object type
-			Object[] results = FlatLogProcessing.processFlatLog(Context, flatLog, currentType, parameters); //TODO what happens if Context==null?
-			assert(results[0] instanceof Set);
-			Set<Place> placeNets = (Set<Place>) results[0];
-			assert(results[1] instanceof HashMap);
-			HashMap<String,String> newMap = (HashMap<String,String>) results[1];
+			Set<Place> placeNets = FlatLogProcessing.processFlatLogHiddenTagging(Context, flatLog, currentType, parameters); //TODO what happens if Context==null?
+			// testing if it does work when not creating places from casted taggedPlaces: Yes it works! :(
+//			Set<Place> placeNets = FlatLogProcessing.processFlatLogNoTagging(Context, flatLog, currentType, parameters);
 			Main.updateProgress("Finished discovery of place nets for object type "+currentType+".");
 
 			// unite place nets
 			placeNetsUnion.addAll(placeNets);
-			typeMap.putAll(newMap);
 		}
 		
 		// convert set of places to PlaceSet
 		PlaceSet placeSet = new PlaceSet(placeNetsUnion);
 		
-		return new Object[] {placeSet, typeMap};
+		return placeSet;
 	}
 	
 	/**
@@ -341,55 +398,192 @@ public class Main {
 		return lpmsTagged;
 	}
 	
-	public static OCLPMResult convertLPMstoOCLPMs (OCLPMDiscoveryParameters parameters, LPMResultsTagged tlpms, HashMap<String,String> typeMap) {
+	public static OCLPMResult convertLPMstoOCLPMs (OCLPMDiscoveryParameters parameters, LPMResultsTagged tlpms) {
 
-		OCLPMResult oclpmResult = new OCLPMResult(parameters, tlpms, typeMap);
+		OCLPMResult oclpmResult = new OCLPMResult(parameters, tlpms);
 		
-		// identify variable arcs
-		oclpmResult = Main.identifyVariableArcs(parameters, oclpmResult);
-		
-		// reevaluation of OCLPMs
-		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
+//		// identify variable arcs
+//		oclpmResult = Main.identifyVariableArcs(parameters, oclpmResult);
+//		
+//		// reevaluation of OCLPMs
+//		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
 		
 		return oclpmResult;
 	}
 	
-	public static OCLPMResult identifyVariableArcs (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult) {
+	/**
+	 * For each place adds all isomorphic places of different object types.
+	 * Completes the model such that the object flow is not interrupted if possible.
+	 * (Object flow = Tokens of a type entering a transition should also exit)
+	 * @param parameters
+	 * @param oclpmResult
+	 * @return
+	 */
+	public static OCLPMResult completePlaces (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult, PlaceSet placeSet) {
+		Main.messageNormal("Starting place completion.");
 		
+		// Identify equal OCLPMs (ignoring object type of places and variable arcs)
+		HashSet<Integer> deletionSet = new HashSet<Integer>(oclpmResult.getElements().size());
+		for (int i1 = 0; i1<oclpmResult.getElements().size(); i1++) {
+			if (deletionSet.contains(i1)) {
+				continue; // model is already tagged to be deleted
+			}
+			for (int i2 = i1+1; i2<oclpmResult.getElements().size(); i2++) {
+				if (deletionSet.contains(i2)) {
+					continue; // model is already tagged to be deleted
+				}
+				ObjectCentricLocalProcessModel oclpm1 = oclpmResult.getElement(i1);
+				ObjectCentricLocalProcessModel oclpm2 = oclpmResult.getElement(i2);
+				if (oclpm1.isIsomorphic(oclpm2)) {
+					deletionSet.add(i2);
+				}
+			}
+		}
+		// delete equal OCLPMs
+		HashSet<ObjectCentricLocalProcessModel> deleteModels = new HashSet<ObjectCentricLocalProcessModel>(deletionSet.size());
+		for (int i : deletionSet) {
+			deleteModels.add(oclpmResult.getElement(i));
+		}
+		for (ObjectCentricLocalProcessModel o : deleteModels) {
+			oclpmResult.remove(o);			
+		}
+		
+		// add places of other types to model if equal place already is in there
+		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+			Set<TaggedPlace> tmpPlaceSet = new HashSet<>(oclpm.getPlaces().size());
+			for (TaggedPlace tp : oclpm.getPlaces()) {
+				for (Place pNet : placeSet.getElements()) {
+					if (!tp.getObjectType().equals(((TaggedPlace) pNet).getObjectType())) { // different type?
+						if (tp.isIsomorphic((TaggedPlace)pNet)) { // exactly the same transitions?
+							tmpPlaceSet.add((TaggedPlace)pNet);
+						}
+					}
+				}
+			}
+			oclpm.addAllPlaces(tmpPlaceSet);
+		}
+		
+		Main.updateProgress("Finished place completion.");
+		
+		return oclpmResult;
+	}
+	
+	/**
+	 * Variable arc identification when place set is given.
+	 * @param parameters
+	 * @param oclpmResult
+	 * @return
+	 */
+	public static PlaceSet identifyVariableArcs (OCLPMDiscoveryParameters parameters, PlaceSet placeSet) {
+		switch (parameters.getVariableArcIdentification()) {
+			//TODO make it possible to skip variable arc identification (in case it has already been done or is not wanted)
+			case PER_PLACE:
+				Main.messageNormal("Starting variable arc identification per place.");
+				String type;
+				OcelEventLog ocel = parameters.getOcel();
+				for (Place p : placeSet.getElements()) {
+					TaggedPlace tp = (TaggedPlace) p;
+					type = tp.getObjectType();
+					
+					// get input activities
+					HashSet<String> inputActivities = new HashSet<>(tp.getInputTransitions().size());
+					for (Transition t : tp.getInputTransitions()) {
+						inputActivities.add(t.getLabel());
+					}
+					// get output activities
+					HashSet<String> outputActivities = new HashSet<>(tp.getOutputTransitions().size());
+					for (Transition t : tp.getOutputTransitions()) {
+						if (!inputActivities.contains(t.getLabel())) {
+							outputActivities.add(t.getLabel());
+						}
+					}
+					
+					// get all events of input activities
+					OcelEventLog filtered = ocel.cloneEmpty();
+					for (OcelEvent eve : ocel.events.values()) {
+						if (inputActivities.contains(eve.activity)) {
+							filtered.cloneEvent(eve);
+						}
+					}
+					filtered.register();
+					
+					// get all objects of input activities
+					Set<String> inputObjects = filtered.objects.keySet(); 
+					
+					// get all events of output activities with objects from the input activities
+					for (OcelEvent eve : ocel.events.values()) {
+						if (outputActivities.contains(eve.activity)) {
+							for (OcelObject object : eve.relatedObjects) {
+								if (	object.objectType.name.equals(type) // same type //TODO is .name the correct variable?
+										&& inputObjects.contains(object.id)) { 
+									filtered.cloneEvent(eve);
+									break;
+								}
+							}
+						}
+					}
+					filtered.register();
+					
+					// compute score on the filtered log
+					HashMap<List<String>,Double> score = OCELUtils.computeScore(filtered, type);
+					
+					// tag arcs
+					HashSet<String> variableActivities = new  HashSet<>(score.size());
+					score.forEach((key,value) -> {
+						if ( value < parameters.getVariableArcThreshold()) {
+							variableActivities.add(key.get(0));				
+						}
+					});
+					tp.setVariableArcActivities(variableActivities);
+					
+				}
+				break;
+			case WHOLE_LOG:
+			default:
+				Main.messageNormal("Starting variable arc identification using only the whole log.");
+				HashMap<String,HashSet<String>> typeToActivities = computeVariableArcsWholeLog(parameters);
+				
+				// iterate through the models and tag variable arcs
+				for (Place p : placeSet.getElements()) {
+					((TaggedPlace)p).setVariableArcActivities(typeToActivities.get(((TaggedPlace)p).getObjectType()));
+				}
+		}
+		Main.updateProgress("Completed variable arc identification.");
+		return placeSet;
+	}
+	
+	/**
+	 * Variable arc identification in case the plugin is started after the LPM discovery
+	 * @param parameters
+	 * @param oclpmResult
+	 * @return
+	 */
+	public static OCLPMResult identifyVariableArcs (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult) {
+		Main.messageNormal("Starting variable arc identification using only the whole log.");
+		parameters.setVariableArcIdentification(VariableArcIdentification.WHOLE_LOG);
+		
+		HashMap<String,HashSet<String>> typeToActivities = computeVariableArcsWholeLog(parameters);
+		
+		// iterate through the models and tag variable arcs
+		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+			for (TaggedPlace tp : oclpm.getPlaces()) {
+				tp.setVariableArcActivities(typeToActivities.get(tp.getObjectType()));
+			}
+		}
+		Main.updateProgress("Completed variable arc identification.");
+		return oclpmResult;
+	}
+	
+	/**
+	 * Computes a map which assigns each object type to all the activities with which the type has variable arcs
+	 * @param parameters
+	 * @return
+	 */
+	public static HashMap<String,HashSet<String>> computeVariableArcsWholeLog (OCLPMDiscoveryParameters parameters){
 		HashSet<List<String>> variableArcSet = new HashSet<>(); // saves all variable arcs [Activity,ObjectType]
 		
 		// compute score for each activity, objectType pair
-		HashMap<List<String>,Integer> scoreCountingSingles = new  HashMap<>(); // maps [Activity,ObjectType] to #events of activity and |OT|=1
-		HashMap<List<String>,Integer> scoreCountingAll = new  HashMap<>(); // maps [Activity,ObjectType] to #events of activity
-		HashMap<List<String>,Double> score = new HashMap<>(); // maps [Activity,ObjectType] to score (#events of act and |OT|=1 / #events of act)
-		HashMap<String,Integer> scoreCountingTmp = new HashMap<>(); // maps ObjectType to #objects in current event with this type
-		OcelEventLog ocel = parameters.getOcel();
-		String curOT, curAct;
-		for (OcelEvent event : ocel.getEvents().values()) {
-			curAct = event.activity;
-			// count objects present in event
-			for (OcelObject object : event.relatedObjects) {
-				curOT = object.objectType.name;
-				scoreCountingTmp.merge(curOT, 1, Integer::sum); // puts 1 if curOT not present, else adds 1 to it
-			}
-			for (String type : parameters.getObjectTypesAll()) {
-				if (scoreCountingTmp.containsKey(type) && scoreCountingTmp.get(type) == 1) {
-					scoreCountingSingles.merge(Arrays.asList(curAct, type), 1, Integer::sum);
-				}
-				scoreCountingAll.merge(Arrays.asList(curAct, type), 1, Integer::sum);
-			}
-			scoreCountingTmp.clear();
-		}
-		
-		// compute score from counting
-		scoreCountingAll.forEach((key,value) -> {
-			if (scoreCountingSingles.containsKey(key)) {
-				score.put(key, scoreCountingSingles.get(key)/(double)value);				
-			}
-			else {
-				score.put(key, 0.0);
-			}
-		});
+		HashMap<List<String>,Double> score = OCELUtils.computeScore(parameters.getOcel(), parameters.getObjectTypesAll()); // maps [Activity,ObjectType] to score (#events of act and |OT|=1 / #events of act)
 		
 		// Store variable arcs by comparing them to a threshold for the score
 		score.forEach((key,value) -> {
@@ -397,20 +591,37 @@ public class Main {
 				variableArcSet.add(key);				
 			}
 		});
-		oclpmResult.setVariableArcSet(variableArcSet);
 		
-		// iterate through the models and tag variable arcs
-//		parameters.getVariableArcThreshold(); // threshold for variable arc detection necessary
-		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
-			// TODO
+		// for each object type store which activities have variable arcs
+		HashMap<String,HashSet<String>> typeToActivities = new  HashMap<>();
+		String curType, curActivity;
+		for (List<String> activity_type : variableArcSet) {
+			curType = activity_type.get(1);
+			curActivity = activity_type.get(0);
+			if (!typeToActivities.containsKey(curType)) {
+				typeToActivities.put(curType, new HashSet<>(Arrays.asList(curActivity)));
+			}
+			else {
+				typeToActivities.get(curType).add(curActivity);
+			}
 			
 		}
-		
-		return oclpmResult;
+		return typeToActivities;
 	}
 	
 	public static OCLPMResult evaluateOCLPMs (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult) {
 		// TODO
+		return oclpmResult;
+	}
+	
+	public static OCLPMResult postProcessing (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult) {
+		
+		// store place id -> object type map to use in visualizer
+		oclpmResult.createTypeMap();
+		
+		// write variable arcs into result map to use in visualizer
+		oclpmResult.storeVariableArcs();
+		
 		return oclpmResult;
 	}
 	
@@ -466,6 +677,17 @@ public class Main {
 				numSteps += 1;
 			}
 		}
+		
+		// place completion
+		if (parameters.doPlaceCompletion()) {
+			numSteps += 1;
+		}
+		
+		// variable arc identification
+		if (parameters.doVariableArcIdentification()) {
+			numSteps += 1;
+		}
+		
 		Main.setUp(context, 0, numSteps);
 	}
 	

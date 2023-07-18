@@ -1,5 +1,8 @@
 package org.processmining.OCLPMDiscovery.utils;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.processmining.ocel.ocelobjects.OcelEvent;
@@ -106,5 +109,55 @@ public class OCELUtils {
 			activities.add(eve.activity);
 		}
 		return activities;
+	}
+	
+	/**
+	 * Returns map which maps [Activity,ObjectType] to score (#events of act and |OT|=1 / #events of act)
+	 * @param ocel
+	 * @param objectTypes There might be types for which we don't want to compute the score
+	 * @return
+	 */
+	public static HashMap<List<String>,Double> computeScore(OcelEventLog ocel, Set<String> objectTypes){
+		HashMap<List<String>,Integer> scoreCountingSingles = new  HashMap<>(); // maps [Activity,ObjectType] to #events of activity and |OT|=1
+		HashMap<List<String>,Integer> scoreCountingAll = new  HashMap<>(); // maps [Activity,ObjectType] to #events of activity
+		HashMap<List<String>,Double> score = new HashMap<>(); // maps [Activity,ObjectType] to score (#events of act and |OT|=1 / #events of act)
+		HashMap<String,Integer> scoreCountingTmp = new HashMap<>(); // maps ObjectType to #objects in current event with this type
+		String curOT, curAct;
+		for (OcelEvent event : ocel.getEvents().values()) {
+			curAct = event.activity;
+			// count objects present in event
+			for (OcelObject object : event.relatedObjects) {
+				curOT = object.objectType.name;
+				scoreCountingTmp.merge(curOT, 1, Integer::sum); // puts 1 if curOT not present, else adds 1 to it
+			}
+			for (String type : objectTypes) {
+				if (scoreCountingTmp.containsKey(type) && scoreCountingTmp.get(type) == 1) {
+					scoreCountingSingles.merge(Arrays.asList(curAct, type), 1, Integer::sum);
+				}
+				scoreCountingAll.merge(Arrays.asList(curAct, type), 1, Integer::sum);
+			}
+			scoreCountingTmp.clear();
+		}
+		
+		// compute score from counting
+		scoreCountingAll.forEach((key,value) -> {
+			if (scoreCountingSingles.containsKey(key)) {
+				score.put(key, scoreCountingSingles.get(key)/(double)value);				
+			}
+			else {
+				score.put(key, 0.0);
+			}
+		});
+		return score;
+	}
+	
+	/**
+	 * Returns map which maps [Activity,ObjectType] to score (#events of act and |OT|=1 / #events of act)
+	 * @param ocel
+	 * @param objectType
+	 * @return
+	 */
+	public static HashMap<List<String>,Double> computeScore(OcelEventLog ocel, String objectType){
+		return computeScore(ocel, new HashSet<String>(Arrays.asList(objectType)));
 	}
 }

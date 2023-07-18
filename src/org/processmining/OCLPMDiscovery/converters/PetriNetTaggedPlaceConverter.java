@@ -177,6 +177,54 @@ public class PetriNetTaggedPlaceConverter extends AbstractPlaceConverter<Accepti
         return discoveredPlaces;
     }
     
+    /**
+     * Converts Petri net to places without tagging
+     * @param result input petri net
+     * @return
+     */
+    public Set<Place> convertNoTagging(AcceptingPetriNet result) {
+        Set<Place> discoveredPlaces = new HashSet<>();
+        // create transitions
+        Set<Transition> transitions = new HashSet<>();
+        for (org.processmining.models.graphbased.directed.petrinet.elements.Transition t : result.getNet().getTransitions()) {
+            String label = t.getLabel();
+            if (t.isInvisible())
+                label = t.getLabel() + "-" + t.getId().toString();
+            transitions.add(new Transition(label, t.isInvisible()));
+        }
+        Map<String, Transition> transitionMap = TransitionUtils.mapLabelsIntoTransitions(transitions);
+
+
+        Collection<org.processmining.models.graphbased.directed.petrinet.elements.Place> pnPlaces = result.getNet().getPlaces();
+        for (org.processmining.models.graphbased.directed.petrinet.elements.Place pnPlace : pnPlaces) { // for every place
+            Place place = new Place(); // create a place
+
+            // add all input transitions
+            result.getNet().getInEdges(pnPlace)
+                    .stream()
+                    .map(edge -> (org.processmining.models.graphbased.directed.petrinet.elements.Transition) edge.getSource())
+                    .forEach(transition -> {
+                        if (transition.isInvisible())
+                            place.addInputTransition(transitionMap.get(transition.getLabel() + "-" + transition.getId().toString()));
+                        else
+                            place.addInputTransition(transitionMap.get(transition.getLabel()));
+                    });
+
+            // add all output transitions
+            result.getNet().getOutEdges(pnPlace)
+                    .stream()
+                    .map(edge -> (org.processmining.models.graphbased.directed.petrinet.elements.Transition) edge.getTarget())
+                    .forEach(transition -> {
+                        if (transition.isInvisible())
+                            place.addOutputTransition(transitionMap.get(transition.getLabel() + "-" + transition.getId().toString()));
+                        else
+                            place.addOutputTransition(transitionMap.get(transition.getLabel()));
+                    });
+            discoveredPlaces.add(place);
+        }
+        return discoveredPlaces;
+    }
+    
     public Set<TaggedPlace> convertToTagged(AcceptingPetriNet result) {
         Set<TaggedPlace> discoveredTaggedPlaces = new HashSet<>();
         Set<Place> discoveredPlaces = new HashSet<>();

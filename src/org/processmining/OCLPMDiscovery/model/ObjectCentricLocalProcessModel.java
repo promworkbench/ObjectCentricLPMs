@@ -40,7 +40,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
     private OCLPMAdditionalInfo additionalInfo;
 	
 	// leading types for which this OCLPM has been discovered
-	private final HashSet<String> discoveryTypes = new HashSet<String>();;
+	private final HashSet<String> discoveryTypes = new HashSet<String>();
 	
 	public ObjectCentricLocalProcessModel() {
         // setup oclpm
@@ -61,10 +61,9 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
         this.lpm = lpm;
         
         this.id = lpm.getId();
-        //TODO change places to tagged places
         Set<TaggedPlace> tplaces = new HashSet<TaggedPlace>();
         for (Place p : lpm.getPlaces()) {
-        	tplaces.add(new TaggedPlace(p));
+        	tplaces.add((TaggedPlace) p);
         }
         this.addAllPlaces(tplaces); // adds also the transitions, places, arcs
         this.setAdditionalInfo(new OCLPMAdditionalInfo(lpm.getAdditionalInfo()));
@@ -261,6 +260,31 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 
 	public void setLpm(LocalProcessModel lpm) {
 		this.lpm = lpm;
+	}
+
+	/**
+	 * Check if the OCLPMs have equal places (ignoring object type of places and variable arcs)
+	 * @param oclpm2
+	 * @return
+	 */
+	public boolean isIsomorphic(ObjectCentricLocalProcessModel oclpm2) {
+		if (this.getPlaces().size() != oclpm2.getPlaces().size()) {
+			return false;
+		}
+		Boolean found = false;
+		for (TaggedPlace p1 : this.getPlaces()) {
+			for (TaggedPlace p2 : oclpm2.getPlaces()) {
+				if (p1.isIsomorphic(p2)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				return false;
+			}
+			found = false;
+		}
+		return true;
 	}
 
 }
