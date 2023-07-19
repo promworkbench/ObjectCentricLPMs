@@ -2,7 +2,8 @@ package org.processmining.OCLPMDiscovery.parameters;
 
 public enum VariableArcIdentification {
 	WHOLE_LOG ("Score on whole log"), // Computes score[Activity,ObjectType] on all events
-	PER_PLACE ("Score per place")// Computes the score for each place separately such that only events are considered which might be replayed on the place
+	PER_PLACE ("Score per place"), // Computes the score for each place separately such that only events are considered which might be replayed on the place
+	NONE ("Skip discovery") // skip variable arc identification (in case it has already been done or is not wanted)
 //	PER_LPM ("") // Future work
 	;
 	

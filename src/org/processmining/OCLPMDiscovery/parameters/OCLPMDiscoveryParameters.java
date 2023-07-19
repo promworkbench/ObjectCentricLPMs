@@ -18,7 +18,7 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	private DefaultListModel<String> objectTypesList = new DefaultListModel<String>();
 	private Set<String> objectTypesPlaceNets; // object types for which the log is flattened and place nets are discovered
 	private Set<String> objectTypesLeadingTypes; // object types which are used as leading types for discovering process executions
-	private Set<String> objectTypesCaseNotion; // object types considered when doint case notion discovery
+	private Set<String> objectTypesCaseNotion; // object types considered when doing case notion discovery
 	
 	// place discovery
 	private SPECppParameters specppParameters;
@@ -36,6 +36,13 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	// set defaults
 	private Miner placeDiscoveryAlgorithm 			= Miner.SPECPP;
 	private CaseNotionStrategy caseNotionStrategy 	= CaseNotionStrategy.PE_LEADING_RELAXED_O2;
+	
+	// TODO Make the following also adjustable in the GUI?
+		// placeSetPostProcessing
+		// doVariableArcIdentification
+		// variableArcIdentification
+		// variableArcThreshold
+		// placeCompletion
 	
 	public OCLPMDiscoveryParameters(OcelEventLog ocel) {
 		this.setOcel(ocel);

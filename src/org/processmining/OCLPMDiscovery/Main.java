@@ -544,7 +544,8 @@ public class Main {
 	 */
 	public static PlaceSet identifyVariableArcs (OCLPMDiscoveryParameters parameters, PlaceSet placeSet) {
 		switch (parameters.getVariableArcIdentification()) {
-			//TODO make it possible to skip variable arc identification (in case it has already been done or is not wanted)
+			case NONE:
+				break;
 			case PER_PLACE:
 				Main.messageNormal("Starting variable arc identification per place.");
 				String type;
@@ -627,18 +628,23 @@ public class Main {
 	 * @return
 	 */
 	public static OCLPMResult identifyVariableArcs (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult) {
-		Main.messageNormal("Starting variable arc identification using only the whole log.");
-		parameters.setVariableArcIdentification(VariableArcIdentification.WHOLE_LOG);
-		
-		HashMap<String,HashSet<String>> typeToActivities = computeVariableArcsWholeLog(parameters);
-		
-		// iterate through the models and tag variable arcs
-		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
-			for (TaggedPlace tp : oclpm.getPlaces()) {
-				tp.setVariableArcActivities(typeToActivities.get(tp.getObjectType()));
-			}
+		switch (parameters.getVariableArcIdentification()) {
+			case NONE:
+				break;
+			default:
+				Main.messageNormal("Starting variable arc identification using only the whole log.");
+				parameters.setVariableArcIdentification(VariableArcIdentification.WHOLE_LOG);
+				
+				HashMap<String,HashSet<String>> typeToActivities = computeVariableArcsWholeLog(parameters);
+				
+				// iterate through the models and tag variable arcs
+				for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+					for (TaggedPlace tp : oclpm.getPlaces()) {
+						tp.setVariableArcActivities(typeToActivities.get(tp.getObjectType()));
+					}
+				}
+				Main.updateProgress("Completed variable arc identification.");
 		}
-		Main.updateProgress("Completed variable arc identification.");
 		return oclpmResult;
 	}
 	
