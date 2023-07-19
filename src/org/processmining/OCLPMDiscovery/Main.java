@@ -573,7 +573,7 @@ public class Main {
 							filtered.cloneEvent(eve);
 						}
 					}
-					filtered.register();
+//					filtered.register(); // registering would duplicate the objects because the cloning already adds the object, not just the identifier
 					
 					// get all objects of input activities
 					Set<String> inputObjects = filtered.objects.keySet(); 
@@ -582,7 +582,7 @@ public class Main {
 					for (OcelEvent eve : ocel.events.values()) {
 						if (outputActivities.contains(eve.activity)) {
 							for (OcelObject object : eve.relatedObjects) {
-								if (	object.objectType.name.equals(type) // same type //TODO is .name the correct variable?
+								if (	object.objectType.name.equals(type) // same type
 										&& inputObjects.contains(object.id)) { 
 									filtered.cloneEvent(eve);
 									break;
@@ -590,7 +590,7 @@ public class Main {
 							}
 						}
 					}
-					filtered.register();
+//					filtered.register();
 					
 					// compute score on the filtered log
 					HashMap<List<String>,Double> score = OCELUtils.computeScore(filtered, type);
