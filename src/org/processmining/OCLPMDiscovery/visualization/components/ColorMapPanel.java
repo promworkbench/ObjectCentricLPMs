@@ -30,7 +30,7 @@ public class ColorMapPanel extends JPanel implements Scrollable {
 
     public ColorMapPanel(HashMap<String, Color> colorMap) {
         this.colorMap = colorMap;
-        setPreferredSize(new Dimension(200, (colorMap.size()+2) * cellHeight)); // +1 for the legend, +1 for variable arc
+        setPreferredSize(new Dimension(200, (colorMap.size()+3) * cellHeight)); // +1 for the legend, +2 for arcs
         this.setBackground(this.theme.BACKGROUND);
         this.setForeground(this.theme.BACKGROUND);
         for (Component component : this.getComponents()) {
@@ -70,10 +70,10 @@ public class ColorMapPanel extends JPanel implements Scrollable {
             g.setColor(Color.BLACK);
             i++;
         }
-        // paint variable arc
+        // paint usual arc
         g.setColor(theme.ELEMENTS);
         Graphics2D g2d = (Graphics2D) g;
-        g2d.setStroke(new BasicStroke(4, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
+        g2d.setStroke(new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
         int arrowYPos = (i*cellHeight)+rowSeparation+cellHeight/2;
         int apex = rowSeparation + diameter + 10;
         // Arrowshaft
@@ -83,6 +83,24 @@ public class ColorMapPanel extends JPanel implements Scrollable {
         // Arrowhead
         int[] xTriangle = {apex-20, apex, apex-20};
         int[] yTriangle = {arrowYPos-10, arrowYPos, arrowYPos+10};
+        g.fillPolygon(xTriangle, yTriangle, xTriangle.length);
+        // ArrowText
+        g.setColor(theme.TEXT);
+        g.drawString("Arc", apex+textDistance, (i + 1) * cellHeight - 10);
+        
+        // paint variable arc
+        i++;
+        g.setColor(theme.ELEMENTS.darker());
+        g2d.setStroke(new BasicStroke(6, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
+        arrowYPos = (i*cellHeight)+rowSeparation+cellHeight/2;
+        apex = rowSeparation + diameter + 10;
+        // Arrowshaft
+        xPoints[0] = rowSeparation; xPoints[1]= apex-5;
+        yPoints[0] = arrowYPos; yPoints[1] = arrowYPos;
+        g.drawPolyline(xPoints, yPoints, xPoints.length);
+        // Arrowhead
+        xTriangle[0] = apex-20; xTriangle[1] = apex; xTriangle[2] = apex-20;
+        yTriangle[0] = arrowYPos-10; yTriangle[1] = arrowYPos; yTriangle[2] = arrowYPos+10;
         g.fillPolygon(xTriangle, yTriangle, xTriangle.length);
         // ArrowText
         g.setColor(theme.TEXT);

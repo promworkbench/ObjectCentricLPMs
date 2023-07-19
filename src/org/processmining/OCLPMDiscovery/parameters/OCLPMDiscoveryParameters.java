@@ -28,7 +28,7 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	
 	// variable arc identification
 	private boolean doVariableArcIdentification = true;
-	private VariableArcIdentification variableArcIdentification = VariableArcIdentification.WHOLE_LOG;
+	private VariableArcIdentification variableArcIdentification = VariableArcIdentification.PER_PLACE;
 	private float variableArcThreshold = 0.95f; // threshold which the score function is compared against
 	
 	private Boolean placeCompletion = false; // adds equal places to models but of different types

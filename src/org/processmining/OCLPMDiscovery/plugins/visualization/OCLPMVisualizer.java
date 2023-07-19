@@ -36,15 +36,12 @@ public class OCLPMVisualizer {
         if (oclpm == null)
             throw new IllegalArgumentException("The local process model to be visualized should not be null: " + oclpm);
         AcceptingPetriNet net = OCLPMUtils.getAcceptingPetriNetRepresentation(oclpm);
-//        ReduceUsingMurataRulesPlugin reductorPlugin = new ReduceUsingMurataRulesPlugin();
-//        net = reductorPlugin.runDefault(context, net);
         
         int windowHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
         int windowWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
         
         // Petri Net on the left
         OCLPMScrollPane petriNetPane = new OCLPMScrollPane((new CustomAcceptingPetriNetVisualizer()).visualize(context, net, oclpmResult, theme), theme);
-//        component.add((new CustomAcceptingPetriNetVisualizer()).visualize(context, net, oclpmResult));
         
         // Color Legend
         OCLPMScrollPane colorPane = new OCLPMScrollPane(new ColorMapPanel(oclpmResult.getMapTypeColor(), theme), theme);
@@ -73,9 +70,6 @@ public class OCLPMVisualizer {
         OCLPMScrollPane settingsPane = new OCLPMScrollPane(settingsComponent, theme);
         OCLPMTextArea ta_discoverySettings = new OCLPMTextArea(oclpmResult.getOclpmDiscoverySettings(), false, false, theme);
         settingsComponent.add(ta_discoverySettings);
-        
-        // ?
-//        evalComponent.add(new JLabel("Histogram"));
         
         // Component on the right
         OCLPMSplitPane sp_R1 = new OCLPMSplitPane(JSplitPane.VERTICAL_SPLIT, theme, 0);

@@ -109,16 +109,18 @@ public class CustomAcceptingPetriNetVisualizer {
         	// show object type of place when hovering over it
         	map.putViewSpecific(p, AttributeMap.TOOLTIP, type);
         	
+        	map.putViewSpecific(arc, AttributeMap.EDGECOLOR, oclpmResult.getMapTypeColor().get(type)); // color arc according to connected place
+        	
         	// variable arcs
         	if (oclpmResult.getVariableArcActivities().get(p.getLabel()).contains(activity)) {
-        		map.putViewSpecific(arc, AttributeMap.TOOLTIP, "Variable Arc of type "+type);
-        		map.putViewSpecific(arc, AttributeMap.LINEWIDTH, 2f);
-        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, Color.GRAY);
-        		map.putViewSpecific(arc, AttributeMap.LABEL, "variable");
-        		map.putViewSpecific(arc, AttributeMap.SHOWLABEL, true);
-//        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, theme.ELEMENTS); // color of variable arcs
+        		map.putViewSpecific(arc, AttributeMap.TOOLTIP, "Variable Arc");
+        		map.putViewSpecific(arc, AttributeMap.LINEWIDTH, 2.5f);
+//        		map.putViewSpecific(arc, AttributeMap.LABEL, "variable");
+//        		map.putViewSpecific(arc, AttributeMap.SHOWLABEL, true);
+        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, oclpmResult.getMapTypeColor().get(type).darker());
         		
-        		//TODO change the variable edge to be recognizable
+        		// change the variable edge to be recognizable
+        			// made them darker and thicker...
 
         		// doesn't work:
 //        		map.putViewSpecific(arc, AttributeMap.SHAPE, ArrowType.ARROWTYPE_DOUBLELINE);
@@ -139,10 +141,9 @@ public class CustomAcceptingPetriNetVisualizer {
 //        		map.putViewSpecific(arc, AttributeMap.LABELALONGEDGE, "testing");
 //        		map.putViewSpecific(arc, AttributeMap.POLYGON_POINTS, 5);
         	}
-//        	else {
-//        		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, theme.TEXT); // color of other arcs
-//        	}
-        	map.putViewSpecific(arc, AttributeMap.EDGECOLOR, oclpmResult.getMapTypeColor().get(type)); // color arc according to connected place
+        	else {
+        		map.putViewSpecific(arc, AttributeMap.TOOLTIP, "Normal Arc");
+        	}
         }
         
         // change general color theme
