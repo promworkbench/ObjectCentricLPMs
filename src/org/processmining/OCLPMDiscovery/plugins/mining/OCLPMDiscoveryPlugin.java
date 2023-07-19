@@ -1,7 +1,6 @@
 package org.processmining.OCLPMDiscovery.plugins.mining;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
@@ -111,46 +110,48 @@ public class OCLPMDiscoveryPlugin {
 			return null;		
 
 		parameters.setPlaceCompletion(true);
+		parameters.setVariableArcIdentification(VariableArcIdentification.PER_PLACE);
+		
 		Main.setUp(context, parameters, false, true);
 		Object[] result = Main.run(ocel, parameters, placeSet);
 		return (OCLPMResult) result[0];
 	}
 	
 	// variant skipping the place net discovery and object graph computation
-		@UITopiaVariant(
-				affiliation = "RWTH - PADS",
-				author = "Marvin Porsil",
-				email = "marvin.porsil@rwth-aachen.de",
-				uiLabel = "Object-Centric Local Process Model Discovery given place set and object graph."
-		)
-		@PluginVariant(
-				variantLabel = "Object-Centric Local Process Model Discovery",
-				requiredParameterLabels = {0,1,6}
-		)
-		public static OCLPMResult mineOCLPMs (
-				UIPluginContext context, OcelEventLog ocel, PlaceSet placeSet, Graph<String,DefaultEdge> graph
-				) throws Exception {
-			
-			if (!(placeSet.getList().getElement(0) instanceof TaggedPlace)) {
-				throw new Exception("Given places aren't tagged with object types.");
-			}
-			
-			OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
-
-			OCLPMDiscoveryWizard wizard = OCLPMDiscoveryWizard.setUp(parameters, false, true);
-			
-			// show wizard
-			parameters = ProMWizardDisplay.show(context, wizard, parameters);
-
-			if (parameters == null)
-				return null;		
-
-			parameters.setPlaceCompletion(true);
-			Main.setUp(context, parameters, false, true);
-			Main.setGraph(graph);
-			Object[] result = Main.run(ocel, parameters, placeSet);
-			return (OCLPMResult) result[0];
+	@UITopiaVariant(
+			affiliation = "RWTH - PADS",
+			author = "Marvin Porsil",
+			email = "marvin.porsil@rwth-aachen.de",
+			uiLabel = "Object-Centric Local Process Model Discovery given place set and object graph."
+	)
+	@PluginVariant(
+			variantLabel = "Object-Centric Local Process Model Discovery",
+			requiredParameterLabels = {0,1,6}
+	)
+	public static OCLPMResult mineOCLPMs (
+			UIPluginContext context, OcelEventLog ocel, PlaceSet placeSet, Graph<String,DefaultEdge> graph
+			) throws Exception {
+		
+		if (!(placeSet.getList().getElement(0) instanceof TaggedPlace)) {
+			throw new Exception("Given places aren't tagged with object types.");
 		}
+		
+		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
+
+		OCLPMDiscoveryWizard wizard = OCLPMDiscoveryWizard.setUp(parameters, false, true);
+		
+		// show wizard
+		parameters = ProMWizardDisplay.show(context, wizard, parameters);
+
+		if (parameters == null)
+			return null;		
+
+		parameters.setPlaceCompletion(true);
+		Main.setUp(context, parameters, false, true);
+		Main.setGraph(graph);
+		Object[] result = Main.run(ocel, parameters, placeSet);
+		return (OCLPMResult) result[0];
+	}
 	
 	// variant skipping the place net and LPM discovery
 	@UITopiaVariant(
@@ -161,14 +162,17 @@ public class OCLPMDiscoveryPlugin {
 	)
 	@PluginVariant(
 			variantLabel = "Object-Centric Local Process Model Discovery given hashmap of object types and LPMs.",
-			requiredParameterLabels = {0,2,5}
+			requiredParameterLabels = {0,5}
 	)
-	public static OCLPMResult mineOCLPMs(PluginContext context, OcelEventLog ocel, HashMap<String,String> typeMap, LPMResult lpms) {
-		//TODO is this type map stuff still working?
+	public static OCLPMResult mineOCLPMs(PluginContext context, OcelEventLog ocel, LPMResult lpms) throws Exception {
+		// only works if lpms have tagged places
+		if (! (lpms.getElement(0).getPlaces().toArray()[0] instanceof TaggedPlace)) {
+			throw new Exception("Places of LPM aren't tagged with object types.");
+		}
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel); // TODO OCEL necessary?
 		parameters.setCaseNotionStrategy(CaseNotionStrategy.DUMMY); // TODO make user selectable
 		Main.setUp(context, parameters, false, false);
-		return (OCLPMResult) Main.run(ocel, parameters, typeMap, lpms)[0];
+		return (OCLPMResult) Main.run(ocel, parameters, lpms)[0];
 	}
 	
 	// variant accepting enhanced ocel (ocel which already has case notions to be used for LPM discovery)
@@ -204,20 +208,20 @@ public class OCLPMDiscoveryPlugin {
 		return (OCLPMResult) result[0];
 	}
 	
-	// variant skipping the place net and LPM discovery
-	@UITopiaVariant(
-			affiliation = "RWTH - PADS",
-			author = "Marvin Porsil",
-			email = "marvin.porsil@rwth-aachen.de",
-			uiLabel = "Repair OCLPMResult"
-	)
-	@PluginVariant(
-			variantLabel = "Repair OCLPMResult",
-			requiredParameterLabels = {8}
-	)
-	public static OCLPMResult mineOCLPMs(PluginContext context, OCLPMResult result) {
-		return (OCLPMResult) Main.postProcessing(null, result);
-	}
+	// just the post processing (only used this for testing)
+//	@UITopiaVariant(
+//			affiliation = "RWTH - PADS",
+//			author = "Marvin Porsil",
+//			email = "marvin.porsil@rwth-aachen.de",
+//			uiLabel = "Repair OCLPMResult"
+//	)
+//	@PluginVariant(
+//			variantLabel = "Repair OCLPMResult",
+//			requiredParameterLabels = {8}
+//	)
+//	public static OCLPMResult mineOCLPMs(PluginContext context, OCLPMResult result) {
+//		return (OCLPMResult) Main.postProcessing(null, result);
+//	}
 	
 	//==============================================
 	// TODO all variants without UI

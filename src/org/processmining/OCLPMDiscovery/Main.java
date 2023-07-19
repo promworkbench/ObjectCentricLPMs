@@ -32,6 +32,7 @@ import org.processmining.placebasedlpmdiscovery.model.Place;
 import org.processmining.placebasedlpmdiscovery.model.Transition;
 import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
 import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
+import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableList;
 import org.processmining.placebasedlpmdiscovery.plugins.mining.PlaceBasedLPMDiscoveryPlugin;
 
 public class Main {
@@ -91,6 +92,13 @@ public class Main {
 	 * @return {oclpmResult, tlpms}
 	 */
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet) {
+		
+		// remove duplicate places from placeSet
+		if (parameters.doPlaceSetPostProcessing()) {
+			placeSet = Main.postProcessPlaceSet(placeSet);
+			ProvidingObjects.exportPlaceSet(placeSet);
+		}
+		
 		// identify variable arcs
 		placeSet = Main.identifyVariableArcs(parameters, placeSet);
 		
@@ -101,7 +109,9 @@ public class Main {
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
 		
 		// OCLPM place completion
-		oclpmResult = Main.completePlaces(parameters, oclpmResult, placeSet);
+		if (parameters.doPlaceCompletion()) {
+			oclpmResult = Main.completePlaces(parameters, oclpmResult, placeSet);
+		}
 		
 		// reevaluation of OCLPMs
 		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
@@ -120,6 +130,12 @@ public class Main {
 	 * @return {oclpmResult, tlpms}
 	 */
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet, ArrayList<String> labels) {
+		// remove duplicate places from placeSet
+		if (parameters.doPlaceSetPostProcessing()) {
+			placeSet = Main.postProcessPlaceSet(placeSet);
+			ProvidingObjects.exportPlaceSet(placeSet);
+		}
+		
 		// identify variable arcs
 		placeSet = Main.identifyVariableArcs(parameters, placeSet);
 		
@@ -130,7 +146,9 @@ public class Main {
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
 		
 		// OCLPM place completion
-		oclpmResult = Main.completePlaces(parameters, oclpmResult, placeSet);
+		if (parameters.doPlaceCompletion()) {
+			oclpmResult = Main.completePlaces(parameters, oclpmResult, placeSet);
+		}
 		
 		// reevaluation of OCLPMs
 		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
@@ -173,7 +191,7 @@ public class Main {
 	 * @param parameters
 	 * @return {oclpmResult, tlpms}
 	 */
-	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, HashMap<String,String> typeMap, LPMResult lpms) {
+	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, LPMResult lpms) {
         LPMResultsTagged tlpms = new LPMResultsTagged(lpms,"Single Case Notion");
         ProvidingObjects.exportTlpms(tlpms);
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
@@ -260,9 +278,44 @@ public class Main {
 		// convert set of places to PlaceSet
 		PlaceSet placeSet = new PlaceSet(placeNetsUnion);
 		
+		// remove duplicate place nets
+		placeSet = postProcessPlaceSet(placeSet);
+		
 		return placeSet;
 	}
-	
+
+	public static PlaceSet postProcessPlaceSet(PlaceSet placeSet) {
+		Main.messageNormal("Starting place set post processing.");
+		// Identify equal OCLPMs (ignoring variable arcs)
+		HashSet<Integer> deletionSet = new HashSet<Integer>(placeSet.size());
+		SerializableList<Place> placeList = placeSet.getList();
+		for (int i1 = 0; i1<placeSet.size()-1; i1++) {
+			if (deletionSet.contains(i1)) {
+				continue; // place is already tagged to be deleted
+			}
+			for (int i2 = i1+1; i2<placeSet.size(); i2++) {
+				if (deletionSet.contains(i2)) {
+					continue; // place is already tagged to be deleted
+				}
+				TaggedPlace tp1 = (TaggedPlace) placeList.getElement(i1);
+				TaggedPlace tp2 = (TaggedPlace) placeList.getElement(i2);
+				if (tp1.isEqual(tp2)) {
+					deletionSet.add(i2);
+				}
+			}
+		}
+		// delete equal places
+		HashSet<Place> deletePlaces = new HashSet<Place>(deletionSet.size());
+		for (int i : deletionSet) {
+			deletePlaces.add(placeList.getElement(i));
+		}
+		for (Place p : deletePlaces) {
+			placeSet.remove(p);			
+		}
+		Main.messageNormal("Completed place set post processing.");
+		return placeSet;
+	}
+
 	/**
 	 * LPM discovery with given case notions in the OCEL
 	 * @param ocel
@@ -422,9 +475,39 @@ public class Main {
 	public static OCLPMResult completePlaces (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult, PlaceSet placeSet) {
 		Main.messageNormal("Starting place completion.");
 		
-		// Identify equal OCLPMs (ignoring object type of places and variable arcs)
+		// add places of other types to model if both: 
+			// equal place already is in there 
+			// the other types are already present in the net
+		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+			Set<TaggedPlace> tmpPlaceSet = new HashSet<>(oclpm.getPlaces().size());
+			Set<String> placeTypes = oclpm.getPlaceTypes();
+			for (TaggedPlace tp : oclpm.getPlaces()) {
+				for (Place pNet : placeSet.getElements()) {
+					if (
+						!tp.getObjectType().equals(((TaggedPlace) pNet).getObjectType()) // different type
+						&& placeTypes.contains(((TaggedPlace) pNet).getObjectType()) // type already occurs in the oclpm
+						&& tp.isIsomorphic((TaggedPlace)pNet) // exactly the same transitions
+							) {
+						// check if place already is in the oclpm
+						boolean alreadyInThere = false;
+						for (TaggedPlace p2 : oclpm.getPlaces()) {
+							if (p2.equals((TaggedPlace)pNet)) {
+								alreadyInThere = true;
+								break;
+							}
+						}
+						if (!alreadyInThere) {
+							tmpPlaceSet.add((TaggedPlace)pNet);
+						}
+					}
+				}
+			}
+			oclpm.addAllPlaces(tmpPlaceSet);
+		}
+		
+		// Identify equal OCLPMs (ignoring variable arcs)
 		HashSet<Integer> deletionSet = new HashSet<Integer>(oclpmResult.getElements().size());
-		for (int i1 = 0; i1<oclpmResult.getElements().size(); i1++) {
+		for (int i1 = 0; i1<oclpmResult.getElements().size()-1; i1++) {
 			if (deletionSet.contains(i1)) {
 				continue; // model is already tagged to be deleted
 			}
@@ -434,7 +517,7 @@ public class Main {
 				}
 				ObjectCentricLocalProcessModel oclpm1 = oclpmResult.getElement(i1);
 				ObjectCentricLocalProcessModel oclpm2 = oclpmResult.getElement(i2);
-				if (oclpm1.isIsomorphic(oclpm2)) {
+				if (oclpm1.isEqual(oclpm2)) {
 					deletionSet.add(i2);
 				}
 			}
@@ -446,21 +529,6 @@ public class Main {
 		}
 		for (ObjectCentricLocalProcessModel o : deleteModels) {
 			oclpmResult.remove(o);			
-		}
-		
-		// add places of other types to model if equal place already is in there
-		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
-			Set<TaggedPlace> tmpPlaceSet = new HashSet<>(oclpm.getPlaces().size());
-			for (TaggedPlace tp : oclpm.getPlaces()) {
-				for (Place pNet : placeSet.getElements()) {
-					if (!tp.getObjectType().equals(((TaggedPlace) pNet).getObjectType())) { // different type?
-						if (tp.isIsomorphic((TaggedPlace)pNet)) { // exactly the same transitions?
-							tmpPlaceSet.add((TaggedPlace)pNet);
-						}
-					}
-				}
-			}
-			oclpm.addAllPlaces(tmpPlaceSet);
 		}
 		
 		Main.updateProgress("Finished place completion.");

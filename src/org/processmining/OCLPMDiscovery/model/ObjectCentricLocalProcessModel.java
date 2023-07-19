@@ -42,6 +42,9 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	// leading types for which this OCLPM has been discovered
 	private final HashSet<String> discoveryTypes = new HashSet<String>();
 	
+	// the object types of places in the model 
+	private Set<String> placeTypes = new HashSet<String>();
+	
 	public ObjectCentricLocalProcessModel() {
         // setup oclpm
 		this.id = UUID.randomUUID().toString();
@@ -146,6 +149,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
             return;
 
         places.add(place);
+        this.placeTypes.add(place.getObjectType());
 
         for (Transition transition : place.getInputTransitions()) {
             Arc arc = new Arc(place, transition, true);
@@ -275,6 +279,39 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		for (TaggedPlace p1 : this.getPlaces()) {
 			for (TaggedPlace p2 : oclpm2.getPlaces()) {
 				if (p1.isIsomorphic(p2)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				return false;
+			}
+			found = false;
+		}
+		return true;
+	}
+
+	/**
+	 *  the object types of places in the model
+	 * @return
+	 */
+	public Set<String> getPlaceTypes() {
+		return this.placeTypes;
+	}
+
+	/**
+	 * Check if the OCLPMs have equal places (ignoring only variable arcs)
+	 * @param oclpm2
+	 * @return
+	 */
+	public boolean isEqual(ObjectCentricLocalProcessModel oclpm2) {
+		if (this.getPlaces().size() != oclpm2.getPlaces().size()) {
+			return false;
+		}
+		Boolean found = false;
+		for (TaggedPlace p1 : this.getPlaces()) {
+			for (TaggedPlace p2 : oclpm2.getPlaces()) {
+				if (p1.isEqual(p2)) {
 					found = true;
 					break;
 				}

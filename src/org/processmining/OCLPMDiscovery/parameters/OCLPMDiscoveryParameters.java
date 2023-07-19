@@ -24,6 +24,7 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	private SPECppParameters specppParameters;
 	private XLogHybridILPMinerParametersImpl ilpParameters;
 	private PlaceBasedLPMDiscoveryParameters PBLPMDiscoveryParameters;
+	private boolean placeSetPostProcessing = true; // remove duplicate places from placeSet
 	
 	// variable arc identification
 	private boolean doVariableArcIdentification = true;
@@ -266,5 +267,13 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	
 	public void setVariableArcIdentification (boolean doIt) {
 		this.doVariableArcIdentification = doIt;
+	}
+
+	public boolean doPlaceSetPostProcessing() {
+		return this.placeSetPostProcessing;
+	}
+	
+	public void setPlaceSetPostProcessing( boolean b) {
+		this.placeSetPostProcessing = b;
 	}
 }

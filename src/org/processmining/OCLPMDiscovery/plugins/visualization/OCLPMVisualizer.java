@@ -18,7 +18,6 @@ import org.processmining.OCLPMDiscovery.utils.OCLPMUtils;
 import org.processmining.OCLPMDiscovery.visualization.components.ColorMapPanel;
 import org.processmining.OCLPMDiscovery.visualization.components.ComponentFactory;
 import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
-import org.processmining.acceptingpetrinetclassicalreductor.plugins.ReduceUsingMurataRulesPlugin;
 import org.processmining.contexts.uitopia.annotations.Visualizer;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.annotations.Plugin;
@@ -37,8 +36,8 @@ public class OCLPMVisualizer {
         if (oclpm == null)
             throw new IllegalArgumentException("The local process model to be visualized should not be null: " + oclpm);
         AcceptingPetriNet net = OCLPMUtils.getAcceptingPetriNetRepresentation(oclpm);
-        ReduceUsingMurataRulesPlugin reductorPlugin = new ReduceUsingMurataRulesPlugin();
-        net = reductorPlugin.runDefault(context, net);
+//        ReduceUsingMurataRulesPlugin reductorPlugin = new ReduceUsingMurataRulesPlugin();
+//        net = reductorPlugin.runDefault(context, net);
         
         int windowHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
         int windowWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
