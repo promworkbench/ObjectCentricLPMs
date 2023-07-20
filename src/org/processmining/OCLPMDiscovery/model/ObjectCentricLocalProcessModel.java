@@ -141,8 +141,12 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
     public Set<TaggedPlace> getPlaces() {
         return places;
     }
-
+    
     public void addPlace(TaggedPlace place) {
+    	addPlace(place, false);
+    }
+
+    public void addPlace(TaggedPlace place, Boolean skipTransitionCheck) {
         if (place == null)
             throw new IllegalArgumentException("The place to be added should not be null: " + place);
         if (this.containsPlace(place))
@@ -151,27 +155,89 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
         places.add(place);
         this.placeTypes.add(place.getObjectType());
 
-        for (Transition transition : place.getInputTransitions()) {
-            Arc arc = new Arc(place, transition, true);
-            arcs.add(arc);
-            if (!transitions.containsKey(transition.getLabel()))
-                transitions.put(transition.getLabel(), transition);
+        if (!skipTransitionCheck) {
+	        for (Transition transition : place.getInputTransitions()) {
+	            Arc arc = new Arc(place, transition, true);
+	            arcs.add(arc);
+	            if (!transitions.containsKey(transition.getLabel()))
+	                transitions.put(transition.getLabel(), transition);
+	        }
+	
+	        for (Transition transition : place.getOutputTransitions()) {
+	            Arc arc = new Arc(place, transition, false);
+	            arcs.add(arc);
+	            if (!transitions.containsKey(transition.getLabel()))
+	                transitions.put(transition.getLabel(), transition);
+	        }
+	        this.additionalInfo.clearEvaluation();
         }
 
-        for (Transition transition : place.getOutputTransitions()) {
-            Arc arc = new Arc(place, transition, false);
-            arcs.add(arc);
-            if (!transitions.containsKey(transition.getLabel()))
-                transitions.put(transition.getLabel(), transition);
-        }
-
-        this.additionalInfo.clearEvaluation();
+    }
+    
+    public void addAllPlaces(Set<TaggedPlace> places, Boolean skipTransitionCheck) {
+        for (TaggedPlace place : places)
+            this.addPlace(place, skipTransitionCheck);
     }
 
     public void addAllPlaces(Set<TaggedPlace> places) {
         for (TaggedPlace place : places)
             this.addPlace(place);
     }
+    
+    public void deletePlaces(Set<TaggedPlace> places) {
+    	deletePlaces(places,false);
+    }
+    
+    public void deletePlaces(Set<TaggedPlace> places, Boolean skipTransitionCheck) {
+    	if (places == null) {
+    		return;
+    	}
+    	if (places.isEmpty()) {
+    		return;
+    	}
+    	
+		for (TaggedPlace place : places) {
+			// remove place
+			this.places.remove(place);
+			
+			// remove arcs
+			Set<Arc> deleteArcs = new HashSet<>();
+			for (Arc arc : this.arcs) {
+				if (arc.getPlace().equals(place)) {
+					deleteArcs.add(arc);
+				}
+			}
+			this.arcs.removeAll(deleteArcs);
+		}
+		
+		// recalculate object types
+		this.placeTypes.clear();
+		for (TaggedPlace p : this.places) {
+			this.placeTypes.add(p.getObjectType());
+		}
+		
+		// recalculate transitions
+		if (!skipTransitionCheck) {
+		Set<String> deleteTransitions = new HashSet<>();
+		for (Transition transition : this.transitions.values()) {
+			boolean found = false;
+			for (TaggedPlace place : this.places) {
+				if (place.getInputTransitions().contains(transition)
+						|| place.getOutputTransitions().contains(transition)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				deleteTransitions.add(transition.getLabel());
+			}
+		}
+		for (String t : deleteTransitions) {
+			this.transitions.remove(t);
+		}
+		}
+		
+	}
 
     public void addOCLPM(ObjectCentricLocalProcessModel oclpm) {
         for (TaggedPlace place : oclpm.getPlaces())
@@ -322,6 +388,13 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 			found = false;
 		}
 		return true;
+	}
+
+	public void trimVariableArcSet() {
+		for (TaggedPlace tp : this.places) {
+			tp.trimVariableArcSet();
+		}
+		
 	}
 
 }

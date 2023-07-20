@@ -31,7 +31,8 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	private VariableArcIdentification variableArcIdentification = VariableArcIdentification.PER_PLACE;
 	private float variableArcThreshold = 0.95f; // threshold which the score function is compared against
 	
-	private Boolean placeCompletion = false; // adds equal places to models but of different types
+	// place completion
+	private PlaceCompletion placeCompletion = PlaceCompletion.FEWVARIABLE; // adds isomorphic places to each model
 	
 	// set defaults
 	private Miner placeDiscoveryAlgorithm 			= Miner.SPECPP;
@@ -252,11 +253,11 @@ public class OCLPMDiscoveryParameters implements EventLog{
 		this.objectTypesCaseNotion = objectTypesCaseNotion;
 	}
 
-	public Boolean doPlaceCompletion() {
+	public PlaceCompletion getPlaceCompletion() {
 		return placeCompletion;
 	}
 
-	public void setPlaceCompletion(Boolean placeCompletion) {
+	public void setPlaceCompletion(PlaceCompletion placeCompletion) {
 		this.placeCompletion = placeCompletion;
 	}
 

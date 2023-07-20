@@ -16,9 +16,11 @@ import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
 import org.processmining.OCLPMDiscovery.model.TaggedPlace;
 import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
+import org.processmining.OCLPMDiscovery.parameters.PlaceCompletion;
 import org.processmining.OCLPMDiscovery.parameters.VariableArcIdentification;
 import org.processmining.OCLPMDiscovery.utils.FlatLogProcessing;
 import org.processmining.OCLPMDiscovery.utils.OCELUtils;
+import org.processmining.OCLPMDiscovery.utils.PlaceCompletionUtils;
 import org.processmining.OCLPMDiscovery.utils.ProcessExecutions;
 import org.processmining.OCLPMDiscovery.utils.ProvidingObjects;
 import org.processmining.contexts.uitopia.UIPluginContext;
@@ -71,9 +73,7 @@ public class Main {
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
 		
 		// OCLPM place completion
-		if (parameters.doPlaceCompletion()) {
-			oclpmResult = Main.completePlaces(parameters, oclpmResult, placeSet);
-		}
+		oclpmResult = PlaceCompletionUtils.completePlaces(parameters, oclpmResult, placeSet);
 		
 		// reevaluation of OCLPMs
 		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
@@ -109,9 +109,7 @@ public class Main {
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
 		
 		// OCLPM place completion
-		if (parameters.doPlaceCompletion()) {
-			oclpmResult = Main.completePlaces(parameters, oclpmResult, placeSet);
-		}
+		oclpmResult = PlaceCompletionUtils.completePlaces(parameters, oclpmResult, placeSet);
 		
 		// reevaluation of OCLPMs
 		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
@@ -146,9 +144,7 @@ public class Main {
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
 		
 		// OCLPM place completion
-		if (parameters.doPlaceCompletion()) {
-			oclpmResult = Main.completePlaces(parameters, oclpmResult, placeSet);
-		}
+		oclpmResult = PlaceCompletionUtils.completePlaces(parameters, oclpmResult, placeSet);
 		
 		// reevaluation of OCLPMs
 		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
@@ -464,77 +460,7 @@ public class Main {
 		return oclpmResult;
 	}
 	
-	/**
-	 * For each place adds all isomorphic places of different object types.
-	 * Completes the model such that the object flow is not interrupted if possible.
-	 * (Object flow = Tokens of a type entering a transition should also exit)
-	 * @param parameters
-	 * @param oclpmResult
-	 * @return
-	 */
-	public static OCLPMResult completePlaces (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult, PlaceSet placeSet) {
-		Main.messageNormal("Starting place completion.");
-		
-		// add places of other types to model if both: 
-			// equal place already is in there 
-			// the other types are already present in the net
-		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
-			Set<TaggedPlace> tmpPlaceSet = new HashSet<>(oclpm.getPlaces().size());
-			Set<String> placeTypes = oclpm.getPlaceTypes();
-			for (TaggedPlace tp : oclpm.getPlaces()) {
-				for (Place pNet : placeSet.getElements()) {
-					if (
-						!tp.getObjectType().equals(((TaggedPlace) pNet).getObjectType()) // different type
-						&& placeTypes.contains(((TaggedPlace) pNet).getObjectType()) // type already occurs in the oclpm
-						&& tp.isIsomorphic((TaggedPlace)pNet) // exactly the same transitions
-							) {
-						// check if place already is in the oclpm
-						boolean alreadyInThere = false;
-						for (TaggedPlace p2 : oclpm.getPlaces()) {
-							if (p2.equals((TaggedPlace)pNet)) {
-								alreadyInThere = true;
-								break;
-							}
-						}
-						if (!alreadyInThere) {
-							tmpPlaceSet.add((TaggedPlace)pNet);
-						}
-					}
-				}
-			}
-			oclpm.addAllPlaces(tmpPlaceSet);
-		}
-		
-		// Identify equal OCLPMs (ignoring variable arcs)
-		HashSet<Integer> deletionSet = new HashSet<Integer>(oclpmResult.getElements().size());
-		for (int i1 = 0; i1<oclpmResult.getElements().size()-1; i1++) {
-			if (deletionSet.contains(i1)) {
-				continue; // model is already tagged to be deleted
-			}
-			for (int i2 = i1+1; i2<oclpmResult.getElements().size(); i2++) {
-				if (deletionSet.contains(i2)) {
-					continue; // model is already tagged to be deleted
-				}
-				ObjectCentricLocalProcessModel oclpm1 = oclpmResult.getElement(i1);
-				ObjectCentricLocalProcessModel oclpm2 = oclpmResult.getElement(i2);
-				if (oclpm1.isEqual(oclpm2)) {
-					deletionSet.add(i2);
-				}
-			}
-		}
-		// delete equal OCLPMs
-		HashSet<ObjectCentricLocalProcessModel> deleteModels = new HashSet<ObjectCentricLocalProcessModel>(deletionSet.size());
-		for (int i : deletionSet) {
-			deleteModels.add(oclpmResult.getElement(i));
-		}
-		for (ObjectCentricLocalProcessModel o : deleteModels) {
-			oclpmResult.remove(o);			
-		}
-		
-		Main.updateProgress("Finished place completion.");
-		
-		return oclpmResult;
-	}
+	
 	
 	/**
 	 * Variable arc identification when place set is given.
@@ -616,6 +542,13 @@ public class Main {
 				for (Place p : placeSet.getElements()) {
 					((TaggedPlace)p).setVariableArcActivities(typeToActivities.get(((TaggedPlace)p).getObjectType()));
 				}
+				
+				if (parameters.getPlaceCompletion().needsExactVariableArcs()) {
+					// trim variable arc activities to fit the actual transitions of each place
+					for (Place p : placeSet.getElements()) {
+						((TaggedPlace)p).trimVariableArcSet();
+					}
+				}
 		}
 		Main.updateProgress("Completed variable arc identification.");
 		return placeSet;
@@ -641,6 +574,13 @@ public class Main {
 				for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
 					for (TaggedPlace tp : oclpm.getPlaces()) {
 						tp.setVariableArcActivities(typeToActivities.get(tp.getObjectType()));
+					}
+				}
+				
+				// in case the exact number of variable arcs of places is needed
+				if (parameters.getPlaceCompletion().needsExactVariableArcs()) {
+					for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+						oclpm.trimVariableArcSet();
 					}
 				}
 				Main.updateProgress("Completed variable arc identification.");
@@ -753,7 +693,7 @@ public class Main {
 		}
 		
 		// place completion
-		if (parameters.doPlaceCompletion()) {
+		if (parameters.getPlaceCompletion() != PlaceCompletion.NONE) {
 			numSteps += 1;
 		}
 		

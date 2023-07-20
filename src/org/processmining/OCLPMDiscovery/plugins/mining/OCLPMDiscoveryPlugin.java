@@ -9,7 +9,6 @@ import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.TaggedPlace;
 import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
-import org.processmining.OCLPMDiscovery.parameters.VariableArcIdentification;
 import org.processmining.OCLPMDiscovery.wizards.OCLPMDiscoveryWizard;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
@@ -73,9 +72,6 @@ public class OCLPMDiscoveryPlugin {
 			default:
 		}
 		
-		parameters.setPlaceCompletion(true);
-		parameters.setVariableArcIdentification(VariableArcIdentification.PER_PLACE);
-		
 		Main.setUp(context, parameters, true, true);
 		
 		Object[] result = Main.run(ocel, parameters); 
@@ -108,9 +104,6 @@ public class OCLPMDiscoveryPlugin {
 
 		if (parameters == null)
 			return null;		
-
-		parameters.setPlaceCompletion(true);
-		parameters.setVariableArcIdentification(VariableArcIdentification.PER_PLACE);
 		
 		Main.setUp(context, parameters, false, true);
 		Object[] result = Main.run(ocel, parameters, placeSet);
@@ -146,7 +139,6 @@ public class OCLPMDiscoveryPlugin {
 		if (parameters == null)
 			return null;		
 
-		parameters.setPlaceCompletion(true);
 		Main.setUp(context, parameters, false, true);
 		Main.setGraph(graph);
 		Object[] result = Main.run(ocel, parameters, placeSet);
@@ -201,7 +193,6 @@ public class OCLPMDiscoveryPlugin {
 		if (parameters == null)
 			return null;		
 
-		parameters.setPlaceCompletion(true);
 		Main.setUp(context, parameters, false, true);
 		Main.setGraph(graph);
 		Object[] result = Main.run(ocel, parameters, placeSet, labels);

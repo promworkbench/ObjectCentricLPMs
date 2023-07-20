@@ -185,5 +185,36 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 			}
 		}
 	}
+	
+	/**
+	 * Deletes duplicate OCLPMs, ignoring variable arcs
+	 */
+	public void deleteDuplicates () {
+		// Identify equal OCLPMs (ignoring variable arcs)
+		HashSet<Integer> deletionSet = new HashSet<Integer>(this.getElements().size());
+		for (int i1 = 0; i1<this.getElements().size()-1; i1++) {
+			if (deletionSet.contains(i1)) {
+				continue; // model is already tagged to be deleted
+			}
+			for (int i2 = i1+1; i2<this.getElements().size(); i2++) {
+				if (deletionSet.contains(i2)) {
+					continue; // model is already tagged to be deleted
+				}
+				ObjectCentricLocalProcessModel oclpm1 = this.getElement(i1);
+				ObjectCentricLocalProcessModel oclpm2 = this.getElement(i2);
+				if (oclpm1.isEqual(oclpm2)) {
+					deletionSet.add(i2);
+				}
+			}
+		}
+		// delete equal OCLPMs
+		HashSet<ObjectCentricLocalProcessModel> deleteModels = new HashSet<ObjectCentricLocalProcessModel>(deletionSet.size());
+		for (int i : deletionSet) {
+			deleteModels.add(this.getElement(i));
+		}
+		for (ObjectCentricLocalProcessModel o : deleteModels) {
+			this.remove(o);			
+		}
+	}
 
 }

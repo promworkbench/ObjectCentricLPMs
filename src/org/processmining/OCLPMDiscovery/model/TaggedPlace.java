@@ -1,6 +1,7 @@
 package org.processmining.OCLPMDiscovery.model;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import org.processmining.placebasedlpmdiscovery.model.Place;
 import org.processmining.placebasedlpmdiscovery.model.Transition;
@@ -152,5 +153,32 @@ public class TaggedPlace extends Place{
 		}
 		
 		return true;
+	}
+
+	/**
+	 * trim variable arc activities to fit the actual transitions of each place
+	 */
+	public void trimVariableArcSet() {
+		Set<String> delete = new HashSet<>();
+		for (String activity : this.variableArcActivities) {
+			boolean found = false;
+			for (Transition t : this.getInputTransitions()) {
+				if (t.getLabel().equals(activity)) {
+					found = true;
+					break;
+				}
+			}
+			if (found) continue;
+			for (Transition t : this.getOutputTransitions()) {
+				if (t.getLabel().equals(activity)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				delete.add(activity);
+			}
+		}
+		this.variableArcActivities.removeAll(delete);
 	}
 }
