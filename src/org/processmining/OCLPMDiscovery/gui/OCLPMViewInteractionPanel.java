@@ -79,7 +79,7 @@ public interface OCLPMViewInteractionPanel extends UpdateListener {
 	 * getHeightInView() and getWidthInView();
 	 * 
 	 * @param to
-	 *            TODO
+	 *            
 	 * 
 	 */
 	public void willChangeVisibility(boolean to);

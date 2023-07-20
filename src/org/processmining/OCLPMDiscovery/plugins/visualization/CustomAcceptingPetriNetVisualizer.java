@@ -55,8 +55,9 @@ public class CustomAcceptingPetriNetVisualizer {
                 map.putViewSpecific(t, AttributeMap.LABEL, t.getLabel());
             }
             map.putViewSpecific(t, AttributeMap.STROKECOLOR, theme.TEXT); // color of border
-            map.putViewSpecific(t, AttributeMap.LABELCOLOR, theme.TEXT); // doesn't do anything
+            map.putViewSpecific(t, AttributeMap.LABELCOLOR, Color.PINK); // doesn't do anything
             // TODO change text color to theme.TEXT
+            map.putViewSpecific(t, AttributeMap.EDGECOLOR, Color.PINK); // doesn't do anything
         }
         
         // color places based on object type

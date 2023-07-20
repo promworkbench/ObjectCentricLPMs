@@ -684,7 +684,7 @@ public class Main {
 	}
 	
 	public static OCLPMResult evaluateOCLPMs (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult) {
-		// TODO
+		// TODO oclpm evaluation
 		return oclpmResult;
 	}
 	

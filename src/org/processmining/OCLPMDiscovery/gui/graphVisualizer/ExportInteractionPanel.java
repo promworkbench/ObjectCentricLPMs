@@ -45,7 +45,7 @@ public class ExportInteractionPanel extends JPanel implements OCLPMViewInteracti
 	}
 
 	public void updated() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 
 	}
 

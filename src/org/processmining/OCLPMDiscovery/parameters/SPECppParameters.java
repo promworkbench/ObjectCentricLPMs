@@ -127,7 +127,7 @@ public class SPECppParameters {
 		
 		ParameterProvider pp = new ParameterProvider() {
             @Override
-            public void init() { //TODO does all this even work?
+            public void init() {
             	// combine default parameters with new parameters
                 currentAPC.registerAlgorithmParameters(globalComponentSystem());
                 

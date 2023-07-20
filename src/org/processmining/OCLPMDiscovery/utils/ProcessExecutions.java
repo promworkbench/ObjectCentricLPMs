@@ -110,7 +110,7 @@ public class ProcessExecutions {
 		HashMap<String,Set<String>> map = new HashMap<>(); // maps object identifier to
 		for (String currentObject : graph.vertexSet()) {
 			// current object already leading type?
-			if (ocel.getObjects().get(currentObject).objectType.name.equals(leadingType)) { // TODO too slow?
+			if (ocel.getObjects().get(currentObject).objectType.name.equals(leadingType)) {
 				map.put(currentObject, Collections.singleton(idMap.get(currentObject)));
 			}
 			else {
@@ -205,7 +205,7 @@ public class ProcessExecutions {
 		int vDepth; 
 		int lastDepth = 0;
 		for (String currentObject : graph.vertexSet()) {
-			currentType = ocel.getObjects().get(currentObject).objectType.name; // TODO too slow?
+			currentType = ocel.getObjects().get(currentObject).objectType.name;
 			// current object not leading type -> skip
 			if (!currentType.equals(leadingType)) { 
 				continue;
@@ -329,7 +329,7 @@ public class ProcessExecutions {
 		int vDepth; 
 		int lastDepth = 0;
 		for (String currentObject : graph.vertexSet()) {
-			currentType = ocel.getObjects().get(currentObject).objectType.name; // TODO too slow?
+			currentType = ocel.getObjects().get(currentObject).objectType.name;
 			// current object not leading type -> skip
 			if (!currentType.equals(leadingType)) { 
 				continue;
@@ -453,7 +453,7 @@ public class ProcessExecutions {
 		HashMap<String,Set<String>> map = new HashMap<>(); // maps object identifier to
 		for (String currentObject : graph.vertexSet()) {
 			// current object already leading type?
-			if (ocel.getObjects().get(currentObject).objectType.name.equals(leadingType)) { // TODO too slow?
+			if (ocel.getObjects().get(currentObject).objectType.name.equals(leadingType)) {
 				map.put(currentObject, Collections.singleton(idMap.get(currentObject)));
 			}
 			else {
@@ -563,7 +563,7 @@ public class ProcessExecutions {
 		int vDepth; 
 		int lastDepth = 0;
 		for (String currentObject : graph.vertexSet()) {
-			currentType = ocel.getObjects().get(currentObject).objectType.name; // TODO too slow?
+			currentType = ocel.getObjects().get(currentObject).objectType.name;
 			// current object not leading type -> skip
 			if (!currentType.equals(leadingType)) { 
 				continue;
@@ -714,7 +714,7 @@ public class ProcessExecutions {
 		HashMap<String,Set<String>> map = new HashMap<>(); // maps object identifier to
 		for (String currentObject : graph.vertexSet()) {
 			// current object already leading type?
-			if (ocel.getObjects().get(currentObject).objectType.name.equals(leadingType)) { // TODO too slow?
+			if (ocel.getObjects().get(currentObject).objectType.name.equals(leadingType)) {
 				map.put(currentObject, Collections.singleton(idMap.get(currentObject)));
 			}
 			else {
