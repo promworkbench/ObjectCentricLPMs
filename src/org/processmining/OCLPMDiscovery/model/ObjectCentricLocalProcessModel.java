@@ -146,7 +146,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
     	addPlace(place, false);
     }
 
-    public void addPlace(TaggedPlace place, Boolean skipTransitionCheck) {
+    public void addPlace(TaggedPlace place, Boolean keepEvaluation) {
         if (place == null)
             throw new IllegalArgumentException("The place to be added should not be null: " + place);
         if (this.containsPlace(place))
@@ -155,28 +155,28 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
         places.add(place);
         this.placeTypes.add(place.getObjectType());
 
-        if (!skipTransitionCheck) {
-	        for (Transition transition : place.getInputTransitions()) {
-	            Arc arc = new Arc(place, transition, true);
-	            arcs.add(arc);
-	            if (!transitions.containsKey(transition.getLabel()))
-	                transitions.put(transition.getLabel(), transition);
-	        }
+        for (Transition transition : place.getInputTransitions()) {
+            Arc arc = new Arc(place, transition, true);
+            arcs.add(arc);
+            if (!transitions.containsKey(transition.getLabel()))
+                transitions.put(transition.getLabel(), transition);
+        }
 	
-	        for (Transition transition : place.getOutputTransitions()) {
-	            Arc arc = new Arc(place, transition, false);
-	            arcs.add(arc);
-	            if (!transitions.containsKey(transition.getLabel()))
-	                transitions.put(transition.getLabel(), transition);
-	        }
+        for (Transition transition : place.getOutputTransitions()) {
+            Arc arc = new Arc(place, transition, false);
+            arcs.add(arc);
+            if (!transitions.containsKey(transition.getLabel()))
+                transitions.put(transition.getLabel(), transition);
+        }
+        if (!keepEvaluation) {
 	        this.additionalInfo.clearEvaluation();
         }
 
     }
     
-    public void addAllPlaces(Set<TaggedPlace> places, Boolean skipTransitionCheck) {
+    public void addAllPlaces(Set<TaggedPlace> places, Boolean keepEvaluation) {
         for (TaggedPlace place : places)
-            this.addPlace(place, skipTransitionCheck);
+            this.addPlace(place, keepEvaluation);
     }
 
     public void addAllPlaces(Set<TaggedPlace> places) {

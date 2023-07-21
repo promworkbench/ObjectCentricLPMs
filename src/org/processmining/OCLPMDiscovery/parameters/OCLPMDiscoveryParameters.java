@@ -27,7 +27,6 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	private boolean placeSetPostProcessing = true; // remove duplicate places from placeSet
 	
 	// variable arc identification
-	private boolean doVariableArcIdentification = true;
 	private VariableArcIdentification variableArcIdentification = VariableArcIdentification.PER_PLACE;
 	private float variableArcThreshold = 0.95f; // threshold which the score function is compared against
 	
@@ -154,6 +153,10 @@ public class OCLPMDiscoveryParameters implements EventLog{
         	}
         }
         
+        otherParams += "Variable arc identification: "+this.getVariableArcIdentification().getName()+"\n";
+        otherParams += "Variable arc threshold: "+this.getVariableArcThreshold()+"\n";
+        otherParams += "Place completion: "+this.getPlaceCompletion().getName()+"\n";
+        
         return caption + broadParameters + otherParams;
     }
 
@@ -268,14 +271,7 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	public void setVariableArcIdentification(VariableArcIdentification variableArcIdentification) {
 		this.variableArcIdentification = variableArcIdentification;
 	}
-
-	public boolean doVariableArcIdentification() {
-		return this.doVariableArcIdentification;
-	}
-	
-	public void setVariableArcIdentification (boolean doIt) {
-		this.doVariableArcIdentification = doIt;
-	}
+ 
 
 	public boolean doPlaceSetPostProcessing() {
 		return this.placeSetPostProcessing;

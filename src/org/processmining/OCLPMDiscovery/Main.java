@@ -698,7 +698,7 @@ public class Main {
 		}
 		
 		// variable arc identification
-		if (parameters.doVariableArcIdentification()) {
+		if (parameters.getVariableArcIdentification() != VariableArcIdentification.NONE) {
 			numSteps += 1;
 		}
 		

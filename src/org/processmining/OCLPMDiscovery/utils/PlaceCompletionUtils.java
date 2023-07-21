@@ -69,7 +69,6 @@ public class PlaceCompletionUtils {
 			
 			case FEWVARIABLE:
 				// swaps existing places with the places that have the fewest variable arcs
-				//TODO if whole log variable arc identification was performed, trim stored variable arc activities to only those occuring in the place
 				oclpmResult = swapToFewestVariableArcs(oclpmResult,placeSet);
 				break;
 			
@@ -96,6 +95,7 @@ public class PlaceCompletionUtils {
 	 * @return
 	 */
 	public static OCLPMResult swapToFewestVariableArcs(OCLPMResult oclpmResult, PlaceSet placeSet) {
+		// TODO delete isomorphic models beforehand as they would result in the same net afterwards
 		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
 			Set<TaggedPlace> deletePlaces = new HashSet<>(oclpm.getPlaces().size());
 			Set<TaggedPlace> addPlaces = new HashSet<>(oclpm.getPlaces().size());
