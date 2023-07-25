@@ -9,7 +9,6 @@ import java.util.Set;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.placebasedlpmdiscovery.model.LocalProcessModel;
 import org.processmining.placebasedlpmdiscovery.model.Place;
-import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
 import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableList;
 
@@ -32,11 +31,11 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     public OCLPMResult (OCLPMDiscoveryParameters discoveryParameters, LPMResultsTagged tlpms) {
     	super();
     	
-    	HashSet<ObjectCentricLocalProcessModel> oclpms = new HashSet<ObjectCentricLocalProcessModel>(tlpms.totalLPMs());
+    	HashSet<ObjectCentricLocalProcessModel> oclpms = new HashSet<ObjectCentricLocalProcessModel>(tlpms.size());
     	// convert LPM objects into OCLPM objects
-    	for (LPMResult res : tlpms.getTypeMap().keySet()) { // for all used case notions
+    	for (TaggedLPMResult res : tlpms.getElements()) { // for all used case notions
 	    	for (LocalProcessModel lpm : res.getElements()) { // for all lpms discovered for that notion
-	    		ObjectCentricLocalProcessModel oclpm = new ObjectCentricLocalProcessModel(lpm, tlpms.getTypeOf(res));
+	    		ObjectCentricLocalProcessModel oclpm = new ObjectCentricLocalProcessModel(lpm, res.getCaseNotion());
 	    		oclpms.add(oclpm);
 	    	}
     	}
@@ -208,6 +207,37 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 			}
 		}
 		// delete equal OCLPMs
+		HashSet<ObjectCentricLocalProcessModel> deleteModels = new HashSet<ObjectCentricLocalProcessModel>(deletionSet.size());
+		for (int i : deletionSet) {
+			deleteModels.add(this.getElement(i));
+		}
+		for (ObjectCentricLocalProcessModel o : deleteModels) {
+			this.remove(o);			
+		}
+	}
+	
+	/**
+	 * Deletes duplicate OCLPMs, ignoring variable arcs and object types
+	 */
+	public void deleteIsomorphic () {
+		// Identify isomorphic OCLPMs (ignoring variable arcs and object types)
+		HashSet<Integer> deletionSet = new HashSet<Integer>(this.getElements().size());
+		for (int i1 = 0; i1<this.getElements().size()-1; i1++) {
+			if (deletionSet.contains(i1)) {
+				continue; // model is already tagged to be deleted
+			}
+			for (int i2 = i1+1; i2<this.getElements().size(); i2++) {
+				if (deletionSet.contains(i2)) {
+					continue; // model is already tagged to be deleted
+				}
+				ObjectCentricLocalProcessModel oclpm1 = this.getElement(i1);
+				ObjectCentricLocalProcessModel oclpm2 = this.getElement(i2);
+				if (oclpm1.isIsomorphic(oclpm2)) {
+					deletionSet.add(i2);
+				}
+			}
+		}
+		// delete isomorphic OCLPMs
 		HashSet<ObjectCentricLocalProcessModel> deleteModels = new HashSet<ObjectCentricLocalProcessModel>(deletionSet.size());
 		for (int i : deletionSet) {
 			deleteModels.add(this.getElement(i));

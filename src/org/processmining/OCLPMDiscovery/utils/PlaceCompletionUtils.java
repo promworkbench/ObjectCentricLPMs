@@ -1,6 +1,9 @@
 package org.processmining.OCLPMDiscovery.utils;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.processmining.OCLPMDiscovery.Main;
@@ -10,6 +13,7 @@ import org.processmining.OCLPMDiscovery.model.TaggedPlace;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.parameters.PlaceCompletion;
 import org.processmining.placebasedlpmdiscovery.model.Place;
+import org.processmining.placebasedlpmdiscovery.model.Transition;
 import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 
 public class PlaceCompletionUtils {
@@ -58,30 +62,34 @@ public class PlaceCompletionUtils {
 					}
 					oclpm.addAllPlaces(tmpPlaceSet);
 				}
+				
+				oclpmResult.deleteDuplicates();
 				break;
 			
 			case BETTERFLOW:
 				// add places of other types to model if both: 
 				// equal place already is in there 
 				// the other types are already present in the net
-				oclpmResult = betterFlow(oclpmResult, placeSet);
+				oclpmResult = betterFlow2(oclpmResult, placeSet);
+				oclpmResult.deleteDuplicates();
 				break;
 			
 			case FEWVARIABLE:
 				// swaps existing places with the places that have the fewest variable arcs
+				// delete isomorphic models beforehand as they would result in the same net afterwards
+				oclpmResult.deleteIsomorphic();
 				oclpmResult = swapToFewestVariableArcs(oclpmResult,placeSet);
 				break;
 			
 			case FEWVARIABLE_BETTERFLOW:
+				oclpmResult.deleteIsomorphic();
 				oclpmResult = swapToFewestVariableArcs(oclpmResult,placeSet);
-				oclpmResult = betterFlow(oclpmResult, placeSet);
+				oclpmResult = betterFlow2(oclpmResult, placeSet);
 				break;
 			
 			default:
 				return oclpmResult;
 		}
-		
-		oclpmResult.deleteDuplicates();
 		
 		Main.updateProgress("Finished place completion.");
 		
@@ -95,7 +103,6 @@ public class PlaceCompletionUtils {
 	 * @return
 	 */
 	public static OCLPMResult swapToFewestVariableArcs(OCLPMResult oclpmResult, PlaceSet placeSet) {
-		// TODO delete isomorphic models beforehand as they would result in the same net afterwards
 		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
 			Set<TaggedPlace> deletePlaces = new HashSet<>(oclpm.getPlaces().size());
 			Set<TaggedPlace> addPlaces = new HashSet<>(oclpm.getPlaces().size());
@@ -145,7 +152,6 @@ public class PlaceCompletionUtils {
 	 * @return
 	 */
 	public static OCLPMResult betterFlow (OCLPMResult oclpmResult, PlaceSet placeSet) {
-		//TODO Improve this such that places are only added if they are necessary to make the places of that object type connected
 		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
 			Set<TaggedPlace> tmpPlaceSet = new HashSet<>(oclpm.getPlaces().size());
 			Set<String> placeTypes = oclpm.getPlaceTypes();
@@ -171,6 +177,116 @@ public class PlaceCompletionUtils {
 				}
 			}
 			oclpm.addAllPlaces(tmpPlaceSet);
+		}
+		return oclpmResult;
+	}
+	
+	/**
+	 * add place of other types to model if:
+	 * 		transition isn't source or sink
+	 * 		transition has that type only as input or output
+	 * Only adds places that are isomorphic to those already in the model
+	 * Only checks if flow is completely broken (arcs go in nothing goes out),
+	 * not if flow inbalanced (e.g., 2 in 1 out)
+	 * @param oclpmResult
+	 * @param placeSet
+	 * @return
+	 */
+	public static OCLPMResult betterFlow2 (OCLPMResult oclpmResult, PlaceSet placeSet) {		
+		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+			Set<String> outputTransitionLabels = oclpm.getOutputTransitionLabels();
+			Set<String> inputTransitionLabels = oclpm.getInputTransitionLabels();
+			
+			boolean addedSomething = true;
+			
+			while (addedSomething) {
+				addedSomething = false;
+
+				// check current flow situation
+				HashMap<List<String>,Set<TaggedPlace>> transitionMap = new HashMap<>(); // maps transitionName,TypeName,"in"/"out" -> TaggedPlaces
+				for (TaggedPlace tp : oclpm.getPlaces()) {
+					for (Transition t : tp.getInputTransitions()) {
+						String[] key = new String[3];
+						key[0] = t.getLabel();
+						key[1] = tp.getObjectType();
+						key[2] = "out"; // this transition is input to a place
+						if (transitionMap.containsKey(Arrays.asList(key))) {
+							transitionMap.get(Arrays.asList(key)).add(tp);
+						}
+						else {
+							Set<TaggedPlace> value = new HashSet<>();
+							value.add(tp);
+							transitionMap.put(Arrays.asList(key),value);					
+						}
+					}
+					for (Transition t : tp.getOutputTransitions()) {
+						String[] key = new String[3];
+						key[0] = t.getLabel();
+						key[1] = tp.getObjectType();
+						key[2] = "in"; // this transition is output to a place
+						if (transitionMap.containsKey(Arrays.asList(key))) {
+							transitionMap.get(Arrays.asList(key)).add(tp);
+						}
+						else {
+							Set<TaggedPlace> value = new HashSet<>();
+							value.add(tp);
+							transitionMap.put(Arrays.asList(key),value);					
+						}
+					}
+				}
+				
+				for (List<String> keylist : transitionMap.keySet()) {
+					String [] oppositeKey = new String[3];
+					oppositeKey[0] = keylist.get(0);
+					oppositeKey[1] = keylist.get(1);
+					oppositeKey[2] = "out";
+					List<String> oppositeKeyList = Arrays.asList(oppositeKey);
+					if (keylist.get(2).equals("out")) {
+						oppositeKey[2] = "in";
+					}
+					if (!transitionMap.containsKey(oppositeKeyList) // flow preservation unfulfilled
+							&& !inputTransitionLabels.contains(keylist.get(0)) // transition not source
+							&& !outputTransitionLabels.contains(keylist.get(0)) // transition not sink
+							) { 
+						// search for places in the oclpm that fulfill transition and direction but not type
+						Set<TaggedPlace> wrongTypePlaces = new HashSet<>();
+						for (String type : oclpm.getPlaceTypes()) {
+							if (keylist.get(1).equals(type)) {
+								continue; // correct type, which the net doesn't have
+							}
+							Set<TaggedPlace> tmp_places = transitionMap.get(
+									Arrays.asList(new String []{keylist.get(0),type,oppositeKey[2]}));
+							if (tmp_places == null || tmp_places.isEmpty()) {
+								continue;
+							}
+							wrongTypePlaces.addAll(tmp_places);
+						}
+						
+						if (wrongTypePlaces.isEmpty()) break;
+						
+						// search for an isomorphic place with the correct type in the PlaceSet
+						for (Place p : placeSet.getElements()) {
+							TaggedPlace tmp_place = (TaggedPlace) p;
+							if (tmp_place.getObjectType().equals(keylist.get(1)) ){ // type correct
+								// check if isomorphic to some place in wrongTypePlaces
+								for (TaggedPlace wtp : wrongTypePlaces) {
+									if (wtp.isIsomorphic(tmp_place)) { // found place that improves flow preservation
+										oclpm.addPlace(tmp_place);
+										addedSomething = true;
+										break;
+									}
+								}
+								if (addedSomething) {
+									break;
+								}
+							}	
+						}
+					}
+					if (addedSomething) {
+						break;
+					}
+				}
+			} // while addedSomething
 		}
 		return oclpmResult;
 	}

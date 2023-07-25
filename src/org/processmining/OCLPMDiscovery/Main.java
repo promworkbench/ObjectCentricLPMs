@@ -162,14 +162,16 @@ public class Main {
 	 * @param parameters
 	 * @return {oclpmResult}
 	 */
-	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, LPMResultsTagged tlpms) {
+	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, LPMResultsTagged tlpms, PlaceSet placeSet) {
         		
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
 		
-		// OCLPM place completion not possible as the place nets aren't available.
-		
 		// identify variable arcs
 		oclpmResult = Main.identifyVariableArcs(parameters, oclpmResult);
+		placeSet = Main.identifyVariableArcs(parameters, placeSet);
+		
+		// OCLPM place completion
+		oclpmResult = PlaceCompletionUtils.completePlaces(parameters, oclpmResult, placeSet);
 		
 		// reevaluation of OCLPMs
 		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
@@ -334,10 +336,10 @@ public class Main {
 			lpmResults = runLPMPlugin(log, placeSet, parameters);
 			assert(lpmResults[0] instanceof LPMResult);
 			lpmResult = (LPMResult) lpmResults[0];
-			lpmsTagged.put(lpmResult, currentType);
+			lpmsTagged.add(lpmResult, currentType);
 		}
 		System.out.println("Finished LPM discovery.");
-		System.out.println("LPMResult stores "+lpmsTagged.totalLPMs()+" LPMs.");
+		System.out.println("LPMResult stores "+lpmsTagged.size()+" LPMs.");
 		return lpmsTagged;
 	}
 
@@ -407,7 +409,7 @@ public class Main {
 					lpmResults = runLPMPlugin(log, placeSet, parameters);
 					assert(lpmResults[0] instanceof LPMResult);
 					lpmResult = (LPMResult) lpmResults[0];
-					lpmsTagged.put(lpmResult, currentType);
+					lpmsTagged.add(lpmResult, currentType);
 					
 					updateProgress("Finished ocel enhancement using the \""+parameters.getCaseNotionStrategy().getName()+"\" strategy for type \""+currentType+"\".");
 				}
@@ -425,7 +427,7 @@ public class Main {
 				lpmResults = runLPMPlugin(log, placeSet, parameters);
 				assert(lpmResults[0] instanceof LPMResult);
 				lpmResult = (LPMResult) lpmResults[0];
-				lpmsTagged.put(lpmResult, ot);
+				lpmsTagged.add(lpmResult, ot);
 				break;
 				
 			case DUMMY:
@@ -439,23 +441,23 @@ public class Main {
 				lpmResults = runLPMPlugin(log, placeSet, parameters);
 				assert(lpmResults[0] instanceof LPMResult);
 				lpmResult = (LPMResult) lpmResults[0];
-				lpmsTagged.put(lpmResult, dummyType);
+				lpmsTagged.add(lpmResult, dummyType);
 		}
 		System.out.println("Finished LPM discovery.");
-		System.out.println("LPMResult stores "+lpmsTagged.totalLPMs()+" LPMs.");
+		System.out.println("LPMResult stores "+lpmsTagged.size()+" LPMs.");
 		
 		return lpmsTagged;
 	}
 	
 	public static OCLPMResult convertLPMstoOCLPMs (OCLPMDiscoveryParameters parameters, LPMResultsTagged tlpms) {
 
-		OCLPMResult oclpmResult = new OCLPMResult(parameters, tlpms);
+		if (!(tlpms.getList().getElement(0).getElements().get(0).getPlaces().toArray()[0] instanceof TaggedPlace)
+				|| ((TaggedPlace) tlpms.getList().getElement(0).getElements().get(0).getPlaces().toArray()[0]).getObjectType() == null 
+				) {
+			System.out.println("The given LPMs do not have tagged places. Therefore, there won't be any variable arcs.");
+		}
 		
-//		// identify variable arcs
-//		oclpmResult = Main.identifyVariableArcs(parameters, oclpmResult);
-//		
-//		// reevaluation of OCLPMs
-//		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
+		OCLPMResult oclpmResult = new OCLPMResult(parameters, tlpms);
 		
 		return oclpmResult;
 	}

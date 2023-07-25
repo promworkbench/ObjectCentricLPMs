@@ -2,6 +2,7 @@ package org.processmining.OCLPMDiscovery.plugins.mining;
 
 import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.model.LPMResultsTagged;
+import org.processmining.OCLPMDiscovery.model.TaggedLPMResult;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.wizards.OCLPMDiscoveryWizard;
 import org.processmining.contexts.uitopia.UIPluginContext;
@@ -96,8 +97,8 @@ public class LPMDiscoveryPlugin {
 	}
 	
 	public static LPMResult mergeLPMResults(LPMResultsTagged tlpms) {
-		LPMResult lpms = new LPMResult();
-		for (LPMResult res : tlpms.getTypeMap().keySet()) {
+		TaggedLPMResult lpms = new TaggedLPMResult();
+		for (TaggedLPMResult res : tlpms.getElements()) {
 			lpms.addAll(res.getElements());
 		}
 		return lpms;

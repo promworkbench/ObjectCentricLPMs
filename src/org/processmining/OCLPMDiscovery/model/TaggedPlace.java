@@ -102,7 +102,8 @@ public class TaggedPlace extends Place{
 			this.variableArcActivities.clear();
 		}
 		else {
-			this.variableArcActivities = variableArcActivities;
+			this.variableArcActivities.clear();
+			this.variableArcActivities.addAll(variableArcActivities);
 		}
 	}
 

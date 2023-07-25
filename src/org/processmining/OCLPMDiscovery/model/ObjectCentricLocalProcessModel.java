@@ -121,6 +121,42 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
         }
         return res;
     }
+    
+    /**
+     * Finds all transitions that don't have output arcs with any place in the LPM
+     * @return transitions for which there is no place with output arc toward them
+     */
+    public Set<String> getInputTransitionLabels() {
+        Set<String> res = new HashSet<>();
+        for (Transition transition : transitions.values()) {
+            boolean is_input = true;
+            for (Place place : places) {
+                if (place.isOutputTransition(transition))
+                    is_input = false;
+            }
+            if (is_input)
+                res.add(transition.getLabel());
+        }
+        return res;
+    }
+    
+    /**
+     * Finds all transitions that don't have input arcs with any place in the LPM
+     * @return transitions for which there is no place with input arc toward them
+     */
+    public Set<String> getOutputTransitionLabels() {
+    	Set<String> res = new HashSet<>();
+        for (Transition transition : transitions.values()) {
+            boolean is_output = true;
+            for (Place place : places) {
+                if (place.isInputTransition(transition))
+                    is_output = false;
+            }
+            if (is_output)
+                res.add(transition.getLabel());
+        }
+        return res;
+    }
 
     public LPMAdditionalInfo getAdditionalInfo() {
         return additionalInfo;

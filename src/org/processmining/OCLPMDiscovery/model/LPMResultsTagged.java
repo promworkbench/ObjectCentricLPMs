@@ -1,57 +1,46 @@
 package org.processmining.OCLPMDiscovery.model;
 
-import java.util.HashMap;
+import java.io.OutputStream;
 
+import org.processmining.placebasedlpmdiscovery.model.exporting.Exportable;
+import org.processmining.placebasedlpmdiscovery.model.exporting.exporters.Exporter;
 import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
+import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableSet;
 
 /**
  * Model to combine LPMs with the case notion / type which has been used to discover them.
  * @author Marvin
  *
  */
-public class LPMResultsTagged {
+public class LPMResultsTagged extends SerializableSet<TaggedLPMResult> implements Exportable<LPMResultsTagged>{
 	
-	private HashMap<LPMResult,String> typeMap;
-	
-	public LPMResultsTagged() {
-		this.setTypeMap(new HashMap<LPMResult,String>());
+	public LPMResultsTagged () {
+		super();
 	}
 	
 	public LPMResultsTagged(LPMResult lpmResult, String type) {
-		this();
-		this.getTypeMap().put(lpmResult, type);
-	}
-
-	public HashMap<LPMResult,String> getTypeMap() {
-		return typeMap;
-	}
-
-	public void setTypeMap(HashMap<LPMResult,String> typeMap) {
-		this.typeMap = typeMap;
-	}
-	
-	public void put(LPMResult key, String value) {
-		this.getTypeMap().put(key, value);
-	}
-	
-	/**
-	 * Get the type used as case notion for the discovery of that LPMResult
-	 * @param key
-	 * @return
-	 */
-	public String getTypeOf (LPMResult key) {
-		return this.getTypeMap().get(key);
+		super();
+		this.add(new TaggedLPMResult(lpmResult,type));
 	}
 	
 	/**
 	 * Counts the total number of local process models across all stored results.
 	 * @return
 	 */
-	public int totalLPMs() {
+	public int size() {
 		int count = 0;
-		for (LPMResult cur : this.getTypeMap().keySet()) {
+		for (TaggedLPMResult cur : this.getElements()) {
 			count += cur.size();
 		}
 		return count;
+	}
+	
+	@Override
+    public void export(Exporter<LPMResultsTagged> exporter, OutputStream os) {
+        exporter.export(this, os);
+    }
+
+	public void add(LPMResult lpmResult, String currentType) {
+		this.add(new TaggedLPMResult(lpmResult,currentType));		
 	}
 }

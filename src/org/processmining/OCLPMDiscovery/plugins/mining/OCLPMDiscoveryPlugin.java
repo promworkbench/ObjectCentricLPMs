@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.processmining.OCLPMDiscovery.Main;
+import org.processmining.OCLPMDiscovery.model.LPMResultsTagged;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.TaggedPlace;
-import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.wizards.OCLPMDiscoveryWizard;
 import org.processmining.contexts.uitopia.UIPluginContext;
@@ -18,7 +18,6 @@ import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.framework.util.ui.wizard.ProMWizardDisplay;
 import org.processmining.hybridilpminer.parameters.XLogHybridILPMinerParametersImpl;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
-import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
 import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 
 @Plugin(
@@ -150,21 +149,16 @@ public class OCLPMDiscoveryPlugin {
 			affiliation = "RWTH - PADS",
 			author = "Marvin Porsil",
 			email = "marvin.porsil@rwth-aachen.de",
-			uiLabel = "Object-Centric Local Process Model Discovery given hashmap of object types and LPMs."
+			uiLabel = "Object-Centric Local Process Model Discovery given LPMs with tagged places."
 	)
 	@PluginVariant(
-			variantLabel = "Object-Centric Local Process Model Discovery given hashmap of object types and LPMs.",
-			requiredParameterLabels = {0,5}
+			variantLabel = "Object-Centric Local Process Model Discovery given LPMs with tagged places.",
+			requiredParameterLabels = {0,5,1}
 	)
-	public static OCLPMResult mineOCLPMs(PluginContext context, OcelEventLog ocel, LPMResult lpms) throws Exception {
-		// only works if lpms have tagged places
-		if (! (lpms.getElement(0).getPlaces().toArray()[0] instanceof TaggedPlace)) {
-			throw new Exception("Places of LPM aren't tagged with object types.");
-		}
+	public static OCLPMResult mineOCLPMs(PluginContext context, OcelEventLog ocel, LPMResultsTagged lpms, PlaceSet placeSet) throws Exception {
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel); // TODO OCEL necessary?
-		parameters.setCaseNotionStrategy(CaseNotionStrategy.DUMMY); // TODO make user selectable
 		Main.setUp(context, parameters, false, false);
-		return (OCLPMResult) Main.run(ocel, parameters, lpms)[0];
+		return (OCLPMResult) Main.run(ocel, parameters, lpms, placeSet)[0];
 	}
 	
 	// variant accepting enhanced ocel (ocel which already has case notions to be used for LPM discovery)
