@@ -1,7 +1,11 @@
 package org.processmining.OCLPMDiscovery.visualization.components.tables;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.io.Serializable;
 
 import javax.swing.JComponent;
@@ -14,9 +18,11 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import org.processmining.OCLPMDiscovery.gui.OCLPMColors;
+import org.processmining.OCLPMDiscovery.gui.OCLPMComboBox;
 import org.processmining.OCLPMDiscovery.gui.OCLPMPanel;
 import org.processmining.OCLPMDiscovery.gui.OCLPMScrollPane;
 import org.processmining.OCLPMDiscovery.gui.OCLPMToggleButton;
+import org.processmining.OCLPMDiscovery.parameters.PlaceCompletion;
 import org.processmining.OCLPMDiscovery.visualization.components.ComponentId;
 import org.processmining.OCLPMDiscovery.visualization.components.ICommunicativePanel;
 import org.processmining.OCLPMDiscovery.visualization.components.tables.factories.AbstractPluginVisualizerTableFactory;
@@ -90,10 +96,43 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
                 filterForm.setVisible(false);
             }
         });
-
-        this.add(filterForm, BorderLayout.PAGE_START); // add the filter field in the table container
-        this.add(scrollPane, BorderLayout.CENTER); // add the scroll pane in the table container
-        this.add(expandBtn, BorderLayout.PAGE_END); // add the expand/shrink button in the table container
+        
+        // place completion label
+        JLabel placeCompletionLabel = new JLabel("Place Completion:");
+        placeCompletionLabel.setMinimumSize(new Dimension(1,30));
+        
+        // place completion box
+        OCLPMComboBox placeCompletionBox = new OCLPMComboBox(PlaceCompletion.values(), this.theme);
+        
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(0,0,0,0);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridwidth = GridBagConstraints.REMAINDER; // Component spans the whole row
+        
+        gbc.gridx = 0;
+        gbc.weightx = 1.0; // Allow horizontal resizing
+        gbc.anchor = GridBagConstraints.WEST; // Left-align the components
+        gbc.weighty = 0.0;
+        
+        gbc.gridy = 0;
+        this.add(filterForm, gbc); // add the filter field in the table container
+        
+        gbc.gridy = 1;
+        gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.BOTH;
+        this.add(scrollPane, gbc); // add the scroll pane in the table container
+        
+        gbc.weighty = 0.0;
+        gbc.gridy = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        this.add(expandBtn, gbc); // add the expand/shrink button in the table container
+        
+        gbc.gridy = 3;
+        this.add(placeCompletionLabel, gbc);
+        
+        gbc.gridy = 4;
+        this.add(placeCompletionBox, gbc);
     }
 
 
