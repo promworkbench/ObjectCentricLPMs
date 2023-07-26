@@ -70,7 +70,7 @@ public class Main {
 		ProvidingObjects.exportTlpms(tlpms);
 		
 		// OCLPM conversion
-		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, placeSet);
 		
 		// OCLPM place completion
 		oclpmResult = PlaceCompletionUtils.completePlaces(parameters, oclpmResult, placeSet);
@@ -106,7 +106,7 @@ public class Main {
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
 		ProvidingObjects.exportTlpms(tlpms);
 		
-		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, placeSet);
 		
 		// OCLPM place completion
 		oclpmResult = PlaceCompletionUtils.completePlaces(parameters, oclpmResult, placeSet);
@@ -141,7 +141,7 @@ public class Main {
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet, labels);
 		ProvidingObjects.exportTlpms(tlpms);
 		
-		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, placeSet);
 		
 		// OCLPM place completion
 		oclpmResult = PlaceCompletionUtils.completePlaces(parameters, oclpmResult, placeSet);
@@ -169,6 +169,7 @@ public class Main {
 		// identify variable arcs
 		oclpmResult = Main.identifyVariableArcs(parameters, oclpmResult);
 		placeSet = Main.identifyVariableArcs(parameters, placeSet);
+		oclpmResult.setPlaceSet(placeSet);
 		
 		// OCLPM place completion
 		oclpmResult = PlaceCompletionUtils.completePlaces(parameters, oclpmResult, placeSet);
@@ -458,6 +459,19 @@ public class Main {
 		}
 		
 		OCLPMResult oclpmResult = new OCLPMResult(parameters, tlpms);
+		
+		return oclpmResult;
+	}
+	
+	public static OCLPMResult convertLPMstoOCLPMs (OCLPMDiscoveryParameters parameters, LPMResultsTagged tlpms, PlaceSet placeSet) {
+
+		if (!(tlpms.getList().getElement(0).getElements().get(0).getPlaces().toArray()[0] instanceof TaggedPlace)
+				|| ((TaggedPlace) tlpms.getList().getElement(0).getElements().get(0).getPlaces().toArray()[0]).getObjectType() == null 
+				) {
+			System.out.println("The given LPMs do not have tagged places. Therefore, there won't be any variable arcs.");
+		}
+		
+		OCLPMResult oclpmResult = new OCLPMResult(parameters, tlpms, placeSet);
 		
 		return oclpmResult;
 	}

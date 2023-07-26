@@ -23,6 +23,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     private HashMap<String,Color> mapTypeColor; // maps each object type to a color
     private HashSet<List<String>> variableArcSet = new HashSet<>(); // saves all variable arcs [Activity,ObjectType]
     private HashMap<String,HashSet<String>> variableArcActivities = new HashMap<>(); // saves for each place id the activities with which the place forms variable arcs
+    private TaggedPlaceSet placeSet; 
     
     public OCLPMResult() {
     	
@@ -44,8 +45,14 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     	this.refreshColors();
     }
     
+    public OCLPMResult (OCLPMDiscoveryParameters discoveryParameters, LPMResultsTagged tlpms, PlaceSet placeSet) {
+    	this(discoveryParameters, tlpms);
+    	this.setPlaceSet(placeSet);
+    }
+    
     public OCLPMResult (PlaceSet placeSet) {
     	super();
+    	this.placeSet = new TaggedPlaceSet(placeSet);
     	this.objectTypes = new HashSet<String>();
     	this.typeMap = new HashMap<String,String>();
     	for (Place p : placeSet.getElements()) {
@@ -245,6 +252,18 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 		for (ObjectCentricLocalProcessModel o : deleteModels) {
 			this.remove(o);			
 		}
+	}
+
+	public TaggedPlaceSet getPlaceSet() {
+		return placeSet;
+	}
+
+	public void setPlaceSet(TaggedPlaceSet placeSet) {
+		this.placeSet = placeSet;
+	}
+	
+	public void setPlaceSet(PlaceSet placeSet) {
+		this.placeSet = new TaggedPlaceSet(placeSet);
 	}
 
 }
