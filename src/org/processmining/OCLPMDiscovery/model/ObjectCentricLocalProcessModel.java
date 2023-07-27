@@ -39,7 +39,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
     private OCLPMAdditionalInfo additionalInfo;
 	
 	// leading types for which this OCLPM has been discovered
-	private final HashSet<String> discoveryTypes = new HashSet<String>();
+	private HashSet<String> discoveryTypes = new HashSet<String>();
 	
 	// the object types of places in the model 
 	private Set<String> placeTypes = new HashSet<String>();
@@ -90,10 +90,15 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		this.id = lpm.getId();
 		this.addAllPlaces(oclpm.getPlaces());
 		this.setAdditionalInfo(oclpm.getAdditionalInfo());
+		this.setDiscoveryTypes(oclpm.getDiscoveryTypes());
 	}
 
 	public HashSet<String> getDiscoveryTypes() {
 		return discoveryTypes;
+	}
+	
+	public void setDiscoveryTypes(HashSet<String> types) {
+		this.discoveryTypes=types;
 	}
 	
 	/**

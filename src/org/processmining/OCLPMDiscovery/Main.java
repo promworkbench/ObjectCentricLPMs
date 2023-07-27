@@ -559,11 +559,16 @@ public class Main {
 					((TaggedPlace)p).setVariableArcActivities(typeToActivities.get(((TaggedPlace)p).getObjectType()));
 				}
 				
-				if (parameters.getPlaceCompletion().needsExactVariableArcs()) {
-					// trim variable arc activities to fit the actual transitions of each place
-					for (Place p : placeSet.getElements()) {
-						((TaggedPlace)p).trimVariableArcSet();
-					}
+//				if (parameters.getPlaceCompletion().needsExactVariableArcs()) {
+//					// trim variable arc activities to fit the actual transitions of each place
+//					for (Place p : placeSet.getElements()) {
+//						((TaggedPlace)p).trimVariableArcSet();
+//					}
+//				}
+				
+				// always trim variable arcs as the user can select different place completions in the visualizer
+				for (Place p : placeSet.getElements()) {
+					((TaggedPlace)p).trimVariableArcSet();
 				}
 		}
 		Main.updateProgress("Completed variable arc identification.");
@@ -594,11 +599,17 @@ public class Main {
 				}
 				
 				// in case the exact number of variable arcs of places is needed
-				if (parameters.getPlaceCompletion().needsExactVariableArcs()) {
-					for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
-						oclpm.trimVariableArcSet();
-					}
+//				if (parameters.getPlaceCompletion().needsExactVariableArcs()) {
+//					for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+//						oclpm.trimVariableArcSet();
+//					}
+//				}
+				
+				// always trim variable arcs as the user can select different place completions in the visualizer
+				for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+					oclpm.trimVariableArcSet();
 				}
+				
 				Main.updateProgress("Completed variable arc identification.");
 		}
 		return oclpmResult;

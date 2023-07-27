@@ -287,15 +287,17 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 	 * @return
 	 */
 	public OCLPMResult copyForPlaceCompletion () {
-		// reuse all the list attributes
+		// shared attributes
 		OCLPMResult newResult = new OCLPMResult();
 		newResult.setPlaceSet(this.getPlaceSet());
     	newResult.setObjectTypes(this.getObjectTypes());
     	newResult.setTypeMap(this.getTypeMap());
 		newResult.setOclpmDiscoverySettings(this.getOclpmDiscoverySettings()); // TODO: make place completion changeable
     	newResult.setLpmDiscoveryTypes(this.getLpmDiscoveryTypes());
-    	newResult.setVariableArcSet(this.getVariableArcSet());
-    	newResult.setVariableArcActivities(this.getVariableArcActivities());
+    	
+    	// independent attributes
+    	newResult.setVariableArcSet(new HashSet<>());
+    	newResult.setVariableArcActivities(new HashMap<>());
     	
 		// places themselves will not be altered, only which places the OCLPMs use
 		for (ObjectCentricLocalProcessModel oclpm : this.elements) {
