@@ -7,6 +7,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.Serializable;
+import java.util.Map;
+import java.util.function.BiFunction;
 
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -14,6 +16,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.RowFilter;
 import javax.swing.RowSorter;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
@@ -22,10 +25,14 @@ import org.processmining.OCLPMDiscovery.gui.OCLPMComboBox;
 import org.processmining.OCLPMDiscovery.gui.OCLPMPanel;
 import org.processmining.OCLPMDiscovery.gui.OCLPMScrollPane;
 import org.processmining.OCLPMDiscovery.gui.OCLPMToggleButton;
+import org.processmining.OCLPMDiscovery.model.OCLPMResult;
+import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
 import org.processmining.OCLPMDiscovery.parameters.PlaceCompletion;
+import org.processmining.OCLPMDiscovery.utils.PlaceCompletionUtils;
 import org.processmining.OCLPMDiscovery.visualization.components.ComponentId;
 import org.processmining.OCLPMDiscovery.visualization.components.ICommunicativePanel;
 import org.processmining.OCLPMDiscovery.visualization.components.tables.factories.AbstractPluginVisualizerTableFactory;
+import org.processmining.OCLPMDiscovery.visualization.components.tables.factories.OCLPMResultPluginVisualizerTableFactory;
 import org.processmining.placebasedlpmdiscovery.model.TextDescribable;
 import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableCollection;
 import org.processmining.placebasedlpmdiscovery.plugins.visualization.utils.RegexConverter;
@@ -33,12 +40,12 @@ import org.processmining.placebasedlpmdiscovery.plugins.visualization.utils.Rege
 public class TableComposition<T extends TextDescribable & Serializable> extends JComponent implements ICommunicativePanel {
 
     private final ComponentId componentId;
-    private final SerializableCollection<T> result;
+    private final OCLPMResult result;
     private final AbstractPluginVisualizerTableFactory<T> tableFactory;
     private final TableListener<T> controller;
     private OCLPMColors theme = new OCLPMColors();
 
-    public TableComposition(SerializableCollection<T> result,
+    public TableComposition(OCLPMResult result,
                             AbstractPluginVisualizerTableFactory<T> tableFactory,
                             TableListener<T> controller) {
         this.componentId = new ComponentId(ComponentId.Type.TableComponent);
@@ -49,7 +56,7 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         init();
     }
     
-    public TableComposition(SerializableCollection<T> result,
+    public TableComposition(OCLPMResult result,
             AbstractPluginVisualizerTableFactory<T> tableFactory,
             TableListener<T> controller,
             OCLPMColors theme) {
@@ -66,7 +73,7 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         this.setLayout(new BorderLayout());
 
         // create the table
-        GenericTextDescribableTableComponent<T> table = this.tableFactory.getPluginVisualizerTable(this.result, controller, this.theme);
+        GenericTextDescribableTableComponent<T> table = this.tableFactory.getPluginVisualizerTable((SerializableCollection<T>) this.result, controller, this.theme);
         OCLPMScrollPane scrollPane = new OCLPMScrollPane(table, theme); // add the table in a scroll pane
 
         // create the filter form
@@ -103,6 +110,40 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         
         // place completion box
         OCLPMComboBox placeCompletionBox = new OCLPMComboBox(PlaceCompletion.values(), this.theme);
+        placeCompletionBox.addActionListener(actionEvent -> {
+        	OCLPMResult newResult = PlaceCompletionUtils.completePlacesCopy(this.result, (PlaceCompletion) placeCompletionBox.getSelectedItem());
+        	
+        	// show all columns (otherwise it doesn't work)
+            ((VisibilityControllableTableColumnModel) table.getColumnModel()).setAllColumnsVisible(); // show all columns
+            
+        	// insert new data into table and refresh
+        	OCLPMResultPluginVisualizerTableFactory oclpmFactory = (OCLPMResultPluginVisualizerTableFactory) this.tableFactory;
+        	Map<Integer, ObjectCentricLocalProcessModel> indexObjectMap = oclpmFactory.getIndexObjectMap(newResult);
+        	table.setIndexMap((Map<Integer, T>) indexObjectMap);
+        	BiFunction<Integer, ObjectCentricLocalProcessModel, Object[]> objectToColumnsMapper = oclpmFactory.getObjectToColumnsMapper();
+        	Object[][] tableData;
+        	if (indexObjectMap.size() <= 0)
+                tableData = new Object[0][0];
+        	else {
+        		tableData = indexObjectMap.entrySet().stream().map(
+        				entry -> {
+	                        int ind = entry.getKey();
+	                        ObjectCentricLocalProcessModel obj = entry.getValue();
+	                        return objectToColumnsMapper.apply(ind, obj);
+        				}
+        			).toArray(Object[][]::new);
+        	}
+        	String[] columnNames = this.tableFactory.getColumnNames();
+        	((DefaultTableModel) table.getModel()).setDataVector(tableData, columnNames);
+        	
+        	((DefaultTableModel) table.getModel()).fireTableDataChanged();
+        	table.changeSelection(0, 0, false, false);
+        	
+        	// if table isn't expanded only show first column
+        	if (!expandBtn.isSelected()) {
+        		((VisibilityControllableTableColumnModel) table.getColumnModel()).keepOnlyFirstColumn(); // keep only the first column
+        	}
+        });
         
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -137,7 +178,7 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
 
 
     /**
-     * Creating the text filed for the table filter
+     * Creating the text field for the table filter
      *
      * @param table: the table for which the filter is created
      * @return created text field that will be used to filer the values in the table

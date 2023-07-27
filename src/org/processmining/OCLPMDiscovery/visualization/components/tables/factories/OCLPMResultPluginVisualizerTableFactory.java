@@ -3,6 +3,7 @@ package org.processmining.OCLPMDiscovery.visualization.components.tables.factori
 import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -27,7 +28,7 @@ public class OCLPMResultPluginVisualizerTableFactory extends AbstractPluginVisua
     }
 
     @Override
-    protected Map<Integer, ObjectCentricLocalProcessModel> getIndexObjectMap(SerializableCollection<ObjectCentricLocalProcessModel> elements) {
+	public Map<Integer, ObjectCentricLocalProcessModel> getIndexObjectMap(SerializableCollection<ObjectCentricLocalProcessModel> elements) {
         Iterator<ObjectCentricLocalProcessModel> lpmIterator = elements.getElements().iterator();
         return IntStream
                 .range(0, elements.size())
@@ -40,29 +41,8 @@ public class OCLPMResultPluginVisualizerTableFactory extends AbstractPluginVisua
         DecimalFormat df = new DecimalFormat("#.###");
         return new CustomObjectTableModel<>(
                 indexObjectMap,
-                new String[]{
-                        "LPM Index",
-                        "LPM Short Name",
-//                        "Transition Overlapping Score",
-                        "Transition Coverage Score",
-                        "Fitting Window Score",
-                        "Passage Coverage Score",
-                        "Passage Repetition Score",
-                        "Trace Support",
-                        "Aggregate Result"
-                },
-                (ind, lpm) -> new Object[]{
-                        ind + 1,
-                        lpm.getShortString(),
-//                        df.format(getResultOrDefault(lpm, LPMEvaluationResultId.TransitionOverlappingEvaluationResult)),
-                        df.format(getResultOrDefault(lpm, LPMEvaluationResultId.TransitionCoverageEvaluationResult)),
-                        df.format(getResultOrDefault(lpm, LPMEvaluationResultId.FittingWindowsEvaluationResult)),
-                        df.format(getResultOrDefault(lpm, LPMEvaluationResultId.PassageCoverageEvaluationResult)),
-                        df.format(getResultOrDefault(lpm, LPMEvaluationResultId.PassageRepetitionEvaluationResult)),
-                        df.format(getResultOrDefault(lpm, LPMEvaluationResultId.TraceSupportEvaluationResult)),
-                        df.format(lpm.getAdditionalInfo().getEvaluationResult()
-                                .getResult(new EvaluationResultAggregateOperation()))
-                });
+                this.getColumnNames(),
+                this.getObjectToColumnsMapper());
     }
 
     @Override
@@ -78,5 +58,37 @@ public class OCLPMResultPluginVisualizerTableFactory extends AbstractPluginVisua
         });
         popupMenu.add(exportItem);
         return popupMenu;
+    }
+    
+    public String[] getColumnNames() {
+    	return
+    	new String[]{
+                "LPM Index",
+                "LPM Short Name",
+//                "Transition Overlapping Score",
+                "Transition Coverage Score",
+                "Fitting Window Score",
+                "Passage Coverage Score",
+                "Passage Repetition Score",
+                "Trace Support",
+                "Aggregate Result"
+        };
+    }
+    
+    public BiFunction<Integer, ObjectCentricLocalProcessModel, Object[]> getObjectToColumnsMapper(){
+    	DecimalFormat df = new DecimalFormat("#.###");
+    	return 
+    		(ind, lpm) -> new Object[]{
+                ind + 1,
+                lpm.getShortString(),
+//                df.format(getResultOrDefault(lpm, LPMEvaluationResultId.TransitionOverlappingEvaluationResult)),
+                df.format(getResultOrDefault(lpm, LPMEvaluationResultId.TransitionCoverageEvaluationResult)),
+                df.format(getResultOrDefault(lpm, LPMEvaluationResultId.FittingWindowsEvaluationResult)),
+                df.format(getResultOrDefault(lpm, LPMEvaluationResultId.PassageCoverageEvaluationResult)),
+                df.format(getResultOrDefault(lpm, LPMEvaluationResultId.PassageRepetitionEvaluationResult)),
+                df.format(getResultOrDefault(lpm, LPMEvaluationResultId.TraceSupportEvaluationResult)),
+                df.format(lpm.getAdditionalInfo().getEvaluationResult()
+                        .getResult(new EvaluationResultAggregateOperation()))
+    		};
     }
 }

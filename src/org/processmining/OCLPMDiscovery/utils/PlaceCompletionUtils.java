@@ -290,4 +290,14 @@ public class PlaceCompletionUtils {
 		}
 		return oclpmResult;
 	}
+
+	public static OCLPMResult completePlacesCopy(OCLPMResult result, PlaceCompletion placeCompletion) {
+		// TODO Auto-generated method stub
+		OCLPMResult newResult;
+		switch (placeCompletion) {
+			default:
+				newResult = result;
+		}
+		return newResult;
+	}
 }
