@@ -59,6 +59,7 @@ public class GenericTextDescribableTableComponent<T extends TextDescribable> ext
     }
     
     public void setIndexMap (Map<Integer, T> indexMap) {
-    	this.indexMap = indexMap;
+    	this.indexMap.clear();
+    	this.indexMap.putAll(indexMap);
     }
 }

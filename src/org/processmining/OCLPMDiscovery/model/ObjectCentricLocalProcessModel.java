@@ -19,7 +19,6 @@ import org.processmining.placebasedlpmdiscovery.model.LocalProcessModel;
 import org.processmining.placebasedlpmdiscovery.model.Place;
 import org.processmining.placebasedlpmdiscovery.model.TextDescribable;
 import org.processmining.placebasedlpmdiscovery.model.Transition;
-import org.processmining.placebasedlpmdiscovery.model.additionalinfo.LPMAdditionalInfo;
 
 /**
  * The ObjectCentricLocalProcessModel class is used to represent the logic for object-centric local process models. It contains places,
@@ -80,6 +79,17 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	public ObjectCentricLocalProcessModel(LocalProcessModel lpm, String discoveryType) {
 		this(lpm);
 		this.discoveryTypes.add(discoveryType);
+	}
+	
+	/*
+	 * Create copy of the given oclpm where the places can be swapped without changing the original.
+	 */
+	public ObjectCentricLocalProcessModel (ObjectCentricLocalProcessModel oclpm) {
+		this();
+		this.lpm = oclpm.getLpm();
+		this.id = lpm.getId();
+		this.addAllPlaces(oclpm.getPlaces());
+		this.setAdditionalInfo(oclpm.getAdditionalInfo());
 	}
 
 	public HashSet<String> getDiscoveryTypes() {
@@ -158,8 +168,8 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
         return res;
     }
 
-    public LPMAdditionalInfo getAdditionalInfo() {
-        return additionalInfo;
+    public OCLPMAdditionalInfo getAdditionalInfo() {
+        return this.additionalInfo;
     }
 
     public void setAdditionalInfo(OCLPMAdditionalInfo additionalInfo) {

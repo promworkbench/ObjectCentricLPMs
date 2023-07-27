@@ -50,6 +50,10 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     	this.setPlaceSet(placeSet);
     }
     
+    /**
+     * Sets the places as OCLPMs. (for place set visualization)
+     * @param placeSet
+     */
     public OCLPMResult (PlaceSet placeSet) {
     	super();
     	this.placeSet = new TaggedPlaceSet(placeSet);
@@ -75,13 +79,25 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 	public Set<String> getObjectTypes() {
 		return objectTypes;
 	}
+	
+	public void setObjectTypes(Set<String> types) {
+		this.objectTypes = types;
+	}
 
 	public Set<String> getLpmDiscoveryTypes() {
 		return lpmDiscoveryTypes;
 	}
+	
+	public void setLpmDiscoveryTypes(Set<String> types) {
+		this.lpmDiscoveryTypes = types;
+	}
 
 	public String getOclpmDiscoverySettings() {
 		return oclpmDiscoverySettings;
+	}
+	
+	public void setOclpmDiscoverySettings(String settings) {
+		this.oclpmDiscoverySettings = settings;
 	}
 	
 	public void refreshColors() {
@@ -264,6 +280,32 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 	
 	public void setPlaceSet(PlaceSet placeSet) {
 		this.placeSet = new TaggedPlaceSet(placeSet);
+	}
+	
+	/**
+	 * Returns a new object such that place completion can be performed without altering the original OCLPMResult.
+	 * @return
+	 */
+	public OCLPMResult copyForPlaceCompletion () {
+		// reuse all the list attributes
+		OCLPMResult newResult = new OCLPMResult();
+		newResult.setPlaceSet(this.getPlaceSet());
+    	newResult.setObjectTypes(this.getObjectTypes());
+    	newResult.setTypeMap(this.getTypeMap());
+		newResult.setOclpmDiscoverySettings(this.getOclpmDiscoverySettings()); // TODO: make place completion changeable
+    	newResult.setLpmDiscoveryTypes(this.getLpmDiscoveryTypes());
+    	newResult.setVariableArcSet(this.getVariableArcSet());
+    	newResult.setVariableArcActivities(this.getVariableArcActivities());
+    	
+		// places themselves will not be altered, only which places the OCLPMs use
+		for (ObjectCentricLocalProcessModel oclpm : this.elements) {
+			ObjectCentricLocalProcessModel newOclpm = new ObjectCentricLocalProcessModel(oclpm);
+			newResult.add(newOclpm);
+		}
+		
+		newResult.storeVariableArcs();
+    	newResult.refreshColors();
+		return newResult;
 	}
 
 }

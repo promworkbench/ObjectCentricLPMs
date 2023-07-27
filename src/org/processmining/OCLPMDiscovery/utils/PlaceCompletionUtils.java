@@ -26,43 +26,28 @@ public class PlaceCompletionUtils {
 	 * @return
 	 */
 	public static OCLPMResult completePlaces (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult, PlaceSet placeSet) {
-		if (parameters.getPlaceCompletion() == PlaceCompletion.NONE) {
+		return completePlaces(oclpmResult, placeSet, parameters.getPlaceCompletion());
+	}
+	
+	public static OCLPMResult completePlacesCopy(OCLPMResult result, PlaceCompletion placeCompletion) {
+		PlaceSet placeSet = result.getPlaceSet().asPlaceSet();
+		OCLPMResult newResult = result.copyForPlaceCompletion();
+		return completePlaces(newResult, placeSet, placeCompletion);
+	}
+	
+	public static OCLPMResult completePlaces (OCLPMResult oclpmResult, PlaceSet placeSet, PlaceCompletion placeCompletion) {
+		if (placeCompletion == PlaceCompletion.NONE) {
 			return oclpmResult;
 		}
 		
 		Main.messageNormal("Starting place completion.");
 		
-		switch(parameters.getPlaceCompletion()) {
+		switch(placeCompletion) {
 			
 			case ALL:
 				// add places of other types to model if: 
 				// equal place already is in there
-				for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
-					Set<TaggedPlace> tmpPlaceSet = new HashSet<>(oclpm.getPlaces().size());
-					Set<String> placeTypes = oclpm.getPlaceTypes();
-					for (TaggedPlace tp : oclpm.getPlaces()) {
-						for (Place pNet : placeSet.getElements()) {
-							if (
-								!tp.getObjectType().equals(((TaggedPlace) pNet).getObjectType()) // different type
-								&& tp.isIsomorphic((TaggedPlace)pNet) // exactly the same transitions
-									) {
-								// check if place already is in the oclpm
-								boolean alreadyInThere = false;
-								for (TaggedPlace p2 : oclpm.getPlaces()) {
-									if (p2.equals((TaggedPlace)pNet)) {
-										alreadyInThere = true;
-										break;
-									}
-								}
-								if (!alreadyInThere) {
-									tmpPlaceSet.add((TaggedPlace)pNet);
-								}
-							}
-						}
-					}
-					oclpm.addAllPlaces(tmpPlaceSet);
-				}
-				
+				oclpmResult = completeAll(oclpmResult, placeSet);
 				oclpmResult.deleteDuplicates();
 				break;
 			
@@ -291,13 +276,38 @@ public class PlaceCompletionUtils {
 		return oclpmResult;
 	}
 
-	public static OCLPMResult completePlacesCopy(OCLPMResult result, PlaceCompletion placeCompletion) {
-		// TODO Auto-generated method stub
-		OCLPMResult newResult;
-		switch (placeCompletion) {
-			default:
-				newResult = result;
+	/**
+	 * add places of other types to model if: 
+	 * equal place already is in there
+	 * @param oclpmResult
+	 * @param placeSet
+	 * @return
+	 */
+	public static OCLPMResult completeAll (OCLPMResult oclpmResult, PlaceSet placeSet) {
+		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+			Set<TaggedPlace> tmpPlaceSet = new HashSet<>(oclpm.getPlaces().size());
+			for (TaggedPlace tp : oclpm.getPlaces()) {
+				for (Place pNet : placeSet.getElements()) {
+					if (
+						!tp.getObjectType().equals(((TaggedPlace) pNet).getObjectType()) // different type
+						&& tp.isIsomorphic((TaggedPlace)pNet) // exactly the same transitions
+							) {
+						// check if place already is in the oclpm
+						boolean alreadyInThere = false;
+						for (TaggedPlace p2 : oclpm.getPlaces()) {
+							if (p2.equals((TaggedPlace)pNet)) {
+								alreadyInThere = true;
+								break;
+							}
+						}
+						if (!alreadyInThere) {
+							tmpPlaceSet.add((TaggedPlace)pNet);
+						}
+					}
+				}
+			}
+			oclpm.addAllPlaces(tmpPlaceSet);
 		}
-		return newResult;
+		return oclpmResult;
 	}
 }
