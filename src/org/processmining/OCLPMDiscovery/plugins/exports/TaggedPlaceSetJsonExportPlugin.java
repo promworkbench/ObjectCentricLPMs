@@ -30,4 +30,10 @@ public class TaggedPlaceSetJsonExportPlugin {
     	JsonExporter<TaggedPlaceSet> exporter = new JsonExporter<>();
         tps.export(exporter, Files.newOutputStream(file.toPath()));
     }
+    
+    @PluginVariant(variantLabel = "Export set of tagged places into a file", requiredParameterLabels = {0, 1})
+    public static void export(PluginContext context, TaggedPlaceSet placeSet, File file) throws IOException {    	
+    	JsonExporter<TaggedPlaceSet> exporter = new JsonExporter<>();
+        placeSet.export(exporter, Files.newOutputStream(file.toPath()));
+    }
 }

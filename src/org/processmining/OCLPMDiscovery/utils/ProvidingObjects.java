@@ -7,18 +7,18 @@ import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.model.LPMResultsTagged;
+import org.processmining.OCLPMDiscovery.model.TaggedPlaceSet;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
-import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 import org.processmining.plugins.utils.ProvidedObjectHelper;
 
 public class ProvidingObjects {
 
-	public static void exportPlaceSet(PlaceSet placeSet) {
+	public static void exportPlaceSet(TaggedPlaceSet placeSet) {
 		// Add the places as a provided object
 		if (Main.UsingContext) {
 	        Main.getContext().getProvidedObjectManager().createProvidedObject(
 	        		"OCLPM Discovery: United Place Set"
-	        		, placeSet, PlaceSet.class, Main.getContext());
+	        		, placeSet, TaggedPlaceSet.class, Main.getContext());
 	        ProvidedObjectHelper.setFavorite(Main.getContext(), placeSet);
 		}
 	}

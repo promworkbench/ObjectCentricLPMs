@@ -40,7 +40,8 @@ import org.processmining.placebasedlpmdiscovery.plugins.visualization.utils.Rege
 public class TableComposition<T extends TextDescribable & Serializable> extends JComponent implements ICommunicativePanel {
 
     private final ComponentId componentId;
-    private final OCLPMResult result;
+    private final OCLPMResult result; // original unaltered result
+    private OCLPMResult shownResult; // currently shown result, potentially with completed place and object type ellipses
     private final AbstractPluginVisualizerTableFactory<T> tableFactory;
     private final TableListener<T> controller;
     private OCLPMColors theme = new OCLPMColors();
@@ -50,6 +51,7 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
                             TableListener<T> controller) {
         this.componentId = new ComponentId(ComponentId.Type.TableComponent);
         this.result = result;
+        this.shownResult = result;
         this.tableFactory = tableFactory;
         this.controller = controller;
 
@@ -62,6 +64,7 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
             OCLPMColors theme) {
 		this.componentId = new ComponentId(ComponentId.Type.TableComponent);
 		this.result = result;
+		this.shownResult = result;
 		this.tableFactory = tableFactory;
 		this.controller = controller;
 		this.theme = theme;
@@ -104,6 +107,16 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
             }
         });
         
+        // object flow button
+        OCLPMToggleButton objectFlowButton = new OCLPMToggleButton(this.theme);
+        objectFlowButton.setText("Extend Object Flow");
+        objectFlowButton.setSelected(false);
+        objectFlowButton.setCornerRadius(0);
+        objectFlowButton.addActionListener(actionEvent -> {
+        	this.shownResult.showExternalObjectFlow(objectFlowButton.isSelected());
+        	//TODO refresh visualizer to show new places?
+        });
+        
         // place completion label
         JLabel placeCompletionLabel = new JLabel("Place Completion:");
         placeCompletionLabel.setMinimumSize(new Dimension(1,30));
@@ -112,6 +125,7 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         OCLPMComboBox placeCompletionBox = new OCLPMComboBox(PlaceCompletion.values(), this.theme);
         placeCompletionBox.addActionListener(actionEvent -> {
         	OCLPMResult newResult = PlaceCompletionUtils.completePlacesCopy(this.result, (PlaceCompletion) placeCompletionBox.getSelectedItem());
+        	this.shownResult = newResult;
         	
         	// show all columns (otherwise it doesn't work)
             ((VisibilityControllableTableColumnModel) table.getColumnModel()).setAllColumnsVisible(); // show all columns
@@ -151,28 +165,31 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridwidth = GridBagConstraints.REMAINDER; // Component spans the whole row
         
+        // table
         gbc.gridx = 0;
         gbc.weightx = 1.0; // Allow horizontal resizing
         gbc.anchor = GridBagConstraints.WEST; // Left-align the components
         gbc.weighty = 0.0;
-        
-        gbc.gridy = 0;
+        int gridy = 0;
+        gbc.gridy = gridy++;
         this.add(filterForm, gbc); // add the filter field in the table container
-        
-        gbc.gridy = 1;
+        gbc.gridy = gridy++;
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
         this.add(scrollPane, gbc); // add the scroll pane in the table container
-        
         gbc.weighty = 0.0;
-        gbc.gridy = 2;
+        gbc.gridy = gridy++;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         this.add(expandBtn, gbc); // add the expand/shrink button in the table container
         
-        gbc.gridy = 3;
-        this.add(placeCompletionLabel, gbc);
+        // object flow
+        gbc.gridy = gridy++;
+        this.add(objectFlowButton, gbc);
         
-        gbc.gridy = 4;
+        // place completion
+        gbc.gridy = gridy++;
+        this.add(placeCompletionLabel, gbc);
+        gbc.gridy = gridy++;
         this.add(placeCompletionBox, gbc);
     }
 

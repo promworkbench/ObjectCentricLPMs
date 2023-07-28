@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.deckfour.xes.model.XLog;
@@ -14,6 +15,7 @@ import org.processmining.OCLPMDiscovery.model.LPMResultsTagged;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
 import org.processmining.OCLPMDiscovery.model.TaggedPlace;
+import org.processmining.OCLPMDiscovery.model.TaggedPlaceSet;
 import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.parameters.PlaceCompletion;
@@ -33,7 +35,6 @@ import org.processmining.ocel.ocelobjects.OcelObject;
 import org.processmining.placebasedlpmdiscovery.model.Place;
 import org.processmining.placebasedlpmdiscovery.model.Transition;
 import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
-import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableList;
 import org.processmining.placebasedlpmdiscovery.plugins.mining.PlaceBasedLPMDiscoveryPlugin;
 
@@ -59,7 +60,7 @@ public class Main {
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
 		
 		// place discovery
-		PlaceSet placeSet = discoverPlaceSet(ocel,parameters);
+		TaggedPlaceSet placeSet = discoverPlaceSet(ocel,parameters);
 		ProvidingObjects.exportPlaceSet(placeSet);
 		
 		// identify variable arcs
@@ -91,7 +92,7 @@ public class Main {
 	 * @param parameters
 	 * @return {oclpmResult, tlpms}
 	 */
-	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet) {
+	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, TaggedPlaceSet placeSet) {
 		
 		// remove duplicate places from placeSet
 		if (parameters.doPlaceSetPostProcessing()) {
@@ -127,7 +128,7 @@ public class Main {
 	 * @param parameters
 	 * @return {oclpmResult, tlpms}
 	 */
-	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet, ArrayList<String> labels) {
+	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, TaggedPlaceSet placeSet, ArrayList<String> labels) {
 		// remove duplicate places from placeSet
 		if (parameters.doPlaceSetPostProcessing()) {
 			placeSet = Main.postProcessPlaceSet(placeSet);
@@ -162,7 +163,7 @@ public class Main {
 	 * @param parameters
 	 * @return {oclpmResult}
 	 */
-	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, LPMResultsTagged tlpms, PlaceSet placeSet) {
+	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, LPMResultsTagged tlpms, TaggedPlaceSet placeSet) {
         		
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
 		
@@ -218,7 +219,7 @@ public class Main {
 	 */
 	public static LPMResultsTagged runLPMDiscovery(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
         
-		PlaceSet placeSet = discoverPlaceSet(ocel,parameters);
+		TaggedPlaceSet placeSet = discoverPlaceSet(ocel,parameters);
 		ProvidingObjects.exportPlaceSet(placeSet);
 		
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
@@ -234,7 +235,7 @@ public class Main {
 	 * @param placeSet
 	 * @return
 	 */
-	public static LPMResultsTagged runLPMDiscovery(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet) {
+	public static LPMResultsTagged runLPMDiscovery(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, TaggedPlaceSet placeSet) {
         	
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
 
@@ -251,9 +252,10 @@ public class Main {
 	 * @param parameters
 	 * @return PlaceSet
 	 */
-	public static PlaceSet discoverPlaceSet(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
-		Set<Place> placeNetsUnion = new HashSet<>();
-		HashMap<String,String> typeMap = new HashMap<String,String>();
+	public static TaggedPlaceSet discoverPlaceSet(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
+		Set<TaggedPlace> placeNetsUnion = new HashSet<>();
+		Map<String,Set<String>> startingActivities = new HashMap<>(); // maps object type -> activity label
+		Map<String,Set<String>> endingActivities = new HashMap<>();
 		
 		// place net discovery
 		for (String currentType : parameters.getObjectTypesPlaceNets()) {
@@ -262,10 +264,12 @@ public class Main {
 			XLog flatLog = Main.flattenOCEL(ocel, currentType);
 			Main.messageNormal("Flattened ocel for type "+currentType);
 			
+			// TODO discover starting and ending activities
+			
 			// discover petri net using est-miner (use specpp)
 			// split petri net into place nets
 			// tag places with current object type
-			Set<Place> placeNets = FlatLogProcessing.processFlatLogHiddenTagging(Context, flatLog, currentType, parameters); //TODO what happens if Context==null?
+			Set<TaggedPlace> placeNets = FlatLogProcessing.processFlatLog(Context, flatLog, currentType, parameters); //TODO what happens if Context==null?
 			// testing if it does work when not creating places from casted taggedPlaces: Yes it works! :(
 //			Set<Place> placeNets = FlatLogProcessing.processFlatLogNoTagging(Context, flatLog, currentType, parameters);
 			Main.updateProgress("Finished discovery of place nets for object type "+currentType+".");
@@ -275,7 +279,9 @@ public class Main {
 		}
 		
 		// convert set of places to PlaceSet
-		PlaceSet placeSet = new PlaceSet(placeNetsUnion);
+		TaggedPlaceSet placeSet = new TaggedPlaceSet(placeNetsUnion);
+		placeSet.setStartingActivities(startingActivities);
+		placeSet.setEndingActivities(endingActivities);
 		
 		// remove duplicate place nets
 		placeSet = postProcessPlaceSet(placeSet);
@@ -283,11 +289,11 @@ public class Main {
 		return placeSet;
 	}
 
-	public static PlaceSet postProcessPlaceSet(PlaceSet placeSet) {
+	public static TaggedPlaceSet postProcessPlaceSet(TaggedPlaceSet placeSet) {
 		Main.messageNormal("Starting place set post processing.");
 		// Identify equal OCLPMs (ignoring variable arcs)
 		HashSet<Integer> deletionSet = new HashSet<Integer>(placeSet.size());
-		SerializableList<Place> placeList = placeSet.getList();
+		SerializableList<TaggedPlace> placeList = placeSet.getList();
 		for (int i1 = 0; i1<placeSet.size()-1; i1++) {
 			if (deletionSet.contains(i1)) {
 				continue; // place is already tagged to be deleted
@@ -296,19 +302,19 @@ public class Main {
 				if (deletionSet.contains(i2)) {
 					continue; // place is already tagged to be deleted
 				}
-				TaggedPlace tp1 = (TaggedPlace) placeList.getElement(i1);
-				TaggedPlace tp2 = (TaggedPlace) placeList.getElement(i2);
+				TaggedPlace tp1 = placeList.getElement(i1);
+				TaggedPlace tp2 = placeList.getElement(i2);
 				if (tp1.isEqual(tp2)) {
 					deletionSet.add(i2);
 				}
 			}
 		}
 		// delete equal places
-		HashSet<Place> deletePlaces = new HashSet<Place>(deletionSet.size());
+		HashSet<TaggedPlace> deletePlaces = new HashSet<TaggedPlace>(deletionSet.size());
 		for (int i : deletionSet) {
 			deletePlaces.add(placeList.getElement(i));
 		}
-		for (Place p : deletePlaces) {
+		for (TaggedPlace p : deletePlaces) {
 			placeSet.remove(p);			
 		}
 		Main.messageNormal("Completed place set post processing.");
@@ -323,7 +329,7 @@ public class Main {
 	 * @param labels
 	 * @return
 	 */
-	public static LPMResultsTagged discoverLPMs(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet, ArrayList<String> labels) {
+	public static LPMResultsTagged discoverLPMs(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, TaggedPlaceSet placeSet, ArrayList<String> labels) {
 		LPMResultsTagged lpmsTagged = new LPMResultsTagged();
 		XLog log;
 		Object[] lpmResults;
@@ -351,7 +357,7 @@ public class Main {
 	 * @param placeSet
 	 * @return
 	 */
-	public static LPMResultsTagged discoverLPMs(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, PlaceSet placeSet) {
+	public static LPMResultsTagged discoverLPMs(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, TaggedPlaceSet placeSet) {
 
 		messageNormal("Obtained "+placeSet.size()+" place nets for LPM discovery.");
 		
@@ -463,7 +469,7 @@ public class Main {
 		return oclpmResult;
 	}
 	
-	public static OCLPMResult convertLPMstoOCLPMs (OCLPMDiscoveryParameters parameters, LPMResultsTagged tlpms, PlaceSet placeSet) {
+	public static OCLPMResult convertLPMstoOCLPMs (OCLPMDiscoveryParameters parameters, LPMResultsTagged tlpms, TaggedPlaceSet placeSet) {
 
 		if (!(tlpms.getList().getElement(0).getElements().get(0).getPlaces().toArray()[0] instanceof TaggedPlace)
 				|| ((TaggedPlace) tlpms.getList().getElement(0).getElements().get(0).getPlaces().toArray()[0]).getObjectType() == null 
@@ -484,7 +490,7 @@ public class Main {
 	 * @param oclpmResult
 	 * @return
 	 */
-	public static PlaceSet identifyVariableArcs (OCLPMDiscoveryParameters parameters, PlaceSet placeSet) {
+	public static TaggedPlaceSet identifyVariableArcs (OCLPMDiscoveryParameters parameters, TaggedPlaceSet placeSet) {
 		switch (parameters.getVariableArcIdentification()) {
 			case NONE:
 				break;
@@ -756,10 +762,10 @@ public class Main {
 		}
 	}
 	
-	public static Object[] runLPMPlugin(XLog log, PlaceSet placeSet, OCLPMDiscoveryParameters parameters) {
+	public static Object[] runLPMPlugin(XLog log, TaggedPlaceSet placeSet, OCLPMDiscoveryParameters parameters) {
 		messageNormal("Starting LPM discovery.");
 		//TODO what happens if Context==null?
-		Object[] lpmResults = PlaceBasedLPMDiscoveryPlugin.mineLPMs(Context, log, placeSet, parameters.getPBLPMDiscoveryParameters());
+		Object[] lpmResults = PlaceBasedLPMDiscoveryPlugin.mineLPMs(Context, log, placeSet.asPlaceSet(), parameters.getPBLPMDiscoveryParameters());
 		updateProgress("Finished LPM discovery.");
 		return lpmResults;
 	}

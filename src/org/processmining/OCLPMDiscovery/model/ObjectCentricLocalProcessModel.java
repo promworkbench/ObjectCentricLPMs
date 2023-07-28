@@ -448,4 +448,14 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		
 	}
 
+	public void addExternalObjectFlow(Map<String, Set<String>> startingActivities, Map<String, Set<String>> endingActivities) {
+		// TODO add special places for starting and ending transitions
+		
+	}
+
+	public void removeExternalObjectFlow(Map<String, Set<String>> startingActivities, Map<String, Set<String>> endingActivities) {
+		// TODO Remove the special places for starting and ending transitions
+		
+	}
+
 }

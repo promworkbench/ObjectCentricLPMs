@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
@@ -24,6 +25,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     private HashSet<List<String>> variableArcSet = new HashSet<>(); // saves all variable arcs [Activity,ObjectType]
     private HashMap<String,HashSet<String>> variableArcActivities = new HashMap<>(); // saves for each place id the activities with which the place forms variable arcs
     private TaggedPlaceSet placeSet; 
+    private boolean showExternalObjectFlow = false;
     
     public OCLPMResult() {
     	
@@ -45,7 +47,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     	this.refreshColors();
     }
     
-    public OCLPMResult (OCLPMDiscoveryParameters discoveryParameters, LPMResultsTagged tlpms, PlaceSet placeSet) {
+    public OCLPMResult (OCLPMDiscoveryParameters discoveryParameters, LPMResultsTagged tlpms, TaggedPlaceSet placeSet) {
     	this(discoveryParameters, tlpms);
     	this.setPlaceSet(placeSet);
     }
@@ -308,6 +310,40 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 		newResult.storeVariableArcs();
     	newResult.refreshColors();
 		return newResult;
+	}
+
+	public void showExternalObjectFlow(boolean selected) {
+		if (this.showExternalObjectFlow == selected) {
+			return; // already in correct state
+		}
+		else if (selected) {
+			// add external flow places
+			for (ObjectCentricLocalProcessModel oclpm : this.getElements()) {
+				oclpm.addExternalObjectFlow(this.getStartingActivities(), this.getEndingActivities());
+			}
+		}
+		else {
+			// remove external flow places
+			for (ObjectCentricLocalProcessModel oclpm : this.getElements()) {
+				oclpm.removeExternalObjectFlow(this.getStartingActivities(), this.getEndingActivities());
+			}
+		}
+	}
+
+	public Map<String, Set<String>> getStartingActivities() {
+		return this.placeSet.getStartingActivities();
+	}
+
+	public void setStartingActivities(Map<String, Set<String>> startingActivities) {
+		this.placeSet.setStartingActivities(startingActivities);
+	}
+
+	public Map<String, Set<String>> getEndingActivities() {
+		return this.placeSet.getEndingActivities();
+	}
+
+	public void setEndingActivities(Map<String, Set<String>> endingActivities) {
+		this.placeSet.setEndingActivities(endingActivities);
 	}
 
 }

@@ -10,11 +10,11 @@ import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
 import org.processmining.OCLPMDiscovery.model.TaggedPlace;
+import org.processmining.OCLPMDiscovery.model.TaggedPlaceSet;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.parameters.PlaceCompletion;
 import org.processmining.placebasedlpmdiscovery.model.Place;
 import org.processmining.placebasedlpmdiscovery.model.Transition;
-import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 
 public class PlaceCompletionUtils {
 	/**
@@ -25,12 +25,11 @@ public class PlaceCompletionUtils {
 	 * @param oclpmResult
 	 * @return
 	 */
-	public static OCLPMResult completePlaces (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult, PlaceSet placeSet) {
+	public static OCLPMResult completePlaces (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult, TaggedPlaceSet placeSet) {
 		return completePlaces(oclpmResult, parameters.getPlaceCompletion());
 	}
 	
 	public static OCLPMResult completePlacesCopy(OCLPMResult result, PlaceCompletion placeCompletion) {
-		PlaceSet placeSet = result.getPlaceSet().asPlaceSet();
 		OCLPMResult newResult = result.copyForPlaceCompletion();
 		return completePlaces(newResult, placeCompletion);
 	}

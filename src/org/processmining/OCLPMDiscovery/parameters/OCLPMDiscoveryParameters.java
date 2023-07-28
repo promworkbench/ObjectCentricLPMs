@@ -36,7 +36,7 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	
 	// set defaults
 	private Miner placeDiscoveryAlgorithm 			= Miner.SPECPP;
-	private CaseNotionStrategy caseNotionStrategy 	= CaseNotionStrategy.PE_LEADING_RELAXED_O2;
+	private CaseNotionStrategy caseNotionStrategy 	= CaseNotionStrategy.PE_CONNECTED;
 	
 	// TODO Make the following also adjustable in the GUI?
 		// placeSetPostProcessing
