@@ -113,5 +113,7 @@ public abstract class AbstractPluginVisualizerTableFactory<T extends TextDescrib
     protected abstract CustomObjectTableModel<T> createTableModel(Map<Integer, T> indexObjectMap);
 
     protected abstract JPopupMenu getPopupMenu();
+    
+    public abstract String[] getColumnNames();
 
 }

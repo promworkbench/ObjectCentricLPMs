@@ -23,6 +23,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     private HashMap<String,Color> mapTypeColor; // maps each object type to a color
     private HashSet<List<String>> variableArcSet = new HashSet<>(); // saves all variable arcs [Activity,ObjectType]
     private HashMap<String,HashSet<String>> variableArcActivities = new HashMap<>(); // saves for each place id the activities with which the place forms variable arcs
+    private TaggedPlaceSet placeSet; 
     
     public OCLPMResult() {
     	
@@ -44,8 +45,18 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     	this.refreshColors();
     }
     
+    public OCLPMResult (OCLPMDiscoveryParameters discoveryParameters, LPMResultsTagged tlpms, PlaceSet placeSet) {
+    	this(discoveryParameters, tlpms);
+    	this.setPlaceSet(placeSet);
+    }
+    
+    /**
+     * Sets the places as OCLPMs. (for place set visualization)
+     * @param placeSet
+     */
     public OCLPMResult (PlaceSet placeSet) {
     	super();
+    	this.placeSet = new TaggedPlaceSet(placeSet);
     	this.objectTypes = new HashSet<String>();
     	this.typeMap = new HashMap<String,String>();
     	for (Place p : placeSet.getElements()) {
@@ -68,13 +79,25 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 	public Set<String> getObjectTypes() {
 		return objectTypes;
 	}
+	
+	public void setObjectTypes(Set<String> types) {
+		this.objectTypes = types;
+	}
 
 	public Set<String> getLpmDiscoveryTypes() {
 		return lpmDiscoveryTypes;
 	}
+	
+	public void setLpmDiscoveryTypes(Set<String> types) {
+		this.lpmDiscoveryTypes = types;
+	}
 
 	public String getOclpmDiscoverySettings() {
 		return oclpmDiscoverySettings;
+	}
+	
+	public void setOclpmDiscoverySettings(String settings) {
+		this.oclpmDiscoverySettings = settings;
 	}
 	
 	public void refreshColors() {
@@ -245,6 +268,46 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 		for (ObjectCentricLocalProcessModel o : deleteModels) {
 			this.remove(o);			
 		}
+	}
+
+	public TaggedPlaceSet getPlaceSet() {
+		return placeSet;
+	}
+
+	public void setPlaceSet(TaggedPlaceSet placeSet) {
+		this.placeSet = placeSet;
+	}
+	
+	public void setPlaceSet(PlaceSet placeSet) {
+		this.placeSet = new TaggedPlaceSet(placeSet);
+	}
+	
+	/**
+	 * Returns a new object such that place completion can be performed without altering the original OCLPMResult.
+	 * @return
+	 */
+	public OCLPMResult copyForPlaceCompletion () {
+		// shared attributes
+		OCLPMResult newResult = new OCLPMResult();
+		newResult.setPlaceSet(this.getPlaceSet());
+    	newResult.setObjectTypes(this.getObjectTypes());
+    	newResult.setTypeMap(this.getTypeMap());
+		newResult.setOclpmDiscoverySettings(this.getOclpmDiscoverySettings()); // TODO: make place completion changeable
+    	newResult.setLpmDiscoveryTypes(this.getLpmDiscoveryTypes());
+    	
+    	// independent attributes
+    	newResult.setVariableArcSet(new HashSet<>());
+    	newResult.setVariableArcActivities(new HashMap<>());
+    	
+		// places themselves will not be altered, only which places the OCLPMs use
+		for (ObjectCentricLocalProcessModel oclpm : this.elements) {
+			ObjectCentricLocalProcessModel newOclpm = new ObjectCentricLocalProcessModel(oclpm);
+			newResult.add(newOclpm);
+		}
+		
+		newResult.storeVariableArcs();
+    	newResult.refreshColors();
+		return newResult;
 	}
 
 }

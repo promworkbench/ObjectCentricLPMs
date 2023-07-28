@@ -70,7 +70,7 @@ public class Main {
 		ProvidingObjects.exportTlpms(tlpms);
 		
 		// OCLPM conversion
-		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, placeSet);
 		
 		// OCLPM place completion
 		oclpmResult = PlaceCompletionUtils.completePlaces(parameters, oclpmResult, placeSet);
@@ -106,7 +106,7 @@ public class Main {
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
 		ProvidingObjects.exportTlpms(tlpms);
 		
-		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, placeSet);
 		
 		// OCLPM place completion
 		oclpmResult = PlaceCompletionUtils.completePlaces(parameters, oclpmResult, placeSet);
@@ -141,7 +141,7 @@ public class Main {
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet, labels);
 		ProvidingObjects.exportTlpms(tlpms);
 		
-		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
+		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, placeSet);
 		
 		// OCLPM place completion
 		oclpmResult = PlaceCompletionUtils.completePlaces(parameters, oclpmResult, placeSet);
@@ -169,6 +169,7 @@ public class Main {
 		// identify variable arcs
 		oclpmResult = Main.identifyVariableArcs(parameters, oclpmResult);
 		placeSet = Main.identifyVariableArcs(parameters, placeSet);
+		oclpmResult.setPlaceSet(placeSet);
 		
 		// OCLPM place completion
 		oclpmResult = PlaceCompletionUtils.completePlaces(parameters, oclpmResult, placeSet);
@@ -462,6 +463,19 @@ public class Main {
 		return oclpmResult;
 	}
 	
+	public static OCLPMResult convertLPMstoOCLPMs (OCLPMDiscoveryParameters parameters, LPMResultsTagged tlpms, PlaceSet placeSet) {
+
+		if (!(tlpms.getList().getElement(0).getElements().get(0).getPlaces().toArray()[0] instanceof TaggedPlace)
+				|| ((TaggedPlace) tlpms.getList().getElement(0).getElements().get(0).getPlaces().toArray()[0]).getObjectType() == null 
+				) {
+			System.out.println("The given LPMs do not have tagged places. Therefore, there won't be any variable arcs.");
+		}
+		
+		OCLPMResult oclpmResult = new OCLPMResult(parameters, tlpms, placeSet);
+		
+		return oclpmResult;
+	}
+	
 	
 	
 	/**
@@ -545,11 +559,16 @@ public class Main {
 					((TaggedPlace)p).setVariableArcActivities(typeToActivities.get(((TaggedPlace)p).getObjectType()));
 				}
 				
-				if (parameters.getPlaceCompletion().needsExactVariableArcs()) {
-					// trim variable arc activities to fit the actual transitions of each place
-					for (Place p : placeSet.getElements()) {
-						((TaggedPlace)p).trimVariableArcSet();
-					}
+//				if (parameters.getPlaceCompletion().needsExactVariableArcs()) {
+//					// trim variable arc activities to fit the actual transitions of each place
+//					for (Place p : placeSet.getElements()) {
+//						((TaggedPlace)p).trimVariableArcSet();
+//					}
+//				}
+				
+				// always trim variable arcs as the user can select different place completions in the visualizer
+				for (Place p : placeSet.getElements()) {
+					((TaggedPlace)p).trimVariableArcSet();
 				}
 		}
 		Main.updateProgress("Completed variable arc identification.");
@@ -580,11 +599,17 @@ public class Main {
 				}
 				
 				// in case the exact number of variable arcs of places is needed
-				if (parameters.getPlaceCompletion().needsExactVariableArcs()) {
-					for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
-						oclpm.trimVariableArcSet();
-					}
+//				if (parameters.getPlaceCompletion().needsExactVariableArcs()) {
+//					for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+//						oclpm.trimVariableArcSet();
+//					}
+//				}
+				
+				// always trim variable arcs as the user can select different place completions in the visualizer
+				for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+					oclpm.trimVariableArcSet();
 				}
+				
 				Main.updateProgress("Completed variable arc identification.");
 		}
 		return oclpmResult;

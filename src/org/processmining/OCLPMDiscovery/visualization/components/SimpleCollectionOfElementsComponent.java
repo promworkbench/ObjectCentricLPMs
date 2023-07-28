@@ -62,7 +62,7 @@ public class SimpleCollectionOfElementsComponent<T extends TextDescribable & Ser
         // create the table and LPM visualization containers
         visualizerComponent = createVisualizerComponent();
         // TODO find out why the table only holds like 125 models when there are 200 models
-        JComponent tableContainer = new TableComposition<>((SerializableCollection<T>) (this.result), this.tableFactory, this, theme);
+        JComponent tableContainer = new TableComposition<>(this.result, this.tableFactory, this, theme);
 
         // set the preferred dimension of the two containers
         int windowHeight = Toolkit.getDefaultToolkit().getScreenSize().height;

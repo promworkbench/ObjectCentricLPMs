@@ -26,43 +26,28 @@ public class PlaceCompletionUtils {
 	 * @return
 	 */
 	public static OCLPMResult completePlaces (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult, PlaceSet placeSet) {
-		if (parameters.getPlaceCompletion() == PlaceCompletion.NONE) {
+		return completePlaces(oclpmResult, parameters.getPlaceCompletion());
+	}
+	
+	public static OCLPMResult completePlacesCopy(OCLPMResult result, PlaceCompletion placeCompletion) {
+		PlaceSet placeSet = result.getPlaceSet().asPlaceSet();
+		OCLPMResult newResult = result.copyForPlaceCompletion();
+		return completePlaces(newResult, placeCompletion);
+	}
+	
+	public static OCLPMResult completePlaces (OCLPMResult oclpmResult, PlaceCompletion placeCompletion) {
+		if (placeCompletion == PlaceCompletion.NONE) {
 			return oclpmResult;
 		}
 		
 		Main.messageNormal("Starting place completion.");
 		
-		switch(parameters.getPlaceCompletion()) {
+		switch(placeCompletion) {
 			
 			case ALL:
 				// add places of other types to model if: 
 				// equal place already is in there
-				for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
-					Set<TaggedPlace> tmpPlaceSet = new HashSet<>(oclpm.getPlaces().size());
-					Set<String> placeTypes = oclpm.getPlaceTypes();
-					for (TaggedPlace tp : oclpm.getPlaces()) {
-						for (Place pNet : placeSet.getElements()) {
-							if (
-								!tp.getObjectType().equals(((TaggedPlace) pNet).getObjectType()) // different type
-								&& tp.isIsomorphic((TaggedPlace)pNet) // exactly the same transitions
-									) {
-								// check if place already is in the oclpm
-								boolean alreadyInThere = false;
-								for (TaggedPlace p2 : oclpm.getPlaces()) {
-									if (p2.equals((TaggedPlace)pNet)) {
-										alreadyInThere = true;
-										break;
-									}
-								}
-								if (!alreadyInThere) {
-									tmpPlaceSet.add((TaggedPlace)pNet);
-								}
-							}
-						}
-					}
-					oclpm.addAllPlaces(tmpPlaceSet);
-				}
-				
+				oclpmResult = completeAll(oclpmResult);
 				oclpmResult.deleteDuplicates();
 				break;
 			
@@ -70,7 +55,7 @@ public class PlaceCompletionUtils {
 				// add places of other types to model if both: 
 				// equal place already is in there 
 				// the other types are already present in the net
-				oclpmResult = betterFlow2(oclpmResult, placeSet);
+				oclpmResult = betterFlow2(oclpmResult);
 				oclpmResult.deleteDuplicates();
 				break;
 			
@@ -78,13 +63,13 @@ public class PlaceCompletionUtils {
 				// swaps existing places with the places that have the fewest variable arcs
 				// delete isomorphic models beforehand as they would result in the same net afterwards
 				oclpmResult.deleteIsomorphic();
-				oclpmResult = swapToFewestVariableArcs(oclpmResult,placeSet);
+				oclpmResult = swapToLessThan2VariableArcs(oclpmResult);
 				break;
 			
 			case FEWVARIABLE_BETTERFLOW:
 				oclpmResult.deleteIsomorphic();
-				oclpmResult = swapToFewestVariableArcs(oclpmResult,placeSet);
-				oclpmResult = betterFlow2(oclpmResult, placeSet);
+				oclpmResult = swapToLessThan2VariableArcs(oclpmResult);
+				oclpmResult = betterFlow2(oclpmResult);
 				break;
 			
 			default:
@@ -102,36 +87,82 @@ public class PlaceCompletionUtils {
 	 * @param placeSet
 	 * @return
 	 */
-	public static OCLPMResult swapToFewestVariableArcs(OCLPMResult oclpmResult, PlaceSet placeSet) {
+	public static OCLPMResult swapToFewestVariableArcs(OCLPMResult oclpmResult) {
 		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
 			Set<TaggedPlace> deletePlaces = new HashSet<>(oclpm.getPlaces().size());
 			Set<TaggedPlace> addPlaces = new HashSet<>(oclpm.getPlaces().size());
-			Set<String> placeTypes = oclpm.getPlaceTypes();
 			int leastVariable;
 			for (TaggedPlace tp : oclpm.getPlaces()) {
 				Set<TaggedPlace> tmpPlaceSet = new HashSet<>(oclpm.getPlaces().size());
 				leastVariable = tp.getVariableArcActivities().size();
-				for (Place pNet : placeSet.getElements()) {
+				for (TaggedPlace pNet : oclpmResult.getPlaceSet().getElements()) {
 					if (
-						!tp.getObjectType().equals(((TaggedPlace) pNet).getObjectType()) // different type
-						&& tp.isIsomorphic((TaggedPlace)pNet) // exactly the same transitions
-						&& ((TaggedPlace) pNet).getVariableArcActivities().size() <= leastVariable // fewer variable arcs
+						!tp.getObjectType().equals(pNet.getObjectType()) // different type
+						&& tp.isIsomorphic(pNet) // exactly the same transitions
+						&& pNet.getVariableArcActivities().size() <= leastVariable // fewer variable arcs
 							) {
-						if (((TaggedPlace) pNet).getVariableArcActivities().size() < leastVariable) {
-							leastVariable = ((TaggedPlace) pNet).getVariableArcActivities().size();
+						if (pNet.getVariableArcActivities().size() < leastVariable) {
+							leastVariable = pNet.getVariableArcActivities().size();
 							tmpPlaceSet.clear(); // only add the places with the fewest variable arcs
 							deletePlaces.add(tp); // delete place as a "better" one has been found
 						}
 						// check if place already is in the oclpm
 						boolean alreadyInThere = false;
 						for (TaggedPlace p2 : oclpm.getPlaces()) {
-							if (p2.equals((TaggedPlace)pNet)) {
+							if (p2.equals(pNet)) {
 								alreadyInThere = true;
 								break;
 							}
 						}
 						if (!alreadyInThere) {
-							tmpPlaceSet.add((TaggedPlace)pNet);
+							tmpPlaceSet.add(pNet);
+						}
+					}
+				}
+				addPlaces.addAll(tmpPlaceSet);
+			}
+			oclpm.deletePlaces(deletePlaces, true);
+			oclpm.addAllPlaces(addPlaces, true);
+		}
+		return oclpmResult;
+	}
+	
+	/**
+	 * swaps existing places with the places that have only one or fewer variable arcs
+	 * @param oclpmResult
+	 * @param placeSet
+	 * @return
+	 */
+	public static OCLPMResult swapToLessThan2VariableArcs(OCLPMResult oclpmResult) {
+		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+			Set<TaggedPlace> deletePlaces = new HashSet<>(oclpm.getPlaces().size());
+			Set<TaggedPlace> addPlaces = new HashSet<>(oclpm.getPlaces().size());
+			int leastVariable;
+			for (TaggedPlace tp : oclpm.getPlaces()) {
+				Set<TaggedPlace> tmpPlaceSet = new HashSet<>(oclpm.getPlaces().size());
+				leastVariable = tp.getVariableArcActivities().size();
+				for (TaggedPlace pNet : oclpmResult.getPlaceSet().getElements()) {
+					if (
+						!tp.getObjectType().equals(pNet.getObjectType()) // different type
+						&& tp.isIsomorphic(pNet) // exactly the same transitions
+						&& (pNet.getVariableArcActivities().size() <= leastVariable // fewer variable arcs
+						|| pNet.getVariableArcActivities().size() <= 1) // only one variable arc
+							) {
+						if (pNet.getVariableArcActivities().size() < leastVariable && leastVariable > 1) {
+							leastVariable = pNet.getVariableArcActivities().size();
+							tmpPlaceSet.clear(); // only add the places with the fewest variable arcs
+							deletePlaces.add(tp); // delete place as a "better" one has been found
+						}
+						// check if place already is in the oclpm
+						boolean alreadyInThere = false;
+						for (TaggedPlace p2 : oclpm.getPlaces()) {
+							if (p2.equals(pNet)) {
+								alreadyInThere = true;
+								break;
+							}
+						}
+						if (!alreadyInThere) {
+							tmpPlaceSet.add(pNet);
 						}
 					}
 				}
@@ -151,27 +182,27 @@ public class PlaceCompletionUtils {
 	 * @param placeSet
 	 * @return
 	 */
-	public static OCLPMResult betterFlow (OCLPMResult oclpmResult, PlaceSet placeSet) {
+	public static OCLPMResult betterFlow (OCLPMResult oclpmResult) {
 		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
 			Set<TaggedPlace> tmpPlaceSet = new HashSet<>(oclpm.getPlaces().size());
 			Set<String> placeTypes = oclpm.getPlaceTypes();
 			for (TaggedPlace tp : oclpm.getPlaces()) {
-				for (Place pNet : placeSet.getElements()) {
+				for (TaggedPlace pNet : oclpmResult.getPlaceSet().getElements()) {
 					if (
-						!tp.getObjectType().equals(((TaggedPlace) pNet).getObjectType()) // different type
-						&& placeTypes.contains(((TaggedPlace) pNet).getObjectType()) // type already occurs in the oclpm
-						&& tp.isIsomorphic((TaggedPlace)pNet) // exactly the same transitions
+						!tp.getObjectType().equals(pNet.getObjectType()) // different type
+						&& placeTypes.contains(pNet.getObjectType()) // type already occurs in the oclpm
+						&& tp.isIsomorphic(pNet) // exactly the same transitions
 							) {
 						// check if place already is in the oclpm
 						boolean alreadyInThere = false;
 						for (TaggedPlace p2 : oclpm.getPlaces()) {
-							if (p2.equals((TaggedPlace)pNet)) {
+							if (p2.equals(pNet)) {
 								alreadyInThere = true;
 								break;
 							}
 						}
 						if (!alreadyInThere) {
-							tmpPlaceSet.add((TaggedPlace)pNet);
+							tmpPlaceSet.add(pNet);
 						}
 					}
 				}
@@ -192,7 +223,7 @@ public class PlaceCompletionUtils {
 	 * @param placeSet
 	 * @return
 	 */
-	public static OCLPMResult betterFlow2 (OCLPMResult oclpmResult, PlaceSet placeSet) {		
+	public static OCLPMResult betterFlow2 (OCLPMResult oclpmResult) {		
 		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
 			Set<String> outputTransitionLabels = oclpm.getOutputTransitionLabels();
 			Set<String> inputTransitionLabels = oclpm.getInputTransitionLabels();
@@ -265,8 +296,7 @@ public class PlaceCompletionUtils {
 						if (wrongTypePlaces.isEmpty()) break;
 						
 						// search for an isomorphic place with the correct type in the PlaceSet
-						for (Place p : placeSet.getElements()) {
-							TaggedPlace tmp_place = (TaggedPlace) p;
+						for (TaggedPlace tmp_place : oclpmResult.getPlaceSet().getElements()) {
 							if (tmp_place.getObjectType().equals(keylist.get(1)) ){ // type correct
 								// check if isomorphic to some place in wrongTypePlaces
 								for (TaggedPlace wtp : wrongTypePlaces) {
@@ -287,6 +317,41 @@ public class PlaceCompletionUtils {
 					}
 				}
 			} // while addedSomething
+		}
+		return oclpmResult;
+	}
+
+	/**
+	 * add places of other types to model if: 
+	 * equal place already is in there
+	 * @param oclpmResult
+	 * @param placeSet
+	 * @return
+	 */
+	public static OCLPMResult completeAll (OCLPMResult oclpmResult) {
+		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+			Set<TaggedPlace> tmpPlaceSet = new HashSet<>(oclpm.getPlaces().size());
+			for (TaggedPlace tp : oclpm.getPlaces()) {
+				for (Place pNet : oclpmResult.getPlaceSet().getElements()) {
+					if (
+						!tp.getObjectType().equals(((TaggedPlace) pNet).getObjectType()) // different type
+						&& tp.isIsomorphic((TaggedPlace)pNet) // exactly the same transitions
+							) {
+						// check if place already is in the oclpm
+						boolean alreadyInThere = false;
+						for (TaggedPlace p2 : oclpm.getPlaces()) {
+							if (p2.equals(pNet)) {
+								alreadyInThere = true;
+								break;
+							}
+						}
+						if (!alreadyInThere) {
+							tmpPlaceSet.add((TaggedPlace)pNet);
+						}
+					}
+				}
+			}
+			oclpm.addAllPlaces(tmpPlaceSet);
 		}
 		return oclpmResult;
 	}

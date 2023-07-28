@@ -28,7 +28,7 @@ public class PlaceSetPluginVisualizerTableFactory extends AbstractPluginVisualiz
     protected CustomObjectTableModel<Place> createTableModel(Map<Integer, Place> indexObjectMap) {
         return new CustomObjectTableModel<>(
                 indexObjectMap,
-                new String[]{"Place Index", "Place Short Name"},
+                this.getColumnNames(),
                 (ind, place) -> new Object[]{
                         ind + 1,
                         place.getShortString()
@@ -49,5 +49,11 @@ public class PlaceSetPluginVisualizerTableFactory extends AbstractPluginVisualiz
         popupMenu.add(exportItem);
         return popupMenu;
     }
+
+	public String[] getColumnNames() {
+		return new String[]{"Place Index", "Place Short Name"};
+	}
+    
+    
 
 }

@@ -39,4 +39,12 @@ public class TaggedPlaceSet extends SerializableSet<TaggedPlace> implements Expo
     public void export(Exporter<TaggedPlaceSet> exporter, OutputStream os) {
         exporter.export(this, os);
     }
+    
+    public PlaceSet asPlaceSet() {
+    	PlaceSet placeSet = new PlaceSet();
+    	for (TaggedPlace tp : this.getElements()) {
+    		placeSet.add(tp);
+    	}
+    	return placeSet;
+    }
 }

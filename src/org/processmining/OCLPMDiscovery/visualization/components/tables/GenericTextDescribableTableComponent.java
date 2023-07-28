@@ -12,7 +12,7 @@ import org.processmining.placebasedlpmdiscovery.model.TextDescribable;
 
 public class GenericTextDescribableTableComponent<T extends TextDescribable> extends JTable {
 
-    private final Map<Integer, T> indexMap;
+    private Map<Integer, T> indexMap;
 
     public GenericTextDescribableTableComponent(Map<Integer, T> indexMap) {
         this.indexMap = indexMap;
@@ -56,5 +56,10 @@ public class GenericTextDescribableTableComponent<T extends TextDescribable> ext
         int ind = this.getRowSorter().convertRowIndexToModel(row);
         return this.indexMap.containsKey(ind) ?
                 this.indexMap.get(ind).getShortString() : null;
+    }
+    
+    public void setIndexMap (Map<Integer, T> indexMap) {
+    	this.indexMap.clear();
+    	this.indexMap.putAll(indexMap);
     }
 }

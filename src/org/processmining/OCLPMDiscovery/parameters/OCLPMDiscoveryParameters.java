@@ -31,7 +31,8 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	private float variableArcThreshold = 0.95f; // threshold which the score function is compared against
 	
 	// place completion
-	private PlaceCompletion placeCompletion = PlaceCompletion.FEWVARIABLE_BETTERFLOW; // adds isomorphic places to each model
+	private PlaceCompletion placeCompletion = PlaceCompletion.NONE; // adds isomorphic places to each model
+	// place completion can be done afterwards, in the visualizer
 	
 	// set defaults
 	private Miner placeDiscoveryAlgorithm 			= Miner.SPECPP;
