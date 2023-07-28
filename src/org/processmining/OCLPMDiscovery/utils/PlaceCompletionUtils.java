@@ -63,12 +63,12 @@ public class PlaceCompletionUtils {
 				// swaps existing places with the places that have the fewest variable arcs
 				// delete isomorphic models beforehand as they would result in the same net afterwards
 				oclpmResult.deleteIsomorphic();
-				oclpmResult = swapToFewestVariableArcs(oclpmResult);
+				oclpmResult = swapToLessThan2VariableArcs(oclpmResult);
 				break;
 			
 			case FEWVARIABLE_BETTERFLOW:
 				oclpmResult.deleteIsomorphic();
-				oclpmResult = swapToFewestVariableArcs(oclpmResult);
+				oclpmResult = swapToLessThan2VariableArcs(oclpmResult);
 				oclpmResult = betterFlow2(oclpmResult);
 				break;
 			
@@ -102,6 +102,53 @@ public class PlaceCompletionUtils {
 						&& pNet.getVariableArcActivities().size() <= leastVariable // fewer variable arcs
 							) {
 						if (pNet.getVariableArcActivities().size() < leastVariable) {
+							leastVariable = pNet.getVariableArcActivities().size();
+							tmpPlaceSet.clear(); // only add the places with the fewest variable arcs
+							deletePlaces.add(tp); // delete place as a "better" one has been found
+						}
+						// check if place already is in the oclpm
+						boolean alreadyInThere = false;
+						for (TaggedPlace p2 : oclpm.getPlaces()) {
+							if (p2.equals(pNet)) {
+								alreadyInThere = true;
+								break;
+							}
+						}
+						if (!alreadyInThere) {
+							tmpPlaceSet.add(pNet);
+						}
+					}
+				}
+				addPlaces.addAll(tmpPlaceSet);
+			}
+			oclpm.deletePlaces(deletePlaces, true);
+			oclpm.addAllPlaces(addPlaces, true);
+		}
+		return oclpmResult;
+	}
+	
+	/**
+	 * swaps existing places with the places that have only one or fewer variable arcs
+	 * @param oclpmResult
+	 * @param placeSet
+	 * @return
+	 */
+	public static OCLPMResult swapToLessThan2VariableArcs(OCLPMResult oclpmResult) {
+		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+			Set<TaggedPlace> deletePlaces = new HashSet<>(oclpm.getPlaces().size());
+			Set<TaggedPlace> addPlaces = new HashSet<>(oclpm.getPlaces().size());
+			int leastVariable;
+			for (TaggedPlace tp : oclpm.getPlaces()) {
+				Set<TaggedPlace> tmpPlaceSet = new HashSet<>(oclpm.getPlaces().size());
+				leastVariable = tp.getVariableArcActivities().size();
+				for (TaggedPlace pNet : oclpmResult.getPlaceSet().getElements()) {
+					if (
+						!tp.getObjectType().equals(pNet.getObjectType()) // different type
+						&& tp.isIsomorphic(pNet) // exactly the same transitions
+						&& (pNet.getVariableArcActivities().size() <= leastVariable // fewer variable arcs
+						|| pNet.getVariableArcActivities().size() <= 1) // only one variable arc
+							) {
+						if (pNet.getVariableArcActivities().size() < leastVariable && leastVariable > 1) {
 							leastVariable = pNet.getVariableArcActivities().size();
 							tmpPlaceSet.clear(); // only add the places with the fewest variable arcs
 							deletePlaces.add(tp); // delete place as a "better" one has been found
