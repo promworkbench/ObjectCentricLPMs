@@ -2,6 +2,7 @@ package org.processmining.OCLPMDiscovery.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,6 +12,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.processmining.OCLPMDiscovery.model.additionalinfo.OCLPMAdditionalInfo;
 import org.processmining.models.graphbased.NodeID;
@@ -448,14 +450,120 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		
 	}
 
+	/**
+	 * add special places for starting and ending transitions
+	 * @param startingActivities
+	 * @param endingActivities
+	 */
 	public void addExternalObjectFlow(Map<String, Set<String>> startingActivities, Map<String, Set<String>> endingActivities) {
-		// TODO add special places for starting and ending transitions
+		
+		// check current flow situation
+		HashMap<List<String>,Set<TaggedPlace>> transitionMap = new HashMap<>(); // maps transitionName,TypeName,"in"/"out" -> TaggedPlaces
+		for (TaggedPlace tp : this.getPlaces()) {
+			for (Transition t : tp.getInputTransitions()) {
+				String[] key = new String[3];
+				key[0] = t.getLabel();
+				key[1] = tp.getObjectType();
+				key[2] = "out"; // this transition is input to a place
+				if (transitionMap.containsKey(Arrays.asList(key))) {
+					transitionMap.get(Arrays.asList(key)).add(tp);
+				}
+				else {
+					Set<TaggedPlace> value = new HashSet<>();
+					value.add(tp);
+					transitionMap.put(Arrays.asList(key),value);					
+				}
+			}
+			for (Transition t : tp.getOutputTransitions()) {
+				String[] key = new String[3];
+				key[0] = t.getLabel();
+				key[1] = tp.getObjectType();
+				key[2] = "in"; // this transition is output to a place
+				if (transitionMap.containsKey(Arrays.asList(key))) {
+					transitionMap.get(Arrays.asList(key)).add(tp);
+				}
+				else {
+					Set<TaggedPlace> value = new HashSet<>();
+					value.add(tp);
+					transitionMap.put(Arrays.asList(key),value);					
+				}
+			}
+		}
+		
+		// add special places for starting transitions
+		Set<TaggedPlace> newPlaces = new HashSet<>();
+		for (String type : this.getPlaceTypes()) {
+			for (String startingActivity : startingActivities.get(type)) {
+				// if this starting activity is in the model and there is an arc of the type coming out 
+				if(!transitionMap.get(Arrays.asList(new String[] {startingActivity,type,"out"})).isEmpty()) {
+					// then add the special starting place
+					// if there already is a place "StartingPlace:type" only add the new transitions
+					boolean placeExists = false;
+					for (TaggedPlace tmp_place : newPlaces) {
+						if (tmp_place.getId().equals("StartingPlace:"+type)) {
+							placeExists = true;
+							tmp_place.addOutputTransition(this.transitions.get(startingActivity));
+							break;
+						}
+					}
+					if (!placeExists) {
+						TaggedPlace p = new TaggedPlace("StartingPlace:"+type);
+						p.setObjectType(type);
+						p.addOutputTransition(this.transitions.get(startingActivity));
+						newPlaces.add(p);
+					}
+				}
+			}
+			// same for ending activities
+			for (String endingActivity : startingActivities.get(type)) {
+				// if this starting activity is in the model and there is an arc of the type coming out 
+				if(!transitionMap.get(Arrays.asList(new String[] {endingActivity,type,"in"})).isEmpty()) {
+					// then add the special starting place
+					// if there already is a place "EndingPlace:type" only add the new transitions
+					boolean placeExists = false;
+					for (TaggedPlace tmp_place : newPlaces) {
+						if (tmp_place.getId().equals("EndingPlace:"+type)) {
+							placeExists = true;
+							tmp_place.addInputTransition(this.transitions.get(endingActivity));
+							break;
+						}
+					}
+					if (!placeExists) {
+						TaggedPlace p = new TaggedPlace("EndingPlace:"+type);
+						p.setObjectType(type);
+						p.addInputTransition(this.transitions.get(endingActivity));
+						newPlaces.add(p);
+					}
+				}
+			}
+		}
+		// variable arcs of starting and ending places
+		for (TaggedPlace newPlace : newPlaces) { // for all new places
+			for (TaggedPlace p : this.getPlaces()) { // for all existing places
+				if (!p.getObjectType().equals(newPlace.getObjectType())) break; // same type?
+				for (Transition t : Stream.concat( // iterate over all transitions of the new place
+						newPlace.getInputTransitions().stream(),
+						newPlace.getOutputTransitions().stream())
+							.collect(Collectors.toSet())) {
+						if (p.getVariableArcActivities().contains(t.getLabel())) {
+							newPlace.getVariableArcActivities().add(t.getLabel()); // add variable arc activity to the new place
+						}
+				}
+			}
+		}
+		this.addAllPlaces(newPlaces);
 		
 	}
 
 	public void removeExternalObjectFlow(Map<String, Set<String>> startingActivities, Map<String, Set<String>> endingActivities) {
-		// TODO Remove the special places for starting and ending transitions
-		
+		// Remove the special places for starting and ending transitions
+		Set<TaggedPlace> deletePlaces = new HashSet<>();
+		for (TaggedPlace p : this.getPlaces()) {
+			if (p.getId().contains("StartingPlace") || p.getId().contains("EndingPlace")) {
+				deletePlaces.add(p);
+			}
+		}
+		this.deletePlaces(deletePlaces);
 	}
 
 }

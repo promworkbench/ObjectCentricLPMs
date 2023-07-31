@@ -181,7 +181,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 	 * Fetches the variable arc activities from the tagged places and stores them in a map
 	 * mapping from the place id to the activities which have variable arcs for the corresponding
 	 * object type.
-	 * Use in case it isn't possible for the visualizer to access the tagged places.
+	 * Used because it isn't possible for the visualizer to access the tagged places.
 	 */
 	public void storeVariableArcs() {
 		for (ObjectCentricLocalProcessModel oclpm : this.elements) {
@@ -327,6 +327,13 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 			for (ObjectCentricLocalProcessModel oclpm : this.getElements()) {
 				oclpm.removeExternalObjectFlow(this.getStartingActivities(), this.getEndingActivities());
 			}
+		}
+		this.storeVariableArcs(); // variable arcs for starting and ending places might've been added
+		
+		// add new place labels to the type map
+		for (String type : this.objectTypes) {
+			this.typeMap.put("StartingPlace:"+type,type);
+			this.typeMap.put("EndingPlace:"+type,type);
 		}
 	}
 

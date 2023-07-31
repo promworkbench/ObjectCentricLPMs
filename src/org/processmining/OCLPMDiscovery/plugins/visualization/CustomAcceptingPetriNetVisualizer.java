@@ -64,7 +64,8 @@ public class CustomAcceptingPetriNetVisualizer {
         for (Place p: net.getNet().getPlaces()) {
         	//! cannot convert from this place to taggedPlace so I need a Map from id to color for this.
         	
-        	if (!oclpmResult.getMapIdColor().containsKey(p.getLabel())) {
+        	if (!oclpmResult.getMapIdColor().containsKey(p.getLabel())
+        			&& !(p.getLabel().contains("StartingPlace") || p.getLabel().contains("EndingPlace"))) {
         		System.out.println("Color map doesn't contain the place id "+p.getLabel());
         	}
         	// p.getId() is a new random id for the petri net node! 
@@ -74,6 +75,24 @@ public class CustomAcceptingPetriNetVisualizer {
         	// ah I changed it back again
         	map.putViewSpecific(p, AttributeMap.FILLCOLOR, oclpmResult.getMapIdColor().get(p.getLabel()));
         	map.putViewSpecific(p, AttributeMap.STROKECOLOR, theme.TEXT);
+        	// show object type of place when hovering over it
+        	map.putViewSpecific(p, AttributeMap.TOOLTIP, oclpmResult.getTypeMap().get(p.getLabel()));
+        	
+        	// special appearance for starting and ending places
+        	if (p.getLabel().contains("StartingPlace") || p.getLabel().contains("EndingPlace")){
+        		String type = oclpmResult.getTypeMap().get(p.getLabel());
+        		if (p.getLabel().contains("StartingPlace")){
+        			map.putViewSpecific(p, AttributeMap.TOOLTIP, "Starting Place "+type);
+        		}
+        		else if (p.getLabel().contains("EndingPlace")){
+        			map.putViewSpecific(p, AttributeMap.TOOLTIP, "Ending Place "+type);
+        		}
+        		map.putViewSpecific(p, AttributeMap.FILLCOLOR, theme.ELEMENTS);
+        		map.putViewSpecific(p, AttributeMap.STROKECOLOR, oclpmResult.getMapTypeColor().get(type));
+//        		map.putViewSpecific(p, AttributeMap.LABEL, type); // looks bad because the label won't fit in there
+        		map.putViewSpecific(p, AttributeMap.BORDERWIDTH, 1);
+        		//TODO label color?
+        	}
         }
         
         String type, activity;
@@ -107,9 +126,6 @@ public class CustomAcceptingPetriNetVisualizer {
         		activity = ((Transition)(arc.getTarget())).getLabel();
         	}
         	
-        	// show object type of place when hovering over it
-        	map.putViewSpecific(p, AttributeMap.TOOLTIP, type);
-        	
         	map.putViewSpecific(arc, AttributeMap.EDGECOLOR, oclpmResult.getMapTypeColor().get(type)); // color arc according to connected place
         	
         	// variable arcs
@@ -119,6 +135,12 @@ public class CustomAcceptingPetriNetVisualizer {
 //        		map.putViewSpecific(arc, AttributeMap.LABEL, "variable");
 //        		map.putViewSpecific(arc, AttributeMap.SHOWLABEL, true);
         		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, oclpmResult.getMapTypeColor().get(type).darker());
+        		
+        		// starting and ending places: make place stroke thick and darker if variable arc connected to it
+        		if (p.getLabel().contains("StartingPlace") || p.getLabel().contains("EndingPlace")){
+        			map.putViewSpecific(p, AttributeMap.STROKECOLOR, oclpmResult.getMapTypeColor().get(type).darker());
+        			map.putViewSpecific(p, AttributeMap.BORDERWIDTH, 2);
+        		}
         		
         		// change the variable edge to be recognizable
         			// made them darker and thicker...

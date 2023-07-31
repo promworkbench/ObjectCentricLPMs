@@ -13,7 +13,7 @@ import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableS
 public class TaggedPlaceSet extends SerializableSet<TaggedPlace> implements Exportable<TaggedPlaceSet> {
 
     private static final long serialVersionUID = 1645883969214312641L;
-    private Map<String, Set<String>> startingActivities;
+    private Map<String, Set<String>> startingActivities; // object type -> activities
     private Map<String, Set<String>> endingActivities;
 
     public TaggedPlaceSet() {
