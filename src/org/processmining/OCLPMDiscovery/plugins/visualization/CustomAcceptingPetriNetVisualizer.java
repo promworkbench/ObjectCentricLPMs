@@ -129,7 +129,9 @@ public class CustomAcceptingPetriNetVisualizer {
         	map.putViewSpecific(arc, AttributeMap.EDGECOLOR, oclpmResult.getMapTypeColor().get(type)); // color arc according to connected place
         	
         	// variable arcs
-        	if (oclpmResult.getVariableArcActivities().get(p.getLabel()).contains(activity)) {
+        	if (oclpmResult.getVariableArcActivities()
+        			.get(p.getLabel())
+        			.contains(activity)) {
         		map.putViewSpecific(arc, AttributeMap.TOOLTIP, "Variable Arc");
         		map.putViewSpecific(arc, AttributeMap.LINEWIDTH, 2.5f);
 //        		map.putViewSpecific(arc, AttributeMap.LABEL, "variable");

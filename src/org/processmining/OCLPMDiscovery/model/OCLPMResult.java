@@ -317,8 +317,6 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     	newResult.setLpmDiscoveryTypes(this.getLpmDiscoveryTypes());
     	
     	// independent attributes
-    	newResult.setVariableArcSet(new HashSet<>());
-    	newResult.setVariableArcActivities(new HashMap<>());
     	
 		// places themselves will not be altered, only which places the OCLPMs use
 		for (ObjectCentricLocalProcessModel oclpm : this.elements) {

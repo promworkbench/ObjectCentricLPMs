@@ -126,6 +126,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		for (String key : oclpm.getEvaluation().keySet()) {
 			this.evaluation.put(key, oclpm.getEvaluation().get(key));
 		}
+		this.combinedScore = oclpm.getCombinedScore();
 	}
 
 	public HashSet<String> getDiscoveryTypes() {

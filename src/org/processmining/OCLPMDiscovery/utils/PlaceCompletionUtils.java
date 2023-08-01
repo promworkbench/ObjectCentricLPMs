@@ -75,6 +75,7 @@ public class PlaceCompletionUtils {
 				return oclpmResult;
 		}
 		
+		oclpmResult.storeVariableArcs();
 		Main.updateProgress("Finished place completion.");
 		
 		return oclpmResult;
