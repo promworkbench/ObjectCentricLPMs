@@ -657,7 +657,9 @@ public class Main {
 	}
 	
 	public static OCLPMResult evaluateOCLPMs (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult) {
-		// TODO oclpm evaluation
+		for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+			oclpm.recalculateEvaluation();
+		}
 		return oclpmResult;
 	}
 	

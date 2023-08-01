@@ -7,6 +7,7 @@ import org.processmining.OCLPMDiscovery.gui.OCLPMPanel;
 import org.processmining.OCLPMDiscovery.gui.OCLPMTextArea;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.TaggedPlace;
+import org.processmining.OCLPMDiscovery.model.TaggedPlaceSet;
 import org.processmining.OCLPMDiscovery.visualization.components.SimpleCollectionOfElementsComponent;
 import org.processmining.OCLPMDiscovery.visualization.components.tables.factories.OCLPMResultPluginVisualizerTableFactory;
 import org.processmining.contexts.uitopia.UIPluginContext;
@@ -24,7 +25,28 @@ public class TaggedPlaceSetVisualizer {
 	@Plugin(name = "@0 Tagged PlaceSet visalizer",
             returnLabels = {"Visualized Tagged PlaceSet"},
             returnTypes = {JComponent.class},
-            parameterLabels = {"TaggedPlace Array"})
+            parameterLabels = {"TaggedPlaceSet"})
+    @Visualizer
+    @PluginVariant(variantLabel = "Tagged PlaceSet visalizer", requiredParameterLabels = {0})
+    public JComponent visualize(UIPluginContext context, TaggedPlaceSet placeSet) {
+
+        if (placeSet.size() < 1) {
+        	OCLPMPanel panel = new OCLPMPanel(theme);
+	    	panel.add(new OCLPMTextArea("The given PlaceSet doesn't contain any places.",theme));
+	        return panel;
+        }
+        
+        OCLPMResult result = new OCLPMResult(placeSet);
+        
+        OCLPMResultPluginVisualizerTableFactory factory = new OCLPMResultPluginVisualizerTableFactory();
+        SimpleCollectionOfElementsComponent scoec = new SimpleCollectionOfElementsComponent<>(context, result, factory, theme);
+        return scoec;
+    }
+	
+	@Plugin(name = "@0 Tagged PlaceSet visalizer",
+            returnLabels = {"Visualized Tagged PlaceSet"},
+            returnTypes = {JComponent.class},
+            parameterLabels = {"PlaceSet"})
     @Visualizer
     @PluginVariant(variantLabel = "Tagged PlaceSet visalizer", requiredParameterLabels = {0})
     public JComponent visualize(UIPluginContext context, PlaceSet placeSet) {

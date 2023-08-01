@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 import org.processmining.OCLPMDiscovery.model.additionalinfo.OCLPMAdditionalInfo;
 import org.processmining.models.graphbased.NodeID;
+import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.SimpleEvaluationResult;
 import org.processmining.placebasedlpmdiscovery.model.Arc;
 import org.processmining.placebasedlpmdiscovery.model.LocalProcessModel;
 import org.processmining.placebasedlpmdiscovery.model.Place;
@@ -46,6 +47,10 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	// the object types of places in the model 
 	private Set<String> placeTypes = new HashSet<String>();
 	
+	// evaluation
+	private Map<String,Double> evaluation = new HashMap<>();
+	private Double combinedScore = -1.0;
+	
 	public ObjectCentricLocalProcessModel() {
         // setup oclpm
 		this.id = UUID.randomUUID().toString();
@@ -71,6 +76,31 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
         }
         this.addAllPlaces(tplaces); // adds also the transitions, places, arcs
         this.setAdditionalInfo(new OCLPMAdditionalInfo(lpm.getAdditionalInfo()));
+        
+        // store evaluation score from the lpm into the evaluation map
+        List<SimpleEvaluationResult> results = lpm.getAdditionalInfo().getEvaluationResult().getResults();
+        for (SimpleEvaluationResult result : results) {
+        	switch (result.getId()) {
+        		case FittingWindowsEvaluationResult:
+        			this.evaluation.put("Fitting Window Score",result.getNormalizedResult());
+        			break;
+        		case TransitionOverlappingEvaluationResult:
+        			break;
+        		case TransitionCoverageEvaluationResult:
+        			this.evaluation.put("Transition Coverage Score",result.getNormalizedResult());
+        			break;
+        		case PassageCoverageEvaluationResult:
+        			this.evaluation.put("Passage Coverage Score",result.getNormalizedResult());
+        			break;
+        		case PassageRepetitionEvaluationResult:
+        			this.evaluation.put("Passage Repetition Score",result.getNormalizedResult());
+        			break;
+        		case TraceSupportEvaluationResult:
+        			break;
+        		default:
+        			break;
+        	}
+        }
     }
 
     public ObjectCentricLocalProcessModel(TaggedPlace place) {
@@ -93,6 +123,9 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		this.addAllPlaces(oclpm.getPlaces());
 		this.setAdditionalInfo(oclpm.getAdditionalInfo());
 		this.setDiscoveryTypes(oclpm.getDiscoveryTypes());
+		for (String key : oclpm.getEvaluation().keySet()) {
+			this.evaluation.put(key, oclpm.getEvaluation().get(key));
+		}
 	}
 
 	public HashSet<String> getDiscoveryTypes() {
@@ -564,6 +597,52 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 			}
 		}
 		this.deletePlaces(deletePlaces);
+	}
+
+	/**
+	 * String consisting of all evaluation metrics to be displayed for this OCLPM
+	 * @return
+	 */
+	public String getEvaluationString() {
+		String evalString = "";
+		for (String name : this.evaluation.keySet()) {
+			Double score = Math.round(this.evaluation.get(name)*1000.0)/1000.0;
+			evalString += name+": "+score+"\n";
+		}
+		evalString += "Combined Score: "+Math.round(this.combinedScore*1000.0)/1000.0+"\n";
+		return evalString;
+	}
+	
+	/**
+	 * Calculates evaluation metric which are dependent on the exact places and variable arcs.
+	 * Calculates the combined score as the average of all scores. 
+	 */
+	public void recalculateEvaluation() {
+		// TODO calculate evaluation which is dependent on the placecompletion
+		
+		// calculate combined score
+		Double combinedScore = 0.0;
+		for (Double score : this.evaluation.values()) {
+			combinedScore+=score;
+		}
+		combinedScore = combinedScore / this.evaluation.size();
+		this.combinedScore = combinedScore;
+	}
+
+	public Map<String,Double> getEvaluation() {
+		return evaluation;
+	}
+
+	public void setEvaluation(Map<String,Double> evaluation) {
+		this.evaluation = evaluation;
+	}
+
+	public Double getCombinedScore() {
+		return combinedScore;
+	}
+
+	public void setCombinedScore(Double combinedScore) {
+		this.combinedScore = combinedScore;
 	}
 
 }

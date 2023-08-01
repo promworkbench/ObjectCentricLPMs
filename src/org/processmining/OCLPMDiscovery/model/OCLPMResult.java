@@ -72,6 +72,25 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     	this.refreshColors();
     }
     
+    /**
+     * Sets the places as OCLPMs. (for place set visualization)
+     * @param placeSet
+     */
+    public OCLPMResult (TaggedPlaceSet placeSet) {
+    	super();
+    	this.placeSet = placeSet;
+    	this.objectTypes = new HashSet<String>();
+    	this.typeMap = new HashMap<String,String>();
+    	for (TaggedPlace tp : placeSet.getElements()) {
+    		this.objectTypes.add(tp.getObjectType());
+    		this.typeMap.put(tp.getId(), tp.getObjectType());
+    		ObjectCentricLocalProcessModel oclpm = new ObjectCentricLocalProcessModel(tp);
+    		this.add(oclpm);
+    	}
+    	this.storeVariableArcs();
+    	this.refreshColors();
+    }
+    
     public void copyDiscoveryParameters(OCLPMDiscoveryParameters discoveryParameters) {
     	this.oclpmDiscoverySettings = discoveryParameters.toString();
     	this.objectTypes = discoveryParameters.getObjectTypesAll();
@@ -294,7 +313,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 		newResult.setPlaceSet(this.getPlaceSet());
     	newResult.setObjectTypes(this.getObjectTypes());
     	newResult.setTypeMap(this.getTypeMap());
-		newResult.setOclpmDiscoverySettings(this.getOclpmDiscoverySettings()); // TODO: make place completion changeable
+		newResult.setOclpmDiscoverySettings(this.getOclpmDiscoverySettings()); // make place completion changeable? removed it from the settings print
     	newResult.setLpmDiscoveryTypes(this.getLpmDiscoveryTypes());
     	
     	// independent attributes

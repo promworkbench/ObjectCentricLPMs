@@ -8,9 +8,8 @@ import org.processmining.framework.abstractplugins.AbstractImportPlugin;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.placebasedlpmdiscovery.model.exporting.importers.JsonImporter;
-import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 
-@Plugin(name = "Import Set of tagged places from a json file", parameterLabels = {"Filename"}, returnLabels = {"Set of places"}, returnTypes = {PlaceSet.class})
+@Plugin(name = "Import Set of tagged places from a json file", parameterLabels = {"Filename"}, returnLabels = {"Set of places"}, returnTypes = {TaggedPlaceSet.class})
 @UIImportPlugin(description = "Import set of tagged places from a json file", extensions = {"json"})
 public class TaggedPlaceSetJsonImportPlugin extends AbstractImportPlugin {
 
@@ -18,7 +17,7 @@ public class TaggedPlaceSetJsonImportPlugin extends AbstractImportPlugin {
             throws Exception {
 
         try {
-            context.getFutureResult(0).setLabel("Set of places imported from " + filename);
+            context.getFutureResult(0).setLabel("Tagged place set imported from " + filename);
         } catch (final Throwable ignored) {
 
         }

@@ -43,7 +43,6 @@ public class OCLPMDiscoveryParameters implements EventLog{
 		// doVariableArcIdentification
 		// variableArcIdentification
 		// variableArcThreshold
-		// placeCompletion
 	
 	public OCLPMDiscoveryParameters(OcelEventLog ocel) {
 		this.setOcel(ocel);
@@ -156,7 +155,7 @@ public class OCLPMDiscoveryParameters implements EventLog{
         
         otherParams += "Variable arc identification: "+this.getVariableArcIdentification().getName()+"\n";
         otherParams += "Variable arc threshold: "+this.getVariableArcThreshold()+"\n";
-        otherParams += "Place completion: "+this.getPlaceCompletion().getName()+"\n";
+//        otherParams += "Place completion: "+this.getPlaceCompletion().getName()+"\n";
         
         return caption + broadParameters + otherParams;
     }

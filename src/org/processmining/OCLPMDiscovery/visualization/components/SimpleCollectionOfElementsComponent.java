@@ -67,9 +67,10 @@ public class SimpleCollectionOfElementsComponent<T extends TextDescribable & Ser
         // set the preferred dimension of the two containers
         int windowHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
         int windowWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
+        tableContainer.setMinimumSize(new Dimension (0,0));
         tableContainer.setPreferredSize(new Dimension(15 * windowWidth / 100, windowHeight));
         visualizerComponent.setPreferredSize(new Dimension(85 * windowWidth / 100, windowHeight)); // doesn't really work well
-        this.setResizeWeight(0.05); // weighs which side should be larger
+        this.setResizeWeight(0.10); // weighs which side should be larger
 
         // add the table and LPM visualization containers
         this.setLeftComponent(tableContainer);
@@ -135,7 +136,7 @@ public class SimpleCollectionOfElementsComponent<T extends TextDescribable & Ser
         
         // reset split position
         if (!expanded) {
-        	this.setDividerLocation(0.05);
+        	this.setDividerLocation(0.10);
         }
         if (expanded) {
         	this.setDividerLocation(1.0);
