@@ -114,7 +114,11 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         objectFlowButton.setCornerRadius(0);
         objectFlowButton.addActionListener(actionEvent -> {
         	this.shownResult.showExternalObjectFlow(objectFlowButton.isSelected());
-        	//TODO refresh visualizer to show new places?
+        	// refresh visualizer to show new places
+        	int row = table.getSelectedRow();
+        	int column = table.getSelectedColumn();
+        	table.clearSelection();
+        	table.changeSelection(row, column, false, false);
         });
         
         // place completion label
@@ -157,6 +161,9 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         	if (!expandBtn.isSelected()) {
         		((VisibilityControllableTableColumnModel) table.getColumnModel()).keepOnlyFirstColumn(); // keep only the first column
         	}
+        	
+        	//TODO add external object flow if the button is selected
+//        	objectFlowButton.setSelected(objectFlowButton.isSelected());
         });
         
         setLayout(new GridBagLayout());
