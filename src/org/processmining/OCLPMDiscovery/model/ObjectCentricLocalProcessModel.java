@@ -53,7 +53,10 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	// stores all the places of the original place set which are isomorphic to the ones present in the model
 	// also stores the place in the model as their ids might be different if Viki changes them...
 	// (necessary for place completion with per lpm variable arcs)
-	private Map<String,TaggedPlace> placeMap = new HashMap<>(); // place id -> place
+	private Map<String,TaggedPlace> placeMapIsomorphic = new HashMap<>(); // place id -> place
+	
+	// stores all places (from the isomorphic set and all newly added)
+	private Map<String,TaggedPlace> placeMapAll = new HashMap<>(); // place id -> place
 	
 	// evaluation
 	private Map<String,Double> evaluation = new HashMap<>();
@@ -249,6 +252,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 
         places.add(place);
         this.placeTypes.add(place.getObjectType());
+        this.placeMapAll.put(place.getId(), place);
 
         for (Transition transition : place.getInputTransitions()) {
             Arc arc = new Arc(place, transition, true);
@@ -277,7 +281,6 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
     public void addAllPlaces(Set<TaggedPlace> places) {
         for (TaggedPlace place : places) {
             this.addPlace(place);
-            this.placeMap.put(place.getId(), place);
         }
     }
     
@@ -676,7 +679,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	}
 
 	public Set<TaggedPlace> getIsomorphicPlaces() {
-		return new HashSet<>(this.placeMap.values());
+		return new HashSet<>(this.placeMapIsomorphic.values());
 	}
 
 	/**
@@ -695,7 +698,8 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 			for (TaggedPlace thisPlace : this.places) {
 				// store isomorphic places
 				if (thisPlace.isIsomorphic(tp)) {
-					this.placeMap.put(tp.getId(),tp);
+					this.placeMapIsomorphic.put(tp.getId(),tp);
+					this.placeMapAll.put(tp.getId(),tp);
 					/* If they are also of the same type but don't have the same id 
 					 * then replace this place by the place from the placeSet.
 					 * This is done because they should've been the same place anyway
@@ -714,11 +718,19 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 
 	
 	public TaggedPlace getPlace(String id) {
-		return this.placeMap.get(id);
+		return this.placeMapAll.get(id);
 	}
 	
-	public Map<String,TaggedPlace> getPlaceMap(){
-		return this.placeMap;
+	public Map<String,TaggedPlace> getPlaceMapAll(){
+		return this.placeMapAll;
+	}
+	
+	public Map<String,TaggedPlace> getPlaceMapIsomorphic(){
+		return this.placeMapIsomorphic;
+	}
+
+	public Set<String> getVariableArcActivities(TaggedPlace tp) {
+		return this.mapIdVarArcActivities.get(tp.getId());
 	}
 
 }

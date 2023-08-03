@@ -578,7 +578,7 @@ public class Main {
 					
 					// enter variable arc activities into each OCLPM that has this place in the isomorphic places set
 					for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
-						if (oclpm.getPlaceMap().keySet().contains(tp.getId())) {
+						if (oclpm.getPlaceMapIsomorphic().keySet().contains(tp.getId())) {
 							oclpm.getMapIdVarArcActivities().put(tp.getId(), new HashSet<String>(variableActivities));
 						}
 					}

@@ -52,6 +52,7 @@ public class CustomAcceptingPetriNetVisualizer {
         // color places based on object type
         for (Place p: net.getNet().getPlaces()) {
         	//! cannot convert from this place to taggedPlace so I need a Map from id to color for this.
+        	String type = oclpm.getPlace(p.getLabel()).getObjectType();
         	
 //        	if (!oclpmResult.getMapIdColor().containsKey(p.getLabel())
 //        			&& !(p.getLabel().contains("StartingPlace") || p.getLabel().contains("EndingPlace"))) {
@@ -62,15 +63,13 @@ public class CustomAcceptingPetriNetVisualizer {
         	// p.getLabel() is now the object type...
         	// This would all be simpler if I could just change the id of a place to any String!
         	// ah I changed it back again
-        	map.putViewSpecific(p, AttributeMap.FILLCOLOR, oclpmResult.getMapTypeColor().get(oclpm.getPlace(p.getLabel()).getObjectType()));
+        	map.putViewSpecific(p, AttributeMap.FILLCOLOR, oclpmResult.getMapTypeColor().get(type));
         	map.putViewSpecific(p, AttributeMap.STROKECOLOR, theme.TEXT);
         	// show object type of place when hovering over it
-        	map.putViewSpecific(p, AttributeMap.TOOLTIP, oclpm.getPlace(p.getLabel()).getObjectType());
-        	//TODO change the rest also to fit this new scheme where more is stored in the oclpm
+        	map.putViewSpecific(p, AttributeMap.TOOLTIP, type);
         	
         	// special appearance for starting and ending places
         	if (p.getLabel().contains("StartingPlace") || p.getLabel().contains("EndingPlace")){
-        		String type = oclpmResult.getTypeMap().get(p.getLabel());
         		if (p.getLabel().contains("StartingPlace")){
         			map.putViewSpecific(p, AttributeMap.TOOLTIP, "Starting Place "+type);
         		}
@@ -104,15 +103,15 @@ public class CustomAcceptingPetriNetVisualizer {
 //        	map.putViewSpecific(arc, AttributeMap.EDGEMIDDLE, ArrowType.ARROWTYPE_DOUBLELINE);
 //        	map.putViewSpecific(arc, AttributeMap.STROKECOLOR, Color.BLUE);
 //        	map.putViewSpecific(arc, AttributeMap.LABELALONGEDGE, "variable arc");
-        	
+
         	if (arc.getSource() instanceof Transition) {
         		activity = ((Transition)(arc.getSource())).getLabel();
         		p = (Place) arc.getTarget();
-        		type = oclpmResult.getTypeMap().get(p.getLabel());
+        		type = oclpm.getPlace(p.getLabel()).getObjectType();
         	}
         	else {
         		p = (Place) arc.getSource();
-        		type = oclpmResult.getTypeMap().get(p.getLabel());
+        		type = oclpm.getPlace(p.getLabel()).getObjectType();
         		activity = ((Transition)(arc.getTarget())).getLabel();
         	}
         	
