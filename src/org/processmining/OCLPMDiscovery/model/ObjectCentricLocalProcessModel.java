@@ -138,6 +138,8 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 			this.evaluation.put(key, oclpm.getEvaluation().get(key));
 		}
 		this.combinedScore = oclpm.getCombinedScore();
+		this.placeMapAll = oclpm.getPlaceMapAll();
+		this.placeMapIsomorphic.putAll(oclpm.getPlaceMapIsomorphic());
 	}
 
 	public HashSet<String> getDiscoveryTypes() {
@@ -490,13 +492,6 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		return true;
 	}
 
-	public void trimVariableArcSet() {
-		for (TaggedPlace tp : this.places) {
-			tp.trimVariableArcSet();
-		}
-		
-	}
-
 	/**
 	 * add special places for starting and ending transitions
 	 * @param startingActivities
@@ -506,13 +501,11 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	 */
 	public void addExternalObjectFlow(
 			Map<String, Set<String>> startingActivities, 
-			Map<String, Set<String>> endingActivities, 
-			HashMap<String, String> typeMap, // maps each place.id to an object type
-			HashMap<String, HashSet<String>> variableArcActivities // place id -> activity label if arc is variable
+			Map<String, Set<String>> endingActivities
 			){
 		
 		// check current flow situation
-		HashMap<List<String>,Set<TaggedPlace>> transitionMap = new HashMap<>(); // maps transitionName,TypeName,"in"/"out" -> TaggedPlaces
+		HashMap<List<String>,Set<TaggedPlace>> transitionMap = new HashMap<>(); // maps (transitionName,TypeName,"in"/"out") -> TaggedPlaces
 		for (TaggedPlace tp : this.getPlaces()) {
 			for (Transition t : tp.getInputTransitions()) {
 				String[] key = new String[3];
@@ -610,7 +603,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 			}
 		}
 		this.addAllPlaces(newPlaces);
-		
+		//TODO add variable arcs
 	}
 
 	public void removeExternalObjectFlow(Map<String, Set<String>> startingActivities, Map<String, Set<String>> endingActivities) {

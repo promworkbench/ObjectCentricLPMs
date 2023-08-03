@@ -48,7 +48,7 @@ public class TaggedPlaceSetVisualizer {
             returnTypes = {JComponent.class},
             parameterLabels = {"PlaceSet"})
     @Visualizer
-    @PluginVariant(variantLabel = "Tagged PlaceSet visalizer", requiredParameterLabels = {0})
+    @PluginVariant(variantLabel = "PlaceSet visalizer", requiredParameterLabels = {0})
     public JComponent visualize(UIPluginContext context, PlaceSet placeSet) {
 
         if (placeSet.size() < 1) {
@@ -63,7 +63,7 @@ public class TaggedPlaceSetVisualizer {
             return panel;
         }
         
-        OCLPMResult result = new OCLPMResult(placeSet);
+        OCLPMResult result = new OCLPMResult(new TaggedPlaceSet(placeSet));
         
         OCLPMResultPluginVisualizerTableFactory factory = new OCLPMResultPluginVisualizerTableFactory();
         SimpleCollectionOfElementsComponent scoec = new SimpleCollectionOfElementsComponent<>(context, result, factory, theme);

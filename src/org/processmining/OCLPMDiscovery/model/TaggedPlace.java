@@ -14,7 +14,6 @@ public class TaggedPlace extends Place{
 	 */
 	private static final long serialVersionUID = 3783671545908492239L;
 	private String objectType;
-	private HashSet<String> variableArcActivities = new HashSet<String>();
 	
 	public TaggedPlace(String objectType) {
 		super();
@@ -100,20 +99,6 @@ public class TaggedPlace extends Place{
 		this.objectType = objectType;
 	}
 
-	public HashSet<String> getVariableArcActivities() {
-		return variableArcActivities;
-	}
-
-	public void setVariableArcActivities(HashSet<String> variableArcActivities) {
-		if (variableArcActivities == null) {
-			this.variableArcActivities.clear();
-		}
-		else {
-			this.variableArcActivities.clear();
-			this.variableArcActivities.addAll(variableArcActivities);
-		}
-	}
-
 	/**
 	 * Checks if all the transition are equal (doesn't check variable arcs)
 	 * @param tp
@@ -161,33 +146,6 @@ public class TaggedPlace extends Place{
 		}
 		
 		return true;
-	}
-
-	/**
-	 * trim variable arc activities to fit the actual transitions of each place
-	 */
-	public void trimVariableArcSet() {
-		Set<String> delete = new HashSet<>();
-		for (String activity : this.variableArcActivities) {
-			boolean found = false;
-			for (Transition t : this.getInputTransitions()) {
-				if (t.getLabel().equals(activity)) {
-					found = true;
-					break;
-				}
-			}
-			if (found) continue;
-			for (Transition t : this.getOutputTransitions()) {
-				if (t.getLabel().equals(activity)) {
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				delete.add(activity);
-			}
-		}
-		this.variableArcActivities.removeAll(delete);
 	}
 
 	/**

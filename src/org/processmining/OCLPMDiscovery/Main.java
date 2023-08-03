@@ -200,8 +200,8 @@ public class Main {
 		
 		// OCLPM place completion not possible as the place nets aren't available.
 		
-		// identify variable arcs
-		oclpmResult = Main.identifyVariableArcs(parameters, oclpmResult);
+//		// identify variable arcs
+//		oclpmResult = Main.identifyVariableArcs(parameters, oclpmResult);
 		
 		// reevaluation of OCLPMs
 		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
@@ -608,46 +608,6 @@ public class Main {
 	}
 	
 	/**
-	 * Variable arc identification in case the plugin is started after the LPM discovery
-	 * @param parameters
-	 * @param oclpmResult
-	 * @return
-	 */
-	public static OCLPMResult identifyVariableArcs (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult) {
-		switch (parameters.getVariableArcIdentification()) {
-			case NONE:
-				break;
-			default:
-				Main.messageNormal("Starting variable arc identification using only the whole log.");
-				parameters.setVariableArcIdentification(VariableArcIdentification.WHOLE_LOG);
-				
-				HashMap<String,HashSet<String>> typeToActivities = computeVariableArcsWholeLog(parameters);
-				
-				// iterate through the models and tag variable arcs
-				for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
-					for (TaggedPlace tp : oclpm.getPlaces()) {
-						tp.setVariableArcActivities(typeToActivities.get(tp.getObjectType()));
-					}
-				}
-				
-				// in case the exact number of variable arcs of places is needed
-//				if (parameters.getPlaceCompletion().needsExactVariableArcs()) {
-//					for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
-//						oclpm.trimVariableArcSet();
-//					}
-//				}
-				
-				// always trim variable arcs as the user can select different place completions in the visualizer
-				for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
-					oclpm.trimVariableArcSet();
-				}
-				
-				Main.updateProgress("Completed variable arc identification.");
-		}
-		return oclpmResult;
-	}
-	
-	/**
 	 * Computes a map which assigns each object type to all the activities with which the type has variable arcs
 	 * @param parameters
 	 * @return
@@ -690,13 +650,7 @@ public class Main {
 	}
 	
 	public static OCLPMResult postProcessing (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult) {
-		
-		// store place id -> object type map to use in visualizer
-		oclpmResult.createTypeMap();
-		
-		// write variable arcs into result map to use in visualizer
-		oclpmResult.storeVariableArcs();
-		
+		// currently nothing to do here
 		return oclpmResult;
 	}
 	
