@@ -14,9 +14,7 @@ import org.processmining.OCLPMDiscovery.gui.OCLPMScrollPane;
 import org.processmining.OCLPMDiscovery.gui.OCLPMSplitPane;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
-import org.processmining.OCLPMDiscovery.utils.OCLPMUtils;
 import org.processmining.OCLPMDiscovery.visualization.components.ColorMapPanel;
-import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.contexts.uitopia.annotations.Visualizer;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.annotations.Plugin;
@@ -34,13 +32,13 @@ public class OCLPMVisualizer {
     	}
         if (oclpm == null)
             throw new IllegalArgumentException("The local process model to be visualized should not be null: " + oclpm);
-        AcceptingPetriNet net = OCLPMUtils.getAcceptingPetriNetRepresentation(oclpm);
         
         int windowHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
         int windowWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
         
         // Petri Net on the left
-        OCLPMScrollPane petriNetPane = new OCLPMScrollPane((new CustomAcceptingPetriNetVisualizer()).visualize(context, net, oclpmResult, theme), theme);
+        //TODO give the actual OCLPM to the visualizer
+        OCLPMScrollPane petriNetPane = new OCLPMScrollPane((new CustomAcceptingPetriNetVisualizer()).visualize(context, oclpm, oclpmResult, theme), theme);
         
         // Color Legend
         OCLPMScrollPane colorPane = new OCLPMScrollPane(new ColorMapPanel(oclpmResult.getMapTypeColor(), theme), theme);
@@ -62,7 +60,7 @@ public class OCLPMVisualizer {
         	}
         }
         
-        //TODO oclpm evaluation 
+        // oclpm evaluation 
         ta_evaluation.append("\n"+"Evaluation scores:"+"\n");
         ta_evaluation.append(oclpm.getEvaluationString());
         
@@ -74,9 +72,9 @@ public class OCLPMVisualizer {
         JComponent settingsComponent = new OCLPMPanel(theme);
         OCLPMScrollPane settingsPane = new OCLPMScrollPane(settingsComponent, theme);
         settingsComponent.setLayout(new BoxLayout(settingsComponent, BoxLayout.Y_AXIS));
-//        OCLPMTextArea ta_discoverySettings = new OCLPMTextArea(oclpmResult.getOclpmDiscoverySettings(), false, false, theme);
         OCLPMAutoResizeTextArea ta_discoverySettings = new OCLPMAutoResizeTextArea("", false, theme);
         ta_discoverySettings.append(oclpmResult.getOclpmDiscoverySettings());
+        
         settingsComponent.add(ta_discoverySettings);
         
         // Component on the right

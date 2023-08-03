@@ -16,7 +16,7 @@ import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableL
 public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel> {
     private static final long serialVersionUID = 9159252267279978544L; //?
     
-    private Set<String> objectTypes; // all object types from the ocel
+    private Set<String> objectTypes = new HashSet<>(); // all object types from the ocel
     private Set<String> lpmDiscoveryTypes; // types which were used as a case notion for LPM discovery
     private String oclpmDiscoverySettings; // settings used for the discovery of this result
     private HashMap<String,String> typeMap; // maps each place.id to an object type
@@ -47,9 +47,20 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     	this.refreshColors();
     }
     
+    /**
+     * Ensures that the places in the OCLPMs have the same ids as the places in the placeSet by replacing them 
+	 * with equal (isomorphic + same type) places from the placeSet. 
+	 * (done in the grabIsomorphicPlaces function)
+     * @param discoveryParameters
+     * @param tlpms
+     * @param placeSet
+     */
     public OCLPMResult (OCLPMDiscoveryParameters discoveryParameters, LPMResultsTagged tlpms, TaggedPlaceSet placeSet) {
     	this(discoveryParameters, tlpms);
     	this.setPlaceSet(placeSet);
+    	for (ObjectCentricLocalProcessModel oclpm : this.elements) {
+    		oclpm.grabIsomorphicPlaces(placeSet);
+    	}
     }
     
     /**
@@ -311,12 +322,12 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 		// shared attributes
 		OCLPMResult newResult = new OCLPMResult();
 		newResult.setPlaceSet(this.getPlaceSet());
-    	newResult.setObjectTypes(this.getObjectTypes());
     	newResult.setTypeMap(this.getTypeMap());
 		newResult.setOclpmDiscoverySettings(this.getOclpmDiscoverySettings()); // make place completion changeable? removed it from the settings print
     	newResult.setLpmDiscoveryTypes(this.getLpmDiscoveryTypes());
     	
     	// independent attributes
+    	newResult.getObjectTypes().addAll(this.getObjectTypes());
     	
 		// places themselves will not be altered, only which places the OCLPMs use
 		for (ObjectCentricLocalProcessModel oclpm : this.elements) {
@@ -336,7 +347,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 		else if (selected) {
 			// add external flow places
 			for (ObjectCentricLocalProcessModel oclpm : this.getElements()) {
-				oclpm.addExternalObjectFlow(this.getStartingActivities(), this.getEndingActivities());
+				oclpm.addExternalObjectFlow(this.getStartingActivities(), this.getEndingActivities(),this.typeMap, this.variableArcActivities);
 			}
 		}
 		else {
@@ -346,12 +357,6 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 			}
 		}
 		this.storeVariableArcs(); // variable arcs for starting and ending places might've been added
-		
-		// add new place labels to the type map
-		for (String type : this.objectTypes) {
-			this.typeMap.put("StartingPlace:"+type,type);
-			this.typeMap.put("EndingPlace:"+type,type);
-		}
 	}
 
 	public Map<String, Set<String>> getStartingActivities() {

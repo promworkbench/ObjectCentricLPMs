@@ -34,18 +34,26 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	// save original LPM, e.g. for LPMAdditionalInfo
 	private LocalProcessModel lpm;
 	
-	// LPM variables
 	private String id;
-    private final Set<TaggedPlace> places;
     private final Map<String, Transition> transitions; // label -> transition map
     private final Set<Arc> arcs;
     private OCLPMAdditionalInfo additionalInfo;
+    
+    private final Set<TaggedPlace> places;
 	
 	// leading types for which this OCLPM has been discovered
 	private HashSet<String> discoveryTypes = new HashSet<String>();
 	
 	// the object types of places in the model 
 	private Set<String> placeTypes = new HashSet<String>();
+	
+	// maps each place id to the activities with which that place has variable arcs
+	private Map<String,Set<String>> mapIdVarArcActivities = new HashMap<>();
+	
+	// stores all the places of the original place set which are isomorphic to the ones present in the model
+	// also stores the place in the model as their ids might be different if Viki changes them...
+	// (necessary for place completion with per lpm variable arcs)
+	private Map<String,TaggedPlace> placeMap = new HashMap<>(); // place id -> place
 	
 	// evaluation
 	private Map<String,Double> evaluation = new HashMap<>();
@@ -267,8 +275,10 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
     }
 
     public void addAllPlaces(Set<TaggedPlace> places) {
-        for (TaggedPlace place : places)
+        for (TaggedPlace place : places) {
             this.addPlace(place);
+            this.placeMap.put(place.getId(), place);
+        }
     }
     
     public void deletePlaces(Set<TaggedPlace> places) {
@@ -488,8 +498,15 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	 * add special places for starting and ending transitions
 	 * @param startingActivities
 	 * @param endingActivities
+	 * @param typeMap 
+	 * @param variableArcActivities 
 	 */
-	public void addExternalObjectFlow(Map<String, Set<String>> startingActivities, Map<String, Set<String>> endingActivities) {
+	public void addExternalObjectFlow(
+			Map<String, Set<String>> startingActivities, 
+			Map<String, Set<String>> endingActivities, 
+			HashMap<String, String> typeMap, // maps each place.id to an object type
+			HashMap<String, HashSet<String>> variableArcActivities // place id -> activity label if arc is variable
+			){
 		
 		// check current flow situation
 		HashMap<List<String>,Set<TaggedPlace>> transitionMap = new HashMap<>(); // maps transitionName,TypeName,"in"/"out" -> TaggedPlaces
@@ -528,8 +545,9 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		Set<TaggedPlace> newPlaces = new HashSet<>();
 		for (String type : this.getPlaceTypes()) {
 			for (String startingActivity : startingActivities.get(type)) {
-				// if this starting activity is in the model and there is an arc of the type coming out 
-				if(!transitionMap.get(Arrays.asList(new String[] {startingActivity,type,"out"})).isEmpty()) {
+				// if this starting activity is in the model and there is an arc of the type coming out
+				List<String> key = Arrays.asList(new String[] {startingActivity,type,"out"});
+				if(transitionMap.containsKey(key) && !transitionMap.get(key).isEmpty()) {
 					// then add the special starting place
 					// if there already is a place "StartingPlace:type" only add the new transitions
 					boolean placeExists = false;
@@ -537,13 +555,15 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 						if (tmp_place.getId().equals("StartingPlace:"+type)) {
 							placeExists = true;
 							tmp_place.addOutputTransition(this.transitions.get(startingActivity));
+							//TODO add this as variable arc if the arc going out of the transition is variable
 							break;
 						}
 					}
 					if (!placeExists) {
-						TaggedPlace p = new TaggedPlace("StartingPlace:"+type);
-						p.setObjectType(type);
+						TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type);
+						typeMap.put(p.getId(),type);
 						p.addOutputTransition(this.transitions.get(startingActivity));
+						//TODO add this as variable arc if the arc going out of the transition is variable
 						newPlaces.add(p);
 					}
 				}
@@ -551,7 +571,8 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 			// same for ending activities
 			for (String endingActivity : startingActivities.get(type)) {
 				// if this starting activity is in the model and there is an arc of the type coming out 
-				if(!transitionMap.get(Arrays.asList(new String[] {endingActivity,type,"in"})).isEmpty()) {
+				List<String> key = Arrays.asList(new String[] {endingActivity,type,"in"});
+				if(transitionMap.containsKey(key) && !transitionMap.get(key).isEmpty()) {
 					// then add the special starting place
 					// if there already is a place "EndingPlace:type" only add the new transitions
 					boolean placeExists = false;
@@ -563,8 +584,8 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 						}
 					}
 					if (!placeExists) {
-						TaggedPlace p = new TaggedPlace("EndingPlace:"+type);
-						p.setObjectType(type);
+						TaggedPlace p = new TaggedPlace(type, "EndingPlace:"+type);
+						typeMap.put(p.getId(),type);
 						p.addInputTransition(this.transitions.get(endingActivity));
 						newPlaces.add(p);
 					}
@@ -644,6 +665,60 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 
 	public void setCombinedScore(Double combinedScore) {
 		this.combinedScore = combinedScore;
+	}
+
+	public Map<String,Set<String>> getMapIdVarArcActivities() {
+		return mapIdVarArcActivities;
+	}
+
+	public void setMapIdVarArcActivities(Map<String,Set<String>> mapIdVarArcActivities) {
+		this.mapIdVarArcActivities = mapIdVarArcActivities;
+	}
+
+	public Set<TaggedPlace> getIsomorphicPlaces() {
+		return new HashSet<>(this.placeMap.values());
+	}
+
+	/**
+	 * Retrieves the places which are isomorphic to ones in the model
+	 * and stores them in the isomorphicPlaces variable.
+	 * If equal places (isomorphic & same type) are found then they replace 
+	 * the ones in the model!
+	 * Hence, after calling this it is guaranteed that the ids of places in the model
+	 * occur also in the placeSet.
+	 * @param placeSet
+	 */
+	public void grabIsomorphicPlaces(TaggedPlaceSet placeSet) {
+		Set<TaggedPlace> removePlaces = new HashSet<>();
+		Set<TaggedPlace> addPlaces = new HashSet<>();
+		for (TaggedPlace tp : placeSet.getElements()) {
+			for (TaggedPlace thisPlace : this.places) {
+				// store isomorphic places
+				if (thisPlace.isIsomorphic(tp)) {
+					this.placeMap.put(tp.getId(),tp);
+					/* If they are also of the same type but don't have the same id 
+					 * then replace this place by the place from the placeSet.
+					 * This is done because they should've been the same place anyway
+					 * but the LPM discovery changed the placeid (Viki said she might do that ;( ).
+					 */
+					if (tp.getObjectType().equals(thisPlace.getObjectType()) && !tp.getId().equals(thisPlace.getId())) {
+						removePlaces.add(thisPlace);
+						addPlaces.add(tp);
+					}
+				}
+			}
+		}
+		this.deletePlaces(removePlaces, true);
+		this.addAllPlaces(addPlaces, true);
+	}
+
+	
+	public TaggedPlace getPlace(String id) {
+		return this.placeMap.get(id);
+	}
+	
+	public Map<String,TaggedPlace> getPlaceMap(){
+		return this.placeMap;
 	}
 
 }
