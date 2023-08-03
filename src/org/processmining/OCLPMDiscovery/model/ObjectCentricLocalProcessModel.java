@@ -139,6 +139,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		this.combinedScore = oclpm.getCombinedScore();
 		this.placeMapAll = oclpm.getPlaceMapAll();
 		this.placeMapIsomorphic.putAll(oclpm.getPlaceMapIsomorphic());
+		this.mapIdVarArcActivities.putAll(oclpm.getMapIdVarArcActivities());
 	}
 
 	public HashSet<String> getDiscoveryTypes() {
@@ -734,7 +735,21 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	}
 
 	public Set<String> getVariableArcActivities(TaggedPlace tp) {
-		return this.mapIdVarArcActivities.get(tp.getId());
+		if (this.mapIdVarArcActivities.containsKey(tp.getId())) {
+			return this.mapIdVarArcActivities.get(tp.getId());
+		}
+		else {
+			return new HashSet<String>();
+		}
+	}
+	
+	public Set<String> getVariableArcActivities(String placeId) {
+		if (this.mapIdVarArcActivities.containsKey(placeId)) {
+			return this.mapIdVarArcActivities.get(placeId);
+		}
+		else {
+			return new HashSet<String>();
+		}
 	}
 
 }
