@@ -12,7 +12,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.processmining.OCLPMDiscovery.model.additionalinfo.OCLPMAdditionalInfo;
 import org.processmining.models.graphbased.NodeID;
@@ -544,6 +543,8 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 				// if this starting activity is in the model and there is an arc of the type coming out
 				List<String> key = Arrays.asList(new String[] {startingActivity,type,"out"});
 				if(transitionMap.containsKey(key) && !transitionMap.get(key).isEmpty()) {
+					// check if arc already connected to the transition is variable
+					Boolean variableArc = this.getVariableArcActivities(transitionMap.get(key).iterator().next()).contains(startingActivity);
 					// then add the special starting place
 					// if there already is a place "StartingPlace:type" only add the new transitions
 					boolean placeExists = false;
@@ -551,59 +552,69 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 						if (tmp_place.getId().equals("StartingPlace:"+type)) {
 							placeExists = true;
 							tmp_place.addOutputTransition(this.transitions.get(startingActivity));
-							//TODO add this as variable arc if the arc going out of the transition is variable
+							if (variableArc) {
+								// add this as variable arc if the arc going out of the transition is variable
+								this.addVariableArc(tmp_place.getId(),startingActivity);
+							}
 							break;
 						}
 					}
 					if (!placeExists) {
 						TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type);
-						typeMap.put(p.getId(),type);
 						p.addOutputTransition(this.transitions.get(startingActivity));
-						//TODO add this as variable arc if the arc going out of the transition is variable
+						if (variableArc) {
+							// add this as variable arc if the arc going out of the transition is variable
+							this.addVariableArc(p.getId(),startingActivity);
+						}
 						newPlaces.add(p);
 					}
 				}
 			}
 			// same for ending activities
-			for (String endingActivity : startingActivities.get(type)) {
-				// if this starting activity is in the model and there is an arc of the type coming out 
+			for (String endingActivity : endingActivities.get(type)) {
+				// if this ending activity is in the model and there is an arc of the type coming in 
 				List<String> key = Arrays.asList(new String[] {endingActivity,type,"in"});
 				if(transitionMap.containsKey(key) && !transitionMap.get(key).isEmpty()) {
-					// then add the special starting place
+					// check if arc already connected to the transition is variable
+					Boolean variableArc = this.getVariableArcActivities(transitionMap.get(key).iterator().next()).contains(endingActivity);
+					// then add the special ending place
 					// if there already is a place "EndingPlace:type" only add the new transitions
 					boolean placeExists = false;
 					for (TaggedPlace tmp_place : newPlaces) {
 						if (tmp_place.getId().equals("EndingPlace:"+type)) {
 							placeExists = true;
 							tmp_place.addInputTransition(this.transitions.get(endingActivity));
+							if (variableArc) {
+								// add this as variable arc if the arc going in to the transition is variable
+								this.addVariableArc(tmp_place.getId(),endingActivity);
+							}
 							break;
 						}
 					}
 					if (!placeExists) {
 						TaggedPlace p = new TaggedPlace(type, "EndingPlace:"+type);
-						typeMap.put(p.getId(),type);
 						p.addInputTransition(this.transitions.get(endingActivity));
+						if (variableArc) {
+							// add this as variable arc if the arc going in to the transition is variable
+							this.addVariableArc(p.getId(),endingActivity);
+						}
 						newPlaces.add(p);
 					}
 				}
 			}
 		}
-		// variable arcs of starting and ending places
-		for (TaggedPlace newPlace : newPlaces) { // for all new places
-			for (TaggedPlace p : this.getPlaces()) { // for all existing places
-				if (!p.getObjectType().equals(newPlace.getObjectType())) break; // same type?
-				for (Transition t : Stream.concat( // iterate over all transitions of the new place
-						newPlace.getInputTransitions().stream(),
-						newPlace.getOutputTransitions().stream())
-							.collect(Collectors.toSet())) {
-						if (p.getVariableArcActivities().contains(t.getLabel())) {
-							newPlace.getVariableArcActivities().add(t.getLabel()); // add variable arc activity to the new place
-						}
-				}
-			}
-		}
 		this.addAllPlaces(newPlaces);
-		//TODO add variable arcs
+	}
+
+	private void addVariableArc(String placeId, String activity) {
+		if (this.mapIdVarArcActivities.containsKey(placeId)) {
+			this.mapIdVarArcActivities.get(placeId).add(activity); //TODO does this work?
+		}
+		else {
+			Set<String> value = new HashSet<>();
+			value.add(activity);
+			this.mapIdVarArcActivities.put(placeId, value);
+		}
 	}
 
 	public void removeExternalObjectFlow(Map<String, Set<String>> startingActivities, Map<String, Set<String>> endingActivities) {
