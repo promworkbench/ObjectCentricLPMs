@@ -47,11 +47,12 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
     private OCLPMColors theme = new OCLPMColors();
 
     public TableComposition(OCLPMResult result,
+    						OCLPMResult resultCopy,
                             AbstractPluginVisualizerTableFactory<T> tableFactory,
                             TableListener<T> controller) {
         this.componentId = new ComponentId(ComponentId.Type.TableComponent);
         this.result = result;
-        this.shownResult = result;
+        this.shownResult = resultCopy;
         this.tableFactory = tableFactory;
         this.controller = controller;
 
@@ -59,12 +60,13 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
     }
     
     public TableComposition(OCLPMResult result,
+			OCLPMResult resultCopy,
             AbstractPluginVisualizerTableFactory<T> tableFactory,
             TableListener<T> controller,
             OCLPMColors theme) {
 		this.componentId = new ComponentId(ComponentId.Type.TableComponent);
 		this.result = result;
-		this.shownResult = result;
+		this.shownResult = resultCopy;
 		this.tableFactory = tableFactory;
 		this.controller = controller;
 		this.theme = theme;
@@ -76,7 +78,7 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         this.setLayout(new BorderLayout());
 
         // create the table
-        GenericTextDescribableTableComponent<T> table = this.tableFactory.getPluginVisualizerTable((SerializableCollection<T>) this.result, controller, this.theme);
+        GenericTextDescribableTableComponent<T> table = this.tableFactory.getPluginVisualizerTable((SerializableCollection<T>) this.shownResult, controller, this.theme);
         OCLPMScrollPane scrollPane = new OCLPMScrollPane(table, theme); // add the table in a scroll pane
 
         // create the filter form
