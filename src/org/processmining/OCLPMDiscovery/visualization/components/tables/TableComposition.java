@@ -164,8 +164,11 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         		((VisibilityControllableTableColumnModel) table.getColumnModel()).keepOnlyFirstColumn(); // keep only the first column
         	}
         	
-        	//TODO add external object flow if the button is selected
-//        	objectFlowButton.setSelected(objectFlowButton.isSelected());
+        	// add external object flow if the button is selected
+        	if (objectFlowButton.isSelected()) {
+        		objectFlowButton.setSelected(false);
+        		objectFlowButton.doClick();
+        	}
         });
         
         setLayout(new GridBagLayout());
