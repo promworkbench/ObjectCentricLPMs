@@ -12,12 +12,11 @@ import javax.swing.JPopupMenu;
 
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
+import org.processmining.OCLPMDiscovery.parameters.OCLPMEvaluationMetrics;
 import org.processmining.OCLPMDiscovery.visualization.components.tables.CustomObjectTableModel;
 import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.LPMEvaluationResult;
 import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.LPMEvaluationResultId;
-import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.aggregateoperations.EvaluationResultAggregateOperation;
 import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableCollection;
-import org.processmining.placebasedlpmdiscovery.utils.LocalProcessModelUtils;
 
 public class OCLPMResultPluginVisualizerTableFactory extends AbstractPluginVisualizerTableFactory<ObjectCentricLocalProcessModel> {
 
@@ -66,13 +65,12 @@ public class OCLPMResultPluginVisualizerTableFactory extends AbstractPluginVisua
     	new String[]{
                 "LPM Index",
                 "LPM Short Name",
-//                "Transition Overlapping Score",
-                "Transition Coverage Score",
-                "Fitting Window Score",
-                "Passage Coverage Score",
-                "Passage Repetition Score",
-                "Trace Support",
-                "Aggregate Result"
+                OCLPMEvaluationMetrics.FITTING_WINDOWS.getName(),
+                OCLPMEvaluationMetrics.PASSAGE_COVERAGE.getName(),
+                OCLPMEvaluationMetrics.PASSAGE_REPETITION.getName(),
+                OCLPMEvaluationMetrics.TRANSITION_COVERAGE.getName(),
+                OCLPMEvaluationMetrics.TRACE_SUPPORT.getName(),
+                OCLPMEvaluationMetrics.COMBINED_SCORE.getName()
         };
     }
     
@@ -82,14 +80,12 @@ public class OCLPMResultPluginVisualizerTableFactory extends AbstractPluginVisua
     		(ind, oclpm) -> new Object[]{
                 ind + 1,
                 oclpm.getShortString(),
-//                df.format(getResultOrDefault(lpm, LPMEvaluationResultId.TransitionOverlappingEvaluationResult)),
-                df.format(getResultOrDefault(oclpm, LPMEvaluationResultId.TransitionCoverageEvaluationResult)),
-                df.format(getResultOrDefault(oclpm, LPMEvaluationResultId.FittingWindowsEvaluationResult)),
-                df.format(getResultOrDefault(oclpm, LPMEvaluationResultId.PassageCoverageEvaluationResult)),
-                df.format(getResultOrDefault(oclpm, LPMEvaluationResultId.PassageRepetitionEvaluationResult)),
-                df.format(getResultOrDefault(oclpm, LPMEvaluationResultId.TraceSupportEvaluationResult)),
-//                df.format(lpm.getAdditionalInfo().getEvaluationResult().getResult(new EvaluationResultAggregateOperation()))
-                df.format(LocalProcessModelUtils.getGroupedEvaluationResult(oclpm.getLpm()).getResult(new EvaluationResultAggregateOperation()))
+                df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.FITTING_WINDOWS)),
+                df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.PASSAGE_COVERAGE)),
+                df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.PASSAGE_REPETITION)),
+                df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.TRANSITION_COVERAGE)),
+                df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.TRACE_SUPPORT)),
+                df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.COMBINED_SCORE)),
     		};
     }
 }

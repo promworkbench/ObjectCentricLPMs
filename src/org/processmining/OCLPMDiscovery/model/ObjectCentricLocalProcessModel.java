@@ -14,6 +14,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.processmining.OCLPMDiscovery.model.additionalinfo.OCLPMAdditionalInfo;
+import org.processmining.OCLPMDiscovery.parameters.OCLPMEvaluationMetrics;
 import org.processmining.models.graphbased.NodeID;
 import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.LPMEvaluationResult;
 import org.processmining.placebasedlpmdiscovery.model.Arc;
@@ -58,8 +59,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	private Map<String,TaggedPlace> placeMapAll = new HashMap<>(); // place id -> place
 	
 	// evaluation
-	private Map<String,Double> evaluation = new HashMap<>();
-	private Double combinedScore = -1.0;
+	private Map<OCLPMEvaluationMetrics,Double> evaluation = new HashMap<>();
 	
 	public ObjectCentricLocalProcessModel() {
         // setup oclpm
@@ -92,20 +92,21 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
         for (LPMEvaluationResult result : results) {
         	switch (result.getId()) {
         		case FittingWindowsEvaluationResult:
-        			this.evaluation.put("Fitting Window Score",result.getNormalizedResult());
+        			this.evaluation.put(OCLPMEvaluationMetrics.FITTING_WINDOWS,result.getNormalizedResult());
         			break;
         		case TransitionOverlappingEvaluationResult:
         			break;
         		case TransitionCoverageEvaluationResult:
-        			this.evaluation.put("Transition Coverage Score",result.getNormalizedResult());
+        			this.evaluation.put(OCLPMEvaluationMetrics.TRANSITION_COVERAGE,result.getNormalizedResult());
         			break;
         		case PassageCoverageEvaluationResult:
-        			this.evaluation.put("Passage Coverage Score",result.getNormalizedResult());
+        			this.evaluation.put(OCLPMEvaluationMetrics.PASSAGE_COVERAGE,result.getNormalizedResult());
         			break;
         		case PassageRepetitionEvaluationResult:
-        			this.evaluation.put("Passage Repetition Score",result.getNormalizedResult());
+        			this.evaluation.put(OCLPMEvaluationMetrics.PASSAGE_REPETITION,result.getNormalizedResult());
         			break;
         		case TraceSupportEvaluationResult:
+        			this.evaluation.put(OCLPMEvaluationMetrics.TRACE_SUPPORT,result.getNormalizedResult());
         			break;
         		default:
         			break;
@@ -133,10 +134,9 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		this.addAllPlaces(oclpm.getPlaces());
 		this.setAdditionalInfo(oclpm.getAdditionalInfo());
 		this.setDiscoveryTypes(oclpm.getDiscoveryTypes());
-		for (String key : oclpm.getEvaluation().keySet()) {
+		for (OCLPMEvaluationMetrics key : oclpm.getEvaluation().keySet()) {
 			this.evaluation.put(key, oclpm.getEvaluation().get(key));
 		}
-		this.combinedScore = oclpm.getCombinedScore();
 		this.placeMapAll = oclpm.getPlaceMapAll();
 		this.placeMapIsomorphic.putAll(oclpm.getPlaceMapIsomorphic());
 		this.mapIdVarArcActivities.putAll(oclpm.getMapIdVarArcActivities());
@@ -635,11 +635,12 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	 */
 	public String getEvaluationString() {
 		String evalString = "";
-		for (String name : this.evaluation.keySet()) {
-			Double score = Math.round(this.evaluation.get(name)*1000.0)/1000.0;
-			evalString += name+": "+score+"\n";
+		for (OCLPMEvaluationMetrics metric : this.evaluation.keySet()) {
+			if (metric.equals(OCLPMEvaluationMetrics.COMBINED_SCORE)) continue; // print that as last
+			Double score = Math.round(this.evaluation.get(metric)*1000.0)/1000.0;
+			evalString += metric.getName()+": "+score+"\n";
 		}
-		evalString += "Combined Score: "+Math.round(this.combinedScore*1000.0)/1000.0+"\n";
+		evalString += OCLPMEvaluationMetrics.COMBINED_SCORE.getName()+": "+Math.round(this.evaluation.get(OCLPMEvaluationMetrics.COMBINED_SCORE)*1000.0)/1000.0+"\n";
 		return evalString;
 	}
 	
@@ -652,27 +653,28 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		
 		// calculate combined score
 		Double combinedScore = 0.0;
-		for (Double score : this.evaluation.values()) {
-			combinedScore+=score;
+		for (OCLPMEvaluationMetrics metric : this.evaluation.keySet()) {
+			if (metric.equals(OCLPMEvaluationMetrics.COMBINED_SCORE)) continue;
+			combinedScore+=this.evaluation.get(metric);
 		}
-		combinedScore = combinedScore / this.evaluation.size();
-		this.combinedScore = combinedScore;
+		combinedScore = combinedScore / (this.evaluation.size()-1);
+		this.setCombinedScore(combinedScore);
 	}
 
-	public Map<String,Double> getEvaluation() {
+	public Map<OCLPMEvaluationMetrics,Double> getEvaluation() {
 		return evaluation;
 	}
 
-	public void setEvaluation(Map<String,Double> evaluation) {
+	public void setEvaluation(Map<OCLPMEvaluationMetrics,Double> evaluation) {
 		this.evaluation = evaluation;
 	}
 
 	public Double getCombinedScore() {
-		return combinedScore;
+		return this.evaluation.get(OCLPMEvaluationMetrics.COMBINED_SCORE);
 	}
 
 	public void setCombinedScore(Double combinedScore) {
-		this.combinedScore = combinedScore;
+		this.evaluation.put(OCLPMEvaluationMetrics.COMBINED_SCORE, combinedScore);
 	}
 
 	public Map<String,Set<String>> getMapIdVarArcActivities() {
@@ -750,6 +752,14 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		else {
 			return new HashSet<String>();
 		}
+	}
+
+	public Object getEvaluation(OCLPMEvaluationMetrics metric) {
+		if (this.evaluation.containsKey(metric) 
+				&& this.evaluation.get(metric) != null) {
+			return this.evaluation.get(metric);
+		}
+		return -1;
 	}
 
 }
