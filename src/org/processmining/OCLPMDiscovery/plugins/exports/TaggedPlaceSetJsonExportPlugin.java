@@ -22,12 +22,18 @@ import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
         extension = "json")
 public class TaggedPlaceSetJsonExportPlugin {
 
-    @PluginVariant(variantLabel = "Export set of tagged places into a file", requiredParameterLabels = {0, 1})
+    @PluginVariant(variantLabel = "Export set of places into a file", requiredParameterLabels = {0, 1})
     public static void export(PluginContext context, PlaceSet placeSet, File file) throws IOException {
         // convert PlaceSet to TaggedPlaceSet
     	TaggedPlaceSet tps = new TaggedPlaceSet(placeSet);
     	
     	JsonExporter<TaggedPlaceSet> exporter = new JsonExporter<>();
         tps.export(exporter, Files.newOutputStream(file.toPath()));
+    }
+    
+    @PluginVariant(variantLabel = "Export set of tagged places into a file", requiredParameterLabels = {0, 1})
+    public static void export(PluginContext context, TaggedPlaceSet placeSet, File file) throws IOException {    	
+    	JsonExporter<TaggedPlaceSet> exporter = new JsonExporter<>();
+        placeSet.export(exporter, Files.newOutputStream(file.toPath()));
     }
 }

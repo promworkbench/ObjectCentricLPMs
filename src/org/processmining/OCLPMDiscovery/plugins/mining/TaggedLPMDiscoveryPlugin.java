@@ -2,6 +2,7 @@ package org.processmining.OCLPMDiscovery.plugins.mining;
 
 import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.model.LPMResultsTagged;
+import org.processmining.OCLPMDiscovery.model.TaggedPlaceSet;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.wizards.OCLPMDiscoveryWizard;
 import org.processmining.contexts.uitopia.UIPluginContext;
@@ -12,7 +13,6 @@ import org.processmining.framework.util.ui.wizard.ProMWizardDisplay;
 import org.processmining.hybridilpminer.parameters.XLogHybridILPMinerParametersImpl;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
 import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
-import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 
 @Plugin(
 		name = "Discovery of Tagged Local Process Models", // not shown anywhere anymore because overwritten by uiLabel?
@@ -67,7 +67,7 @@ public class TaggedLPMDiscoveryPlugin {
 			variantLabel = "Local Process Model Discovery given OCEL and PlaceSet",
 			requiredParameterLabels = {0,1}
 	)
-	public static LPMResultsTagged mineTLPMs(UIPluginContext context, OcelEventLog ocel, PlaceSet placeSet) {
+	public static LPMResultsTagged mineTLPMs(UIPluginContext context, OcelEventLog ocel, TaggedPlaceSet placeSet) {
 		Main.setUp(context);
 		
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);

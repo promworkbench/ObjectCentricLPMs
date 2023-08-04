@@ -40,16 +40,19 @@ import org.processmining.placebasedlpmdiscovery.plugins.visualization.utils.Rege
 public class TableComposition<T extends TextDescribable & Serializable> extends JComponent implements ICommunicativePanel {
 
     private final ComponentId componentId;
-    private final OCLPMResult result;
+    private final OCLPMResult result; // original unaltered result
+    private OCLPMResult shownResult; // currently shown result, potentially with completed place and object type ellipses
     private final AbstractPluginVisualizerTableFactory<T> tableFactory;
     private final TableListener<T> controller;
     private OCLPMColors theme = new OCLPMColors();
 
     public TableComposition(OCLPMResult result,
+    						OCLPMResult resultCopy,
                             AbstractPluginVisualizerTableFactory<T> tableFactory,
                             TableListener<T> controller) {
         this.componentId = new ComponentId(ComponentId.Type.TableComponent);
         this.result = result;
+        this.shownResult = resultCopy;
         this.tableFactory = tableFactory;
         this.controller = controller;
 
@@ -57,11 +60,13 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
     }
     
     public TableComposition(OCLPMResult result,
+			OCLPMResult resultCopy,
             AbstractPluginVisualizerTableFactory<T> tableFactory,
             TableListener<T> controller,
             OCLPMColors theme) {
 		this.componentId = new ComponentId(ComponentId.Type.TableComponent);
 		this.result = result;
+		this.shownResult = resultCopy;
 		this.tableFactory = tableFactory;
 		this.controller = controller;
 		this.theme = theme;
@@ -73,7 +78,7 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         this.setLayout(new BorderLayout());
 
         // create the table
-        GenericTextDescribableTableComponent<T> table = this.tableFactory.getPluginVisualizerTable((SerializableCollection<T>) this.result, controller, this.theme);
+        GenericTextDescribableTableComponent<T> table = this.tableFactory.getPluginVisualizerTable((SerializableCollection<T>) this.shownResult, controller, this.theme);
         OCLPMScrollPane scrollPane = new OCLPMScrollPane(table, theme); // add the table in a scroll pane
 
         // create the filter form
@@ -104,6 +109,20 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
             }
         });
         
+        // object flow button
+        OCLPMToggleButton objectFlowButton = new OCLPMToggleButton(this.theme);
+        objectFlowButton.setText("Extend Object Flow");
+        objectFlowButton.setSelected(false);
+        objectFlowButton.setCornerRadius(0);
+        objectFlowButton.addActionListener(actionEvent -> {
+        	this.shownResult.showExternalObjectFlow(objectFlowButton.isSelected());
+        	// refresh visualizer to show new places
+        	int row = table.getSelectedRow();
+        	int column = table.getSelectedColumn();
+        	table.clearSelection();
+        	table.changeSelection(row, column, false, false);
+        });
+        
         // place completion label
         JLabel placeCompletionLabel = new JLabel("Place Completion:");
         placeCompletionLabel.setMinimumSize(new Dimension(1,30));
@@ -112,6 +131,7 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         OCLPMComboBox placeCompletionBox = new OCLPMComboBox(PlaceCompletion.values(), this.theme);
         placeCompletionBox.addActionListener(actionEvent -> {
         	OCLPMResult newResult = PlaceCompletionUtils.completePlacesCopy(this.result, (PlaceCompletion) placeCompletionBox.getSelectedItem());
+        	this.shownResult = newResult;
         	
         	// show all columns (otherwise it doesn't work)
             ((VisibilityControllableTableColumnModel) table.getColumnModel()).setAllColumnsVisible(); // show all columns
@@ -143,6 +163,12 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         	if (!expandBtn.isSelected()) {
         		((VisibilityControllableTableColumnModel) table.getColumnModel()).keepOnlyFirstColumn(); // keep only the first column
         	}
+        	
+        	// add external object flow if the button is selected
+        	if (objectFlowButton.isSelected()) {
+        		objectFlowButton.setSelected(false);
+        		objectFlowButton.doClick();
+        	}
         });
         
         setLayout(new GridBagLayout());
@@ -151,28 +177,31 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridwidth = GridBagConstraints.REMAINDER; // Component spans the whole row
         
+        // table
         gbc.gridx = 0;
         gbc.weightx = 1.0; // Allow horizontal resizing
         gbc.anchor = GridBagConstraints.WEST; // Left-align the components
         gbc.weighty = 0.0;
-        
-        gbc.gridy = 0;
+        int gridy = 0;
+        gbc.gridy = gridy++;
         this.add(filterForm, gbc); // add the filter field in the table container
-        
-        gbc.gridy = 1;
+        gbc.gridy = gridy++;
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
         this.add(scrollPane, gbc); // add the scroll pane in the table container
-        
         gbc.weighty = 0.0;
-        gbc.gridy = 2;
+        gbc.gridy = gridy++;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         this.add(expandBtn, gbc); // add the expand/shrink button in the table container
         
-        gbc.gridy = 3;
-        this.add(placeCompletionLabel, gbc);
+        // object flow
+        gbc.gridy = gridy++;
+        this.add(objectFlowButton, gbc);
         
-        gbc.gridy = 4;
+        // place completion
+        gbc.gridy = gridy++;
+        this.add(placeCompletionLabel, gbc);
+        gbc.gridy = gridy++;
         this.add(placeCompletionBox, gbc);
     }
 

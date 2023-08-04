@@ -8,6 +8,7 @@ import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.model.LPMResultsTagged;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.TaggedPlace;
+import org.processmining.OCLPMDiscovery.model.TaggedPlaceSet;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.wizards.OCLPMDiscoveryWizard;
 import org.processmining.contexts.uitopia.UIPluginContext;
@@ -18,7 +19,6 @@ import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.framework.util.ui.wizard.ProMWizardDisplay;
 import org.processmining.hybridilpminer.parameters.XLogHybridILPMinerParametersImpl;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
-import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 
 @Plugin(
 		name = "Discovery of Object-Centric Local Process Models", // not shown anywhere anymore because overwritten by uiLabel?
@@ -88,7 +88,7 @@ public class OCLPMDiscoveryPlugin {
 			variantLabel = "Object-Centric Local Process Model Discovery",
 			requiredParameterLabels = {0,1}
 	)
-	public static OCLPMResult mineOCLPMs(UIPluginContext context, OcelEventLog ocel, PlaceSet placeSet) throws Exception {
+	public static OCLPMResult mineOCLPMs(UIPluginContext context, OcelEventLog ocel, TaggedPlaceSet placeSet) throws Exception {
 		
 		if (!(placeSet.getList().getElement(0) instanceof TaggedPlace)) {
 			throw new Exception("Given places aren't tagged with object types.");
@@ -121,7 +121,7 @@ public class OCLPMDiscoveryPlugin {
 			requiredParameterLabels = {0,1,6}
 	)
 	public static OCLPMResult mineOCLPMs (
-			UIPluginContext context, OcelEventLog ocel, PlaceSet placeSet, Graph<String,DefaultEdge> graph
+			UIPluginContext context, OcelEventLog ocel, TaggedPlaceSet placeSet, Graph<String,DefaultEdge> graph
 			) throws Exception {
 		
 		if (!(placeSet.getList().getElement(0) instanceof TaggedPlace)) {
@@ -155,7 +155,7 @@ public class OCLPMDiscoveryPlugin {
 			variantLabel = "Object-Centric Local Process Model Discovery given LPMs with tagged places.",
 			requiredParameterLabels = {0,5,1}
 	)
-	public static OCLPMResult mineOCLPMs(PluginContext context, OcelEventLog ocel, LPMResultsTagged lpms, PlaceSet placeSet) throws Exception {
+	public static OCLPMResult mineOCLPMs(PluginContext context, OcelEventLog ocel, LPMResultsTagged lpms, TaggedPlaceSet placeSet) throws Exception {
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel); // TODO OCEL necessary?
 		Main.setUp(context, parameters, false, false);
 		return (OCLPMResult) Main.run(ocel, parameters, lpms, placeSet)[0];
@@ -173,7 +173,7 @@ public class OCLPMDiscoveryPlugin {
 			requiredParameterLabels = {0,1,2,6}
 	)
 	public static OCLPMResult mineOCLPMs (
-			UIPluginContext context, OcelEventLog ocel, ArrayList<String> labels, PlaceSet placeSet, Graph<String,DefaultEdge> graph
+			UIPluginContext context, OcelEventLog ocel, ArrayList<String> labels, TaggedPlaceSet placeSet, Graph<String,DefaultEdge> graph
 			) {
 		
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
@@ -216,7 +216,7 @@ public class OCLPMDiscoveryPlugin {
 		return (OCLPMResult) result[0];
 	}
 	
-	public static OCLPMResult mineOCLPMs(OCLPMDiscoveryParameters parameters, OcelEventLog ocel, PlaceSet placeSet) {
+	public static OCLPMResult mineOCLPMs(OCLPMDiscoveryParameters parameters, OcelEventLog ocel, TaggedPlaceSet placeSet) {
 		Object[] result = Main.run(ocel, parameters, placeSet);
 		return (OCLPMResult) result[0];
 	}

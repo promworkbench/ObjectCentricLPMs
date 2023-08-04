@@ -13,8 +13,6 @@ import javax.swing.border.EmptyBorder;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
 import org.processmining.OCLPMDiscovery.model.TaggedPlace;
-import org.processmining.OCLPMDiscovery.utils.OCLPMUtils;
-import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.Visualizer;
 import org.processmining.framework.plugin.annotations.Plugin;
@@ -34,11 +32,10 @@ public class TaggedPlaceVisualizer {
     public JComponent visualize(UIPluginContext context, TaggedPlace place, OCLPMResult result) {
         if (place == null)
             throw new IllegalArgumentException("The local process model to be visualized should not be null: " + place);
-        AcceptingPetriNet net = OCLPMUtils.getAcceptingPetriNetRepresentation(new ObjectCentricLocalProcessModel(place));
 
         JComponent component = new JPanel();
         component.setLayout(new BoxLayout(component, BoxLayout.X_AXIS));
-        component.add((new CustomAcceptingPetriNetVisualizer()).visualize(context, net, result));
+        component.add((new CustomAcceptingPetriNetVisualizer()).visualize(context, new ObjectCentricLocalProcessModel(place), result));
         component.add(getPlaceAdditionalInfoComponent(place.getAdditionalInfo()));
         return component;
     }

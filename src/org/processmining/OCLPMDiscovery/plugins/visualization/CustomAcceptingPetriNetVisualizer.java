@@ -7,6 +7,8 @@ import javax.swing.JComponent;
 import org.processmining.OCLPMDiscovery.gui.OCLPMColors;
 import org.processmining.OCLPMDiscovery.gui.OCLPMGraphPanel;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
+import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
+import org.processmining.OCLPMDiscovery.utils.OCLPMUtils;
 import org.processmining.OCLPMDiscovery.visualization.components.OCLPMGraphVisualizer;
 import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.contexts.uitopia.annotations.Visualizer;
@@ -18,37 +20,24 @@ import org.processmining.models.graphbased.ViewSpecificAttributeMap;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetEdge;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
-import org.processmining.models.semantics.petrinet.Marking;
 
 public class CustomAcceptingPetriNetVisualizer {
 
-    @Plugin(name = "@0 Visualize Accepting Petri Net",
-            returnLabels = {"Visualized Accepting Petri Net"},
+    @Plugin(name = "@0 Visualize OCLPM",
+            returnLabels = {"Visualized OCLPM"},
             returnTypes = {JComponent.class},
-            parameterLabels = {"Accepting Petri Net"},
+            parameterLabels = {"OCLPM"},
             userAccessible = false)
     @Visualizer
     @PluginVariant(requiredParameterLabels = {0})
-    public JComponent visualize(PluginContext context, AcceptingPetriNet net, OCLPMResult oclpmResult) {
-    	return this.visualize(context, net, oclpmResult, OCLPMColors.getLightMode());
+    public JComponent visualize(PluginContext context, ObjectCentricLocalProcessModel oclpm, OCLPMResult oclpmResult) {
+    	return this.visualize(context, oclpm, oclpmResult, OCLPMColors.getLightMode());
     }
     
-    public JComponent visualize(PluginContext context, AcceptingPetriNet net, OCLPMResult oclpmResult, OCLPMColors theme) {
-        ViewSpecificAttributeMap map = new ViewSpecificAttributeMap();        
+    public JComponent visualize(PluginContext context, ObjectCentricLocalProcessModel oclpm, OCLPMResult oclpmResult, OCLPMColors theme) {
+    	AcceptingPetriNet net = OCLPMUtils.getAcceptingPetriNetRepresentation(oclpm);
+    	ViewSpecificAttributeMap map = new ViewSpecificAttributeMap();
         
-        //! this Marking-Color part doesn't work because the place color is changed again below to fit the theme
-        for (Place place : net.getInitialMarking().baseSet()) {
-            map.putViewSpecific(place, AttributeMap.FILLCOLOR, new Color(127, 0, 0));
-        }
-        for (Marking marking : net.getFinalMarkings()) {
-            for (Place place : marking.baseSet()) {
-                if (net.getInitialMarking().baseSet().contains(place)) {
-                    map.putViewSpecific(place, AttributeMap.FILLCOLOR, new Color(127, 0, 127));
-                } else {
-                    map.putViewSpecific(place, AttributeMap.FILLCOLOR, new Color(0, 0, 127));
-                }
-            }
-        }
         for (Transition t : net.getNet().getTransitions()) {
             if (!t.isInvisible()) {
                 // map.putViewSpecific(t, AttributeMap.LABEL, lpm.getTransitions().get(t.getLabel()).getLabel());
@@ -63,17 +52,36 @@ public class CustomAcceptingPetriNetVisualizer {
         // color places based on object type
         for (Place p: net.getNet().getPlaces()) {
         	//! cannot convert from this place to taggedPlace so I need a Map from id to color for this.
+        	String type = oclpm.getPlace(p.getLabel()).getObjectType();
         	
-        	if (!oclpmResult.getMapIdColor().containsKey(p.getLabel())) {
-        		System.out.println("Color map doesn't contain the place id "+p.getLabel());
-        	}
+//        	if (!oclpmResult.getMapIdColor().containsKey(p.getLabel())
+//        			&& !(p.getLabel().contains("StartingPlace") || p.getLabel().contains("EndingPlace"))) {
+//        		System.out.println("Color map doesn't contain the place id "+p.getLabel());
+//        	}
         	// p.getId() is a new random id for the petri net node! 
         	// p.getLabel() is the id that is set when creating the node.
         	// p.getLabel() is now the object type...
         	// This would all be simpler if I could just change the id of a place to any String!
         	// ah I changed it back again
-        	map.putViewSpecific(p, AttributeMap.FILLCOLOR, oclpmResult.getMapIdColor().get(p.getLabel()));
+        	map.putViewSpecific(p, AttributeMap.FILLCOLOR, oclpmResult.getMapTypeColor().get(type));
         	map.putViewSpecific(p, AttributeMap.STROKECOLOR, theme.TEXT);
+        	// show object type of place when hovering over it
+        	map.putViewSpecific(p, AttributeMap.TOOLTIP, type);
+        	
+        	// special appearance for starting and ending places
+        	if (p.getLabel().contains("StartingPlace") || p.getLabel().contains("EndingPlace")){
+        		if (p.getLabel().contains("StartingPlace")){
+        			map.putViewSpecific(p, AttributeMap.TOOLTIP, "Starting Place "+type);
+        		}
+        		else if (p.getLabel().contains("EndingPlace")){
+        			map.putViewSpecific(p, AttributeMap.TOOLTIP, "Ending Place "+type);
+        		}
+        		map.putViewSpecific(p, AttributeMap.FILLCOLOR, theme.ELEMENTS);
+        		map.putViewSpecific(p, AttributeMap.STROKECOLOR, oclpmResult.getMapTypeColor().get(type));
+//        		map.putViewSpecific(p, AttributeMap.LABEL, type); // looks bad because the label won't fit in there
+        		map.putViewSpecific(p, AttributeMap.BORDERWIDTH, 1);
+        		//TODO label color?
+        	}
         }
         
         String type, activity;
@@ -95,30 +103,32 @@ public class CustomAcceptingPetriNetVisualizer {
 //        	map.putViewSpecific(arc, AttributeMap.EDGEMIDDLE, ArrowType.ARROWTYPE_DOUBLELINE);
 //        	map.putViewSpecific(arc, AttributeMap.STROKECOLOR, Color.BLUE);
 //        	map.putViewSpecific(arc, AttributeMap.LABELALONGEDGE, "variable arc");
-        	
+
         	if (arc.getSource() instanceof Transition) {
         		activity = ((Transition)(arc.getSource())).getLabel();
         		p = (Place) arc.getTarget();
-        		type = oclpmResult.getTypeMap().get(p.getLabel());
+        		type = oclpm.getPlace(p.getLabel()).getObjectType();
         	}
         	else {
         		p = (Place) arc.getSource();
-        		type = oclpmResult.getTypeMap().get(p.getLabel());
+        		type = oclpm.getPlace(p.getLabel()).getObjectType();
         		activity = ((Transition)(arc.getTarget())).getLabel();
         	}
-        	
-        	// show object type of place when hovering over it
-        	map.putViewSpecific(p, AttributeMap.TOOLTIP, type);
         	
         	map.putViewSpecific(arc, AttributeMap.EDGECOLOR, oclpmResult.getMapTypeColor().get(type)); // color arc according to connected place
         	
         	// variable arcs
-        	if (oclpmResult.getVariableArcActivities().get(p.getLabel()).contains(activity)) {
+        	if (oclpm.getVariableArcActivities(p.getLabel()).contains(activity)) {
         		map.putViewSpecific(arc, AttributeMap.TOOLTIP, "Variable Arc");
         		map.putViewSpecific(arc, AttributeMap.LINEWIDTH, 2.5f);
 //        		map.putViewSpecific(arc, AttributeMap.LABEL, "variable");
 //        		map.putViewSpecific(arc, AttributeMap.SHOWLABEL, true);
         		map.putViewSpecific(arc, AttributeMap.EDGECOLOR, oclpmResult.getMapTypeColor().get(type).darker());
+        		// starting and ending places: make place stroke thick and darker if variable arc connected to it
+        		if (p.getLabel().contains("StartingPlace") || p.getLabel().contains("EndingPlace")){
+        			map.putViewSpecific(p, AttributeMap.STROKECOLOR, oclpmResult.getMapTypeColor().get(type).darker());
+        			map.putViewSpecific(p, AttributeMap.BORDERWIDTH, 2);
+        		}
         		
         		// change the variable edge to be recognizable
         			// made them darker and thicker...

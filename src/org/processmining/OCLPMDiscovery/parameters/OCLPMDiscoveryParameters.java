@@ -36,14 +36,13 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	
 	// set defaults
 	private Miner placeDiscoveryAlgorithm 			= Miner.SPECPP;
-	private CaseNotionStrategy caseNotionStrategy 	= CaseNotionStrategy.PE_LEADING_RELAXED_O2;
+	private CaseNotionStrategy caseNotionStrategy 	= CaseNotionStrategy.PE_CONNECTED;
 	
 	// TODO Make the following also adjustable in the GUI?
 		// placeSetPostProcessing
 		// doVariableArcIdentification
 		// variableArcIdentification
 		// variableArcThreshold
-		// placeCompletion
 	
 	public OCLPMDiscoveryParameters(OcelEventLog ocel) {
 		this.setOcel(ocel);
@@ -156,7 +155,7 @@ public class OCLPMDiscoveryParameters implements EventLog{
         
         otherParams += "Variable arc identification: "+this.getVariableArcIdentification().getName()+"\n";
         otherParams += "Variable arc threshold: "+this.getVariableArcThreshold()+"\n";
-        otherParams += "Place completion: "+this.getPlaceCompletion().getName()+"\n";
+//        otherParams += "Place completion: "+this.getPlaceCompletion().getName()+"\n";
         
         return caption + broadParameters + otherParams;
     }

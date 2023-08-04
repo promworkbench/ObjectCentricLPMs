@@ -3,27 +3,23 @@ package org.processmining.OCLPMDiscovery.model;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.placebasedlpmdiscovery.model.LocalProcessModel;
-import org.processmining.placebasedlpmdiscovery.model.Place;
 import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableList;
 
 public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel> {
     private static final long serialVersionUID = 9159252267279978544L; //?
     
-    private Set<String> objectTypes; // all object types from the ocel
+    private Set<String> objectTypes = new HashSet<>(); // all object types from the ocel
     private Set<String> lpmDiscoveryTypes; // types which were used as a case notion for LPM discovery
     private String oclpmDiscoverySettings; // settings used for the discovery of this result
-    private HashMap<String,String> typeMap; // maps each place.id to an object type
-    private HashMap<String,Color> mapIdColor; // maps each place.id to a color.
     private HashMap<String,Color> mapTypeColor; // maps each object type to a color
-    private HashSet<List<String>> variableArcSet = new HashSet<>(); // saves all variable arcs [Activity,ObjectType]
-    private HashMap<String,HashSet<String>> variableArcActivities = new HashMap<>(); // saves for each place id the activities with which the place forms variable arcs
     private TaggedPlaceSet placeSet; 
+    private boolean showExternalObjectFlow = false;
     
     public OCLPMResult() {
     	
@@ -45,28 +41,35 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     	this.refreshColors();
     }
     
-    public OCLPMResult (OCLPMDiscoveryParameters discoveryParameters, LPMResultsTagged tlpms, PlaceSet placeSet) {
+    /**
+     * Ensures that the places in the OCLPMs have the same ids as the places in the placeSet by replacing them 
+	 * with equal (isomorphic + same type) places from the placeSet. 
+	 * (done in the grabIsomorphicPlaces function)
+     * @param discoveryParameters
+     * @param tlpms
+     * @param placeSet
+     */
+    public OCLPMResult (OCLPMDiscoveryParameters discoveryParameters, LPMResultsTagged tlpms, TaggedPlaceSet placeSet) {
     	this(discoveryParameters, tlpms);
     	this.setPlaceSet(placeSet);
+    	for (ObjectCentricLocalProcessModel oclpm : this.elements) {
+    		oclpm.grabIsomorphicPlaces(placeSet);
+    	}
     }
     
     /**
      * Sets the places as OCLPMs. (for place set visualization)
      * @param placeSet
      */
-    public OCLPMResult (PlaceSet placeSet) {
+    public OCLPMResult (TaggedPlaceSet placeSet) {
     	super();
-    	this.placeSet = new TaggedPlaceSet(placeSet);
+    	this.placeSet = placeSet;
     	this.objectTypes = new HashSet<String>();
-    	this.typeMap = new HashMap<String,String>();
-    	for (Place p : placeSet.getElements()) {
-    		TaggedPlace tp = (TaggedPlace)p;
+    	for (TaggedPlace tp : placeSet.getElements()) {
     		this.objectTypes.add(tp.getObjectType());
-    		this.typeMap.put(tp.getId(), tp.getObjectType());
     		ObjectCentricLocalProcessModel oclpm = new ObjectCentricLocalProcessModel(tp);
     		this.add(oclpm);
     	}
-    	this.storeVariableArcs();
     	this.refreshColors();
     }
     
@@ -123,25 +126,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 			counter++;
 		}
 		this.setMapTypeColor(mapTypeColor);
-		
-		// assign place ids to colors
-		HashMap<String,Color> mapIdColor = new HashMap<String,Color>();
-		for (ObjectCentricLocalProcessModel oclpm : this.elements) {
-			for (TaggedPlace tp : oclpm.getPlaces()) {
-				mapIdColor.put(tp.getId(), mapTypeColor.get(tp.getObjectType()));
-			}
-		}
-		this.setMapIdColor(mapIdColor);
 	}
-
-	public HashMap<String, Color> getMapIdColor() {
-		return mapIdColor;
-	}
-
-	public void setMapIdColor(HashMap<String, Color> mapIdColor) {
-		this.mapIdColor = mapIdColor;
-	}
-
 
 	public HashMap<String, Color> getMapTypeColor() {
 		return mapTypeColor;
@@ -149,63 +134,6 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 
 	public void setMapTypeColor(HashMap<String, Color> mapTypeColor) {
 		this.mapTypeColor = mapTypeColor;
-	}
-
-	public HashSet<List<String>> getVariableArcSet() {
-		return variableArcSet;
-	}
-
-	public void setVariableArcSet(HashSet<List<String>> variableArcSet) {
-		this.variableArcSet = variableArcSet;
-	}
-
-	public HashMap<String,String> getTypeMap() {
-		return typeMap;
-	}
-
-	public void setTypeMap(HashMap<String,String> typeMap) {
-		this.typeMap = typeMap;
-	}
-
-	public HashMap<String,HashSet<String>> getVariableArcActivities() {
-		return variableArcActivities;
-	}
-
-	public void setVariableArcActivities(HashMap<String,HashSet<String>> variableArcActivities) {
-		this.variableArcActivities = variableArcActivities;
-	}
-
-	/**
-	 * Fetches the variable arc activities from the tagged places and stores them in a map
-	 * mapping from the place id to the activities which have variable arcs for the corresponding
-	 * object type.
-	 * Use in case it isn't possible for the visualizer to access the tagged places.
-	 */
-	public void storeVariableArcs() {
-		for (ObjectCentricLocalProcessModel oclpm : this.elements) {
-			for (TaggedPlace tp : oclpm.getPlaces()) {
-				if (!(tp.getVariableArcActivities().isEmpty()) && !(tp.getVariableArcActivities() == null)) {
-					this.variableArcActivities.put(tp.getId(), tp.getVariableArcActivities());
-				}
-				else {
-					this.variableArcActivities.put(tp.getId(), new HashSet<String>(1));
-				}
-			}
-		}
-	}
-
-	/**
-	 * Stores for each place id the object type of that place.
-	 * Used in the visualizer because after the conversion to Petri nets for the visualization
-	 * the tagged places aren't accessible anymore.
-	 */
-	public void createTypeMap() {
-		this.typeMap = new HashMap<String,String>();
-		for (ObjectCentricLocalProcessModel oclpm : this.elements) {
-			for (TaggedPlace tp : oclpm.getPlaces()) {
-				this.typeMap.put(tp.getId(), tp.getObjectType());
-			}
-		}
 	}
 	
 	/**
@@ -290,14 +218,10 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 		// shared attributes
 		OCLPMResult newResult = new OCLPMResult();
 		newResult.setPlaceSet(this.getPlaceSet());
-    	newResult.setObjectTypes(this.getObjectTypes());
-    	newResult.setTypeMap(this.getTypeMap());
-		newResult.setOclpmDiscoverySettings(this.getOclpmDiscoverySettings()); // TODO: make place completion changeable
+		newResult.setOclpmDiscoverySettings(this.getOclpmDiscoverySettings()); // make place completion changeable? removed it from the settings print
     	newResult.setLpmDiscoveryTypes(this.getLpmDiscoveryTypes());
     	
-    	// independent attributes
-    	newResult.setVariableArcSet(new HashSet<>());
-    	newResult.setVariableArcActivities(new HashMap<>());
+    	newResult.getObjectTypes().addAll(this.getObjectTypes());
     	
 		// places themselves will not be altered, only which places the OCLPMs use
 		for (ObjectCentricLocalProcessModel oclpm : this.elements) {
@@ -305,9 +229,44 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 			newResult.add(newOclpm);
 		}
 		
-		newResult.storeVariableArcs();
     	newResult.refreshColors();
 		return newResult;
+	}
+
+	public void showExternalObjectFlow(boolean selected) {
+		if (this.showExternalObjectFlow == selected) {
+			return; // already in correct state
+		}
+		else if (selected) {
+			// add external flow places
+			for (ObjectCentricLocalProcessModel oclpm : this.getElements()) {
+				oclpm.addExternalObjectFlow(this.getStartingActivities(), this.getEndingActivities());
+			}
+			this.showExternalObjectFlow = true;
+		}
+		else {
+			// remove external flow places
+			for (ObjectCentricLocalProcessModel oclpm : this.getElements()) {
+				oclpm.removeExternalObjectFlow(this.getStartingActivities(), this.getEndingActivities());
+			}
+			this.showExternalObjectFlow = false;
+		}
+	}
+
+	public Map<String, Set<String>> getStartingActivities() {
+		return this.placeSet.getStartingActivities();
+	}
+
+	public void setStartingActivities(Map<String, Set<String>> startingActivities) {
+		this.placeSet.setStartingActivities(startingActivities);
+	}
+
+	public Map<String, Set<String>> getEndingActivities() {
+		return this.placeSet.getEndingActivities();
+	}
+
+	public void setEndingActivities(Map<String, Set<String>> endingActivities) {
+		this.placeSet.setEndingActivities(endingActivities);
 	}
 
 }

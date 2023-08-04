@@ -3,6 +3,7 @@ package org.processmining.OCLPMDiscovery.plugins.mining;
 import java.util.Set;
 
 import org.processmining.OCLPMDiscovery.Main;
+import org.processmining.OCLPMDiscovery.model.TaggedPlaceSet;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.utils.FlatLogProcessing;
 import org.processmining.OCLPMDiscovery.wizards.OCLPMDiscoveryWizard;
@@ -35,7 +36,7 @@ public class PlaceSetDiscoveryPlugin {
 			variantLabel = "Discovery of Place Set on OCEL",
 			requiredParameterLabels = {0}
 	)
-	public static PlaceSet minePlaceSet (UIPluginContext context, OcelEventLog ocel) {
+	public static TaggedPlaceSet minePlaceSet (UIPluginContext context, OcelEventLog ocel) {
 		
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
 

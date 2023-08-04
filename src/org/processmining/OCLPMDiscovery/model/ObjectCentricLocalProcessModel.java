@@ -2,6 +2,7 @@ package org.processmining.OCLPMDiscovery.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 
 import org.processmining.OCLPMDiscovery.model.additionalinfo.OCLPMAdditionalInfo;
 import org.processmining.models.graphbased.NodeID;
+import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.SimpleEvaluationResult;
 import org.processmining.placebasedlpmdiscovery.model.Arc;
 import org.processmining.placebasedlpmdiscovery.model.LocalProcessModel;
 import org.processmining.placebasedlpmdiscovery.model.Place;
@@ -31,18 +33,33 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	// save original LPM, e.g. for LPMAdditionalInfo
 	private LocalProcessModel lpm;
 	
-	// LPM variables
 	private String id;
-    private final Set<TaggedPlace> places;
     private final Map<String, Transition> transitions; // label -> transition map
     private final Set<Arc> arcs;
     private OCLPMAdditionalInfo additionalInfo;
+    
+    private final Set<TaggedPlace> places;
 	
 	// leading types for which this OCLPM has been discovered
 	private HashSet<String> discoveryTypes = new HashSet<String>();
 	
 	// the object types of places in the model 
 	private Set<String> placeTypes = new HashSet<String>();
+	
+	// maps each place id to the activities with which that place has variable arcs
+	private Map<String,Set<String>> mapIdVarArcActivities = new HashMap<>();
+	
+	// stores all the places of the original place set which are isomorphic to the ones present in the model
+	// also stores the place in the model as their ids might be different if Viki changes them...
+	// (necessary for place completion with per lpm variable arcs)
+	private Map<String,TaggedPlace> placeMapIsomorphic = new HashMap<>(); // place id -> place
+	
+	// stores all places (from the isomorphic set and all newly added)
+	private Map<String,TaggedPlace> placeMapAll = new HashMap<>(); // place id -> place
+	
+	// evaluation
+	private Map<String,Double> evaluation = new HashMap<>();
+	private Double combinedScore = -1.0;
 	
 	public ObjectCentricLocalProcessModel() {
         // setup oclpm
@@ -69,6 +86,31 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
         }
         this.addAllPlaces(tplaces); // adds also the transitions, places, arcs
         this.setAdditionalInfo(new OCLPMAdditionalInfo(lpm.getAdditionalInfo()));
+        
+        // store evaluation score from the lpm into the evaluation map
+        List<SimpleEvaluationResult> results = lpm.getAdditionalInfo().getEvaluationResult().getResults();
+        for (SimpleEvaluationResult result : results) {
+        	switch (result.getId()) {
+        		case FittingWindowsEvaluationResult:
+        			this.evaluation.put("Fitting Window Score",result.getNormalizedResult());
+        			break;
+        		case TransitionOverlappingEvaluationResult:
+        			break;
+        		case TransitionCoverageEvaluationResult:
+        			this.evaluation.put("Transition Coverage Score",result.getNormalizedResult());
+        			break;
+        		case PassageCoverageEvaluationResult:
+        			this.evaluation.put("Passage Coverage Score",result.getNormalizedResult());
+        			break;
+        		case PassageRepetitionEvaluationResult:
+        			this.evaluation.put("Passage Repetition Score",result.getNormalizedResult());
+        			break;
+        		case TraceSupportEvaluationResult:
+        			break;
+        		default:
+        			break;
+        	}
+        }
     }
 
     public ObjectCentricLocalProcessModel(TaggedPlace place) {
@@ -91,6 +133,13 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		this.addAllPlaces(oclpm.getPlaces());
 		this.setAdditionalInfo(oclpm.getAdditionalInfo());
 		this.setDiscoveryTypes(oclpm.getDiscoveryTypes());
+		for (String key : oclpm.getEvaluation().keySet()) {
+			this.evaluation.put(key, oclpm.getEvaluation().get(key));
+		}
+		this.combinedScore = oclpm.getCombinedScore();
+		this.placeMapAll = oclpm.getPlaceMapAll();
+		this.placeMapIsomorphic.putAll(oclpm.getPlaceMapIsomorphic());
+		this.mapIdVarArcActivities.putAll(oclpm.getMapIdVarArcActivities());
 	}
 
 	public HashSet<String> getDiscoveryTypes() {
@@ -205,6 +254,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 
         places.add(place);
         this.placeTypes.add(place.getObjectType());
+        this.placeMapAll.put(place.getId(), place);
 
         for (Transition transition : place.getInputTransitions()) {
             Arc arc = new Arc(place, transition, true);
@@ -231,8 +281,9 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
     }
 
     public void addAllPlaces(Set<TaggedPlace> places) {
-        for (TaggedPlace place : places)
+        for (TaggedPlace place : places) {
             this.addPlace(place);
+        }
     }
     
     public void deletePlaces(Set<TaggedPlace> places) {
@@ -441,11 +492,264 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		return true;
 	}
 
-	public void trimVariableArcSet() {
-		for (TaggedPlace tp : this.places) {
-			tp.trimVariableArcSet();
+	/**
+	 * add special places for starting and ending transitions
+	 * @param startingActivities
+	 * @param endingActivities
+	 * @param typeMap 
+	 * @param variableArcActivities 
+	 */
+	public void addExternalObjectFlow(
+			Map<String, Set<String>> startingActivities, 
+			Map<String, Set<String>> endingActivities
+			){
+		
+		// check current flow situation
+		HashMap<List<String>,Set<TaggedPlace>> transitionMap = new HashMap<>(); // maps (transitionName,TypeName,"in"/"out") -> TaggedPlaces
+		for (TaggedPlace tp : this.getPlaces()) {
+			for (Transition t : tp.getInputTransitions()) {
+				String[] key = new String[3];
+				key[0] = t.getLabel();
+				key[1] = tp.getObjectType();
+				key[2] = "out"; // this transition is input to a place
+				if (transitionMap.containsKey(Arrays.asList(key))) {
+					transitionMap.get(Arrays.asList(key)).add(tp);
+				}
+				else {
+					Set<TaggedPlace> value = new HashSet<>();
+					value.add(tp);
+					transitionMap.put(Arrays.asList(key),value);					
+				}
+			}
+			for (Transition t : tp.getOutputTransitions()) {
+				String[] key = new String[3];
+				key[0] = t.getLabel();
+				key[1] = tp.getObjectType();
+				key[2] = "in"; // this transition is output to a place
+				if (transitionMap.containsKey(Arrays.asList(key))) {
+					transitionMap.get(Arrays.asList(key)).add(tp);
+				}
+				else {
+					Set<TaggedPlace> value = new HashSet<>();
+					value.add(tp);
+					transitionMap.put(Arrays.asList(key),value);					
+				}
+			}
 		}
 		
+		// add special places for starting transitions
+		Set<TaggedPlace> newPlaces = new HashSet<>();
+		for (String type : this.getPlaceTypes()) {
+			for (String startingActivity : startingActivities.get(type)) {
+				// if this starting activity is in the model and there is an arc of the type coming out
+				List<String> key = Arrays.asList(new String[] {startingActivity,type,"out"});
+				if(transitionMap.containsKey(key) && !transitionMap.get(key).isEmpty()) {
+					// check if arc already connected to the transition is variable
+					Boolean variableArc = this.getVariableArcActivities(transitionMap.get(key).iterator().next()).contains(startingActivity);
+					// then add the special starting place
+					// if there already is a place "StartingPlace:type" only add the new transitions
+					boolean placeExists = false;
+					for (TaggedPlace tmp_place : newPlaces) {
+						if (tmp_place.getId().equals("StartingPlace:"+type)) {
+							placeExists = true;
+							tmp_place.addOutputTransition(this.transitions.get(startingActivity));
+							if (variableArc) {
+								// add this as variable arc if the arc going out of the transition is variable
+								this.addVariableArc(tmp_place.getId(),startingActivity);
+							}
+							break;
+						}
+					}
+					if (!placeExists) {
+						TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type);
+						p.addOutputTransition(this.transitions.get(startingActivity));
+						if (variableArc) {
+							// add this as variable arc if the arc going out of the transition is variable
+							this.addVariableArc(p.getId(),startingActivity);
+						}
+						newPlaces.add(p);
+					}
+				}
+			}
+			// same for ending activities
+			for (String endingActivity : endingActivities.get(type)) {
+				// if this ending activity is in the model and there is an arc of the type coming in 
+				List<String> key = Arrays.asList(new String[] {endingActivity,type,"in"});
+				if(transitionMap.containsKey(key) && !transitionMap.get(key).isEmpty()) {
+					// check if arc already connected to the transition is variable
+					Boolean variableArc = this.getVariableArcActivities(transitionMap.get(key).iterator().next()).contains(endingActivity);
+					// then add the special ending place
+					// if there already is a place "EndingPlace:type" only add the new transitions
+					boolean placeExists = false;
+					for (TaggedPlace tmp_place : newPlaces) {
+						if (tmp_place.getId().equals("EndingPlace:"+type)) {
+							placeExists = true;
+							tmp_place.addInputTransition(this.transitions.get(endingActivity));
+							if (variableArc) {
+								// add this as variable arc if the arc going in to the transition is variable
+								this.addVariableArc(tmp_place.getId(),endingActivity);
+							}
+							break;
+						}
+					}
+					if (!placeExists) {
+						TaggedPlace p = new TaggedPlace(type, "EndingPlace:"+type);
+						p.addInputTransition(this.transitions.get(endingActivity));
+						if (variableArc) {
+							// add this as variable arc if the arc going in to the transition is variable
+							this.addVariableArc(p.getId(),endingActivity);
+						}
+						newPlaces.add(p);
+					}
+				}
+			}
+		}
+		this.addAllPlaces(newPlaces);
+	}
+
+	private void addVariableArc(String placeId, String activity) {
+		if (this.mapIdVarArcActivities.containsKey(placeId)) {
+			this.mapIdVarArcActivities.get(placeId).add(activity); //TODO does this work?
+		}
+		else {
+			Set<String> value = new HashSet<>();
+			value.add(activity);
+			this.mapIdVarArcActivities.put(placeId, value);
+		}
+	}
+
+	public void removeExternalObjectFlow(Map<String, Set<String>> startingActivities, Map<String, Set<String>> endingActivities) {
+		// Remove the special places for starting and ending transitions
+		Set<TaggedPlace> deletePlaces = new HashSet<>();
+		for (TaggedPlace p : this.getPlaces()) {
+			if (p.getId().contains("StartingPlace") || p.getId().contains("EndingPlace")) {
+				deletePlaces.add(p);
+			}
+		}
+		this.deletePlaces(deletePlaces);
+	}
+
+	/**
+	 * String consisting of all evaluation metrics to be displayed for this OCLPM
+	 * @return
+	 */
+	public String getEvaluationString() {
+		String evalString = "";
+		for (String name : this.evaluation.keySet()) {
+			Double score = Math.round(this.evaluation.get(name)*1000.0)/1000.0;
+			evalString += name+": "+score+"\n";
+		}
+		evalString += "Combined Score: "+Math.round(this.combinedScore*1000.0)/1000.0+"\n";
+		return evalString;
+	}
+	
+	/**
+	 * Calculates evaluation metric which are dependent on the exact places and variable arcs.
+	 * Calculates the combined score as the average of all scores. 
+	 */
+	public void recalculateEvaluation() {
+		// TODO calculate evaluation which is dependent on the placecompletion
+		
+		// calculate combined score
+		Double combinedScore = 0.0;
+		for (Double score : this.evaluation.values()) {
+			combinedScore+=score;
+		}
+		combinedScore = combinedScore / this.evaluation.size();
+		this.combinedScore = combinedScore;
+	}
+
+	public Map<String,Double> getEvaluation() {
+		return evaluation;
+	}
+
+	public void setEvaluation(Map<String,Double> evaluation) {
+		this.evaluation = evaluation;
+	}
+
+	public Double getCombinedScore() {
+		return combinedScore;
+	}
+
+	public void setCombinedScore(Double combinedScore) {
+		this.combinedScore = combinedScore;
+	}
+
+	public Map<String,Set<String>> getMapIdVarArcActivities() {
+		return mapIdVarArcActivities;
+	}
+
+	public void setMapIdVarArcActivities(Map<String,Set<String>> mapIdVarArcActivities) {
+		this.mapIdVarArcActivities = mapIdVarArcActivities;
+	}
+
+	public Set<TaggedPlace> getIsomorphicPlaces() {
+		return new HashSet<>(this.placeMapIsomorphic.values());
+	}
+
+	/**
+	 * Retrieves the places which are isomorphic to ones in the model
+	 * and stores them in the isomorphicPlaces variable.
+	 * If equal places (isomorphic & same type) are found then they replace 
+	 * the ones in the model!
+	 * Hence, after calling this it is guaranteed that the ids of places in the model
+	 * occur also in the placeSet.
+	 * @param placeSet
+	 */
+	public void grabIsomorphicPlaces(TaggedPlaceSet placeSet) {
+		Set<TaggedPlace> removePlaces = new HashSet<>();
+		Set<TaggedPlace> addPlaces = new HashSet<>();
+		for (TaggedPlace tp : placeSet.getElements()) {
+			for (TaggedPlace thisPlace : this.places) {
+				// store isomorphic places
+				if (thisPlace.isIsomorphic(tp)) {
+					this.placeMapIsomorphic.put(tp.getId(),tp);
+					this.placeMapAll.put(tp.getId(),tp);
+					/* If they are also of the same type but don't have the same id 
+					 * then replace this place by the place from the placeSet.
+					 * This is done because they should've been the same place anyway
+					 * but the LPM discovery changed the placeid (Viki said she might do that ;( ).
+					 */
+					if (tp.getObjectType().equals(thisPlace.getObjectType()) && !tp.getId().equals(thisPlace.getId())) {
+						removePlaces.add(thisPlace);
+						addPlaces.add(tp);
+					}
+				}
+			}
+		}
+		this.deletePlaces(removePlaces, true);
+		this.addAllPlaces(addPlaces, true);
+	}
+
+	
+	public TaggedPlace getPlace(String id) {
+		return this.placeMapAll.get(id);
+	}
+	
+	public Map<String,TaggedPlace> getPlaceMapAll(){
+		return this.placeMapAll;
+	}
+	
+	public Map<String,TaggedPlace> getPlaceMapIsomorphic(){
+		return this.placeMapIsomorphic;
+	}
+
+	public Set<String> getVariableArcActivities(TaggedPlace tp) {
+		if (this.mapIdVarArcActivities.containsKey(tp.getId())) {
+			return this.mapIdVarArcActivities.get(tp.getId());
+		}
+		else {
+			return new HashSet<String>();
+		}
+	}
+	
+	public Set<String> getVariableArcActivities(String placeId) {
+		if (this.mapIdVarArcActivities.containsKey(placeId)) {
+			return this.mapIdVarArcActivities.get(placeId);
+		}
+		else {
+			return new HashSet<String>();
+		}
 	}
 
 }

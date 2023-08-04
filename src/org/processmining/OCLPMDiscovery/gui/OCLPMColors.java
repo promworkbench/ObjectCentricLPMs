@@ -1,6 +1,7 @@
 package org.processmining.OCLPMDiscovery.gui;
 
 import java.awt.Color;
+import java.awt.Font;
 
 import org.processmining.framework.util.ui.widgets.WidgetColors;
 
@@ -13,6 +14,9 @@ public class OCLPMColors {
 	public Color TEXT_INVERS = Color.WHITE;
 	public Color NON_FOCUS = WidgetColors.COLOR_NON_FOCUS;
 	public Color ACCENT = Color.RED;
+	
+	public Font defaultFont = new Font("Arial", Font.PLAIN, 16);
+	public Font titleFont = new Font("Arial", Font.BOLD, 20);
 	
 	// Guide
 	// BACKGROUND:

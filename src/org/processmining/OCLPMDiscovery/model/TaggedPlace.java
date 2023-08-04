@@ -2,6 +2,8 @@ package org.processmining.OCLPMDiscovery.model;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.processmining.placebasedlpmdiscovery.model.Place;
 import org.processmining.placebasedlpmdiscovery.model.Transition;
@@ -12,11 +14,15 @@ public class TaggedPlace extends Place{
 	 */
 	private static final long serialVersionUID = 3783671545908492239L;
 	private String objectType;
-	private HashSet<String> variableArcActivities = new HashSet<String>();
 	
 	public TaggedPlace(String objectType) {
 		super();
 		this.setObjectType(objectType);
+	}
+	
+	public TaggedPlace(String type, String id) {
+		super(id);
+		this.setObjectType(type);
 	}
 	
 	public TaggedPlace() {
@@ -36,7 +42,7 @@ public class TaggedPlace extends Place{
 		this.setAdditionalInfo(place.getAdditionalInfo());
 		this.setFinal(place.isFinal());
 	}
-	
+
 	/**
 	 * Checks if all the transition are equal (doesn't check object-type or variable arcs)
 	 * @param tp
@@ -93,20 +99,6 @@ public class TaggedPlace extends Place{
 		this.objectType = objectType;
 	}
 
-	public HashSet<String> getVariableArcActivities() {
-		return variableArcActivities;
-	}
-
-	public void setVariableArcActivities(HashSet<String> variableArcActivities) {
-		if (variableArcActivities == null) {
-			this.variableArcActivities.clear();
-		}
-		else {
-			this.variableArcActivities.clear();
-			this.variableArcActivities.addAll(variableArcActivities);
-		}
-	}
-
 	/**
 	 * Checks if all the transition are equal (doesn't check variable arcs)
 	 * @param tp
@@ -157,29 +149,21 @@ public class TaggedPlace extends Place{
 	}
 
 	/**
-	 * trim variable arc activities to fit the actual transitions of each place
+	 * Returns of the given activities only those to which this place is connected.
+	 * @param givenActivities
+	 * @return
 	 */
-	public void trimVariableArcSet() {
-		Set<String> delete = new HashSet<>();
-		for (String activity : this.variableArcActivities) {
-			boolean found = false;
-			for (Transition t : this.getInputTransitions()) {
-				if (t.getLabel().equals(activity)) {
-					found = true;
-					break;
-				}
-			}
-			if (found) continue;
-			for (Transition t : this.getOutputTransitions()) {
-				if (t.getLabel().equals(activity)) {
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				delete.add(activity);
-			}
+	public Set<String> getConnectedActivitiesOf(HashSet<String> givenActivities) {
+		
+		// union of transitions connected to this place
+		Set<Transition> connectedTransitions = Stream.concat(this.getInputTransitions().stream(),this.getOutputTransitions().stream()).collect(Collectors.toSet());
+		Set<String> connectedActivities = new HashSet<String>();
+		
+		for (Transition t : connectedTransitions) {
+			connectedActivities.add(t.getLabel());
 		}
-		this.variableArcActivities.removeAll(delete);
+		
+		Set<String> intersection = connectedActivities.stream().filter(givenActivities::contains).collect(Collectors.toSet());
+		return intersection;
 	}
 }
