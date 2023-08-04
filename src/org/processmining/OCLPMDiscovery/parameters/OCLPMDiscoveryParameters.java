@@ -24,6 +24,7 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	private SPECppParameters specppParameters;
 	private XLogHybridILPMinerParametersImpl ilpParameters;
 	private PlaceBasedLPMDiscoveryParameters PBLPMDiscoveryParameters;
+	private int modelLimit = Integer.MAX_VALUE;
 	private boolean placeSetPostProcessing = true; // remove duplicate places from placeSet
 	
 	// variable arc identification
@@ -59,7 +60,8 @@ public class OCLPMDiscoveryParameters implements EventLog{
         }
         
         // setup LPM discovery
-        this.PBLPMDiscoveryParameters = new PlaceBasedLPMDiscoveryParameters(this); // null-init leads to problems, needs a log with all activities        
+        this.PBLPMDiscoveryParameters = new PlaceBasedLPMDiscoveryParameters(this); // null-init leads to problems, needs a log with all activities  
+        this.PBLPMDiscoveryParameters.setLpmCount(Integer.MAX_VALUE);
 	}
 
 	@Override
@@ -279,5 +281,13 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	
 	public void setPlaceSetPostProcessing( boolean b) {
 		this.placeSetPostProcessing = b;
+	}
+
+	public int getModelLimit() {
+		return modelLimit;
+	}
+
+	public void setModelLimit(int modelLimit) {
+		this.modelLimit = modelLimit;
 	}
 }

@@ -650,7 +650,23 @@ public class Main {
 	}
 	
 	public static OCLPMResult postProcessing (OCLPMDiscoveryParameters parameters, OCLPMResult oclpmResult) {
-		// currently nothing to do here
+		// limit the number of returned models
+		if (oclpmResult.size() > parameters.getModelLimit()) {
+			int i = 0;
+			Set<ObjectCentricLocalProcessModel> removeModels = new HashSet<>();
+			for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+				if (i < parameters.getModelLimit()) {
+					i++;
+					continue;
+				}
+				else {
+					removeModels.add(oclpm);
+				}
+			}
+			for (ObjectCentricLocalProcessModel oclpm : removeModels) {
+				oclpmResult.remove(oclpm);
+			}
+		}
 		return oclpmResult;
 	}
 	

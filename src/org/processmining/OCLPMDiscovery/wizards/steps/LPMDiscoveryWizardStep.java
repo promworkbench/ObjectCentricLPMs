@@ -21,7 +21,7 @@ public class LPMDiscoveryWizardStep extends OCLPMPropertiesPanel implements ProM
 
     private static final String TITLE = "LPM Discovery Configuration";
 
-    private final ProMTextField lpmCount;
+//    private final ProMTextField lpmCount;
     private final ProMTextField placeLimit;
     private final ProMTextField timeLimit;
 
@@ -41,30 +41,30 @@ public class LPMDiscoveryWizardStep extends OCLPMPropertiesPanel implements ProM
     public LPMDiscoveryWizardStep(OCLPMDiscoveryParameters parameters) {
         super(TITLE);
 
-        lpmCount = new ProMTextField("100",
-                "Number of local process models that will be returned");
-        addProperty("LPM Count", lpmCount);
-        lpmCount.addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent keyEvent) {
-                if (!Character.isDigit(keyEvent.getKeyChar()) &&
-                        !(keyEvent.getKeyCode() == KeyEvent.VK_BACK_SPACE)) {
-                    keyEvent.consume();
-                }
-            }
-
-            @Override
-            public void keyPressed(KeyEvent keyEvent) {
-                if (keyEvent.isControlDown() && keyEvent.getKeyCode() == KeyEvent.VK_V) {
-                    keyEvent.consume();
-                }
-            }
-
-            @Override
-            public void keyReleased(KeyEvent keyEvent) {
-
-            }
-        });
+//        lpmCount = new ProMTextField("100",
+//                "Number of local process models that will be returned");
+//        addProperty("LPM Count", lpmCount);
+//        lpmCount.addKeyListener(new KeyListener() {
+//            @Override
+//            public void keyTyped(KeyEvent keyEvent) {
+//                if (!Character.isDigit(keyEvent.getKeyChar()) &&
+//                        !(keyEvent.getKeyCode() == KeyEvent.VK_BACK_SPACE)) {
+//                    keyEvent.consume();
+//                }
+//            }
+//
+//            @Override
+//            public void keyPressed(KeyEvent keyEvent) {
+//                if (keyEvent.isControlDown() && keyEvent.getKeyCode() == KeyEvent.VK_V) {
+//                    keyEvent.consume();
+//                }
+//            }
+//
+//            @Override
+//            public void keyReleased(KeyEvent keyEvent) {
+//
+//            }
+//        });
 
         placeLimit = new ProMTextField("50",
                 "Number of places that will be used for building the LPMs");
@@ -179,7 +179,7 @@ public class LPMDiscoveryWizardStep extends OCLPMPropertiesPanel implements ProM
         parameters.getPBLPMDiscoveryParameters().getPlaceChooserParameters().setChosenActivities(activitiesComponent.getSelectedItems());
 //        placeBasedLPMDiscoveryParameters.getLpmFilterParameters()
 //                .setLPMFilterIds(filteringComponent.getSelectedItems());
-        parameters.getPBLPMDiscoveryParameters().setLpmCount(Integer.parseInt(lpmCount.getText()));
+//        parameters.getPBLPMDiscoveryParameters().setLpmCount(Integer.parseInt(lpmCount.getText()));
         parameters.getPBLPMDiscoveryParameters().getPlaceChooserParameters().setPlaceLimit(Integer.parseInt(placeLimit.getText()));
         parameters.getPBLPMDiscoveryParameters().setTimeLimit(Long.parseLong(timeLimit.getText()) * 60000);
         parameters.getPBLPMDiscoveryParameters().getLpmCombinationParameters().setMaxNumPlaces(maxPlacesSlider.getValue());
@@ -201,7 +201,7 @@ public class LPMDiscoveryWizardStep extends OCLPMPropertiesPanel implements ProM
     	PlaceBasedLPMDiscoveryParameters model = parameters.getPBLPMDiscoveryParameters();
         this.activitiesComponent.addSelectedItems(model.getPlaceChooserParameters().getChosenActivities());
 //        this.filteringComponent.addSelectedItems(model.getLpmFilterParameters().getLPMFilterIds());
-        this.lpmCount.setText(String.valueOf(model.getLpmCount()));
+//        this.lpmCount.setText(String.valueOf(model.getLpmCount()));
         this.placeLimit.setText(String.valueOf(model.getPlaceChooserParameters().getPlaceLimit()));
         this.timeLimit.setText(String.valueOf(model.getTimeLimit() / 60000));
         this.maxPlacesSlider.setValue(model.getLpmCombinationParameters().getMaxNumPlaces());
