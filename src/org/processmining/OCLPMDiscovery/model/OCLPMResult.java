@@ -242,12 +242,14 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 			for (ObjectCentricLocalProcessModel oclpm : this.getElements()) {
 				oclpm.addExternalObjectFlow(this.getStartingActivities(), this.getEndingActivities());
 			}
+			this.showExternalObjectFlow = true;
 		}
 		else {
 			// remove external flow places
 			for (ObjectCentricLocalProcessModel oclpm : this.getElements()) {
 				oclpm.removeExternalObjectFlow(this.getStartingActivities(), this.getEndingActivities());
 			}
+			this.showExternalObjectFlow = false;
 		}
 	}
 
