@@ -9,7 +9,7 @@ import org.processmining.OCLPMDiscovery.utils.OCELUtils;
 import org.processmining.hybridilpminer.parameters.XLogHybridILPMinerParametersImpl;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
 import org.processmining.placebasedlpmdiscovery.model.logs.EventLog;
-import org.processmining.placebasedlpmdiscovery.plugins.mining.PlaceBasedLPMDiscoveryParameters;
+import org.processmining.placebasedlpmdiscovery.prom.plugins.mining.PlaceBasedLPMDiscoveryParameters;
 
 public class OCLPMDiscoveryParameters implements EventLog{
 	private OcelEventLog ocel;

@@ -35,7 +35,7 @@ import org.processmining.OCLPMDiscovery.visualization.components.tables.factorie
 import org.processmining.OCLPMDiscovery.visualization.components.tables.factories.OCLPMResultPluginVisualizerTableFactory;
 import org.processmining.placebasedlpmdiscovery.model.TextDescribable;
 import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableCollection;
-import org.processmining.placebasedlpmdiscovery.plugins.visualization.utils.RegexConverter;
+import org.processmining.placebasedlpmdiscovery.prom.plugins.visualization.utils.RegexConverter;
 
 public class TableComposition<T extends TextDescribable & Serializable> extends JComponent implements ICommunicativePanel {
 

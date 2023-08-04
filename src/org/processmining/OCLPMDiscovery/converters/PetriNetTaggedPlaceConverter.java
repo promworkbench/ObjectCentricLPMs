@@ -11,7 +11,7 @@ import org.processmining.OCLPMDiscovery.model.TaggedPlace;
 import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.placebasedlpmdiscovery.model.Place;
 import org.processmining.placebasedlpmdiscovery.model.Transition;
-import org.processmining.placebasedlpmdiscovery.placediscovery.converters.place.AbstractPlaceConverter;
+import org.processmining.placebasedlpmdiscovery.prom.placediscovery.converters.place.AbstractPlaceConverter;
 import org.processmining.placebasedlpmdiscovery.utils.TransitionUtils;
 
 

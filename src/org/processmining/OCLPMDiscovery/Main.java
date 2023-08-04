@@ -38,7 +38,7 @@ import org.processmining.ocel.ocelobjects.OcelObject;
 import org.processmining.placebasedlpmdiscovery.model.Transition;
 import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
 import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableList;
-import org.processmining.placebasedlpmdiscovery.plugins.mining.PlaceBasedLPMDiscoveryPlugin;
+import org.processmining.placebasedlpmdiscovery.prom.plugins.mining.PlaceBasedLPMDiscoveryPlugin;
 
 public class Main {
 	public static PluginContext Context;
@@ -763,7 +763,7 @@ public class Main {
 	public static Object[] runLPMPlugin(XLog log, TaggedPlaceSet placeSet, OCLPMDiscoveryParameters parameters) {
 		messageNormal("Starting LPM discovery.");
 		//TODO what happens if Context==null?
-		Object[] lpmResults = PlaceBasedLPMDiscoveryPlugin.mineLPMs(Context, log, placeSet.asPlaceSet(), parameters.getPBLPMDiscoveryParameters());
+		Object[] lpmResults = new Object[] {PlaceBasedLPMDiscoveryPlugin.mineLPMs(Context, log, placeSet.asPlaceSet(), parameters.getPBLPMDiscoveryParameters())};
 		updateProgress("Finished LPM discovery.");
 		return lpmResults;
 	}

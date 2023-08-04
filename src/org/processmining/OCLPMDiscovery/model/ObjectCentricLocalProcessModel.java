@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import org.processmining.OCLPMDiscovery.model.additionalinfo.OCLPMAdditionalInfo;
 import org.processmining.models.graphbased.NodeID;
-import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.SimpleEvaluationResult;
+import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.LPMEvaluationResult;
 import org.processmining.placebasedlpmdiscovery.model.Arc;
 import org.processmining.placebasedlpmdiscovery.model.LocalProcessModel;
 import org.processmining.placebasedlpmdiscovery.model.Place;
@@ -88,8 +88,8 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
         this.setAdditionalInfo(new OCLPMAdditionalInfo(lpm.getAdditionalInfo()));
         
         // store evaluation score from the lpm into the evaluation map
-        List<SimpleEvaluationResult> results = lpm.getAdditionalInfo().getEvaluationResult().getResults();
-        for (SimpleEvaluationResult result : results) {
+        Collection<LPMEvaluationResult> results = lpm.getAdditionalInfo().getEvalResults().values();
+        for (LPMEvaluationResult result : results) {
         	switch (result.getId()) {
         		case FittingWindowsEvaluationResult:
         			this.evaluation.put("Fitting Window Score",result.getNormalizedResult());
@@ -269,9 +269,9 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
             if (!transitions.containsKey(transition.getLabel()))
                 transitions.put(transition.getLabel(), transition);
         }
-        if (!keepEvaluation) {
-	        this.additionalInfo.clearEvaluation();
-        }
+//        if (!keepEvaluation) {
+//	        this.additionalInfo.clearEvaluation(); // removed by Viki
+//        }
 
     }
     

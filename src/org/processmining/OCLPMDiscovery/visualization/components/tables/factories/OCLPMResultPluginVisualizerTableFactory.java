@@ -13,15 +13,16 @@ import javax.swing.JPopupMenu;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
 import org.processmining.OCLPMDiscovery.visualization.components.tables.CustomObjectTableModel;
+import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.LPMEvaluationResult;
 import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.LPMEvaluationResultId;
-import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.SimpleEvaluationResult;
 import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.aggregateoperations.EvaluationResultAggregateOperation;
 import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableCollection;
+import org.processmining.placebasedlpmdiscovery.utils.LocalProcessModelUtils;
 
 public class OCLPMResultPluginVisualizerTableFactory extends AbstractPluginVisualizerTableFactory<ObjectCentricLocalProcessModel> {
 
     private static double getResultOrDefault(ObjectCentricLocalProcessModel lpm, LPMEvaluationResultId resultId) {
-        SimpleEvaluationResult result = lpm.getAdditionalInfo().getEvaluationResult().getEvaluationResult(resultId);
+        LPMEvaluationResult result = lpm.getAdditionalInfo().getEvalResults().get(resultId);
         if (result != null)
             return result.getResult();
         return -1;
@@ -78,17 +79,17 @@ public class OCLPMResultPluginVisualizerTableFactory extends AbstractPluginVisua
     public BiFunction<Integer, ObjectCentricLocalProcessModel, Object[]> getObjectToColumnsMapper(){
     	DecimalFormat df = new DecimalFormat("#.###");
     	return 
-    		(ind, lpm) -> new Object[]{
+    		(ind, oclpm) -> new Object[]{
                 ind + 1,
-                lpm.getShortString(),
+                oclpm.getShortString(),
 //                df.format(getResultOrDefault(lpm, LPMEvaluationResultId.TransitionOverlappingEvaluationResult)),
-                df.format(getResultOrDefault(lpm, LPMEvaluationResultId.TransitionCoverageEvaluationResult)),
-                df.format(getResultOrDefault(lpm, LPMEvaluationResultId.FittingWindowsEvaluationResult)),
-                df.format(getResultOrDefault(lpm, LPMEvaluationResultId.PassageCoverageEvaluationResult)),
-                df.format(getResultOrDefault(lpm, LPMEvaluationResultId.PassageRepetitionEvaluationResult)),
-                df.format(getResultOrDefault(lpm, LPMEvaluationResultId.TraceSupportEvaluationResult)),
-                df.format(lpm.getAdditionalInfo().getEvaluationResult()
-                        .getResult(new EvaluationResultAggregateOperation()))
+                df.format(getResultOrDefault(oclpm, LPMEvaluationResultId.TransitionCoverageEvaluationResult)),
+                df.format(getResultOrDefault(oclpm, LPMEvaluationResultId.FittingWindowsEvaluationResult)),
+                df.format(getResultOrDefault(oclpm, LPMEvaluationResultId.PassageCoverageEvaluationResult)),
+                df.format(getResultOrDefault(oclpm, LPMEvaluationResultId.PassageRepetitionEvaluationResult)),
+                df.format(getResultOrDefault(oclpm, LPMEvaluationResultId.TraceSupportEvaluationResult)),
+//                df.format(lpm.getAdditionalInfo().getEvaluationResult().getResult(new EvaluationResultAggregateOperation()))
+                df.format(LocalProcessModelUtils.getGroupedEvaluationResult(oclpm.getLpm()).getResult(new EvaluationResultAggregateOperation()))
     		};
     }
 }

@@ -1,15 +1,13 @@
 package org.processmining.OCLPMDiscovery.visualization.components;
 
-import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.AbstractEvaluationResult;
-import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.GroupedEvaluationResult;
-import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.SimpleEvaluationResult;
-import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.aggregateoperations.EvaluationResultAggregateOperation;
-import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.concrete.PassageCoverageEvaluationResult;
-import org.processmining.placebasedlpmdiscovery.utilityandcontext.eventattributesummary.ContinuousEventAttributeSummary;
-import org.processmining.placebasedlpmdiscovery.utilityandcontext.eventattributesummary.EventAttributeSummary;
-
-import javax.swing.*;
 import java.text.DecimalFormat;
+
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.SimpleEvaluationResult;
+import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.concrete.PassageCoverageEvaluationResult;
 
 public class ComponentFactory {
 
@@ -49,33 +47,33 @@ public class ComponentFactory {
         return df.format(result);
     }
 
-    public static JPanel getComplexEvaluationResultComponent(GroupedEvaluationResult evaluationResult) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-
-        for (AbstractEvaluationResult result : evaluationResult.getResults()) {
-            panel.add(ComponentFactory.getLPMEvaluationResultComponent(result));
-        }
-        panel.add(getjLabel("Aggregate Result:    " +
-                getEvaluationTextResult(evaluationResult.getResult(new EvaluationResultAggregateOperation()))));
-
-        return panel;
-    }
-
-    private static JPanel getLPMEvaluationResultComponent(AbstractEvaluationResult evaluationResult) {
-        if (evaluationResult instanceof GroupedEvaluationResult)
-            return getComplexEvaluationResultComponent((GroupedEvaluationResult) evaluationResult);
-//        if (evaluationResult instanceof PassageCoverageEvaluationResult)
-//            return getCoveredPassages((PassageCoverageEvaluationResult) evaluationResult);
-        if (evaluationResult instanceof SimpleEvaluationResult)
-            return getSimpleEvaluationResultComponent((SimpleEvaluationResult) evaluationResult);
-//        if (evaluationResult instanceof FittingWindowsEvaluationResult)
-//            return getWindowsEvaluationResultComponent((FittingWindowsEvaluationResult) evaluationResult);
-//        if (evaluationResult instanceof TransitionsOverlappingEvaluationResult)
-//            return getTransitionOverlappingEvaluationResultComponent((TransitionsOverlappingEvaluationResult) evaluationResult);
-
-        return null;
-    }
+//    public static JPanel getComplexEvaluationResultComponent(GroupedEvaluationResult evaluationResult) {
+//        JPanel panel = new JPanel();
+//        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+//
+//        for (AbstractEvaluationResult result : evaluationResult.getResults()) {
+//            panel.add(ComponentFactory.getLPMEvaluationResultComponent(result));
+//        }
+//        panel.add(getjLabel("Aggregate Result:    " +
+//                getEvaluationTextResult(evaluationResult.getResult(new EvaluationResultAggregateOperation()))));
+//
+//        return panel;
+//    }
+//
+//    private static JPanel getLPMEvaluationResultComponent(AbstractEvaluationResult evaluationResult) {
+//        if (evaluationResult instanceof GroupedEvaluationResult)
+//            return getComplexEvaluationResultComponent((GroupedEvaluationResult) evaluationResult);
+////        if (evaluationResult instanceof PassageCoverageEvaluationResult)
+////            return getCoveredPassages((PassageCoverageEvaluationResult) evaluationResult);
+//        if (evaluationResult instanceof SimpleEvaluationResult)
+//            return getSimpleEvaluationResultComponent((SimpleEvaluationResult) evaluationResult);
+////        if (evaluationResult instanceof FittingWindowsEvaluationResult)
+////            return getWindowsEvaluationResultComponent((FittingWindowsEvaluationResult) evaluationResult);
+////        if (evaluationResult instanceof TransitionsOverlappingEvaluationResult)
+////            return getTransitionOverlappingEvaluationResultComponent((TransitionsOverlappingEvaluationResult) evaluationResult);
+//
+//        return null;
+//    }
 
     private static JPanel getCoveredPassages(PassageCoverageEvaluationResult evaluationResult) {
         JPanel panel = new JPanel();

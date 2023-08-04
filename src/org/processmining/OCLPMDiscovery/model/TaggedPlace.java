@@ -166,4 +166,12 @@ public class TaggedPlace extends Place{
 		Set<String> intersection = connectedActivities.stream().filter(givenActivities::contains).collect(Collectors.toSet());
 		return intersection;
 	}
+	
+	@Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TaggedPlace place = (TaggedPlace) o;
+        return this.isEqual(place);
+    }
 }
