@@ -14,18 +14,16 @@ import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMEvaluationMetrics;
 import org.processmining.OCLPMDiscovery.visualization.components.tables.CustomObjectTableModel;
-import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.LPMEvaluationResult;
-import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.LPMEvaluationResultId;
 import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableCollection;
 
 public class OCLPMResultPluginVisualizerTableFactory extends AbstractPluginVisualizerTableFactory<ObjectCentricLocalProcessModel> {
 
-    private static double getResultOrDefault(ObjectCentricLocalProcessModel lpm, LPMEvaluationResultId resultId) {
-        LPMEvaluationResult result = lpm.getAdditionalInfo().getEvalResults().get(resultId);
-        if (result != null)
-            return result.getResult();
-        return -1;
-    }
+//    private static double getResultOrDefault(ObjectCentricLocalProcessModel lpm, LPMEvaluationResultId resultId) {
+//        LPMEvaluationResult result = lpm.getAdditionalInfo().getEvalResults().get(resultId);
+//        if (result != null)
+//            return result.getResult();
+//        return -1;
+//    }
 
     @Override
 	public Map<Integer, ObjectCentricLocalProcessModel> getIndexObjectMap(SerializableCollection<ObjectCentricLocalProcessModel> elements) {
@@ -38,7 +36,6 @@ public class OCLPMResultPluginVisualizerTableFactory extends AbstractPluginVisua
 
     @Override
     protected CustomObjectTableModel<ObjectCentricLocalProcessModel> createTableModel(Map<Integer, ObjectCentricLocalProcessModel> indexObjectMap) {
-        DecimalFormat df = new DecimalFormat("#.###");
         return new CustomObjectTableModel<>(
                 indexObjectMap,
                 this.getColumnNames(),

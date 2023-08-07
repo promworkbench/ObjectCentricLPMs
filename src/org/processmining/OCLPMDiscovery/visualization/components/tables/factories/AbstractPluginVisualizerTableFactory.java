@@ -9,6 +9,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;
 
 import org.processmining.OCLPMDiscovery.gui.OCLPMColors;
+import org.processmining.OCLPMDiscovery.visualization.components.tables.CustomDecimalRenderer;
 import org.processmining.OCLPMDiscovery.visualization.components.tables.CustomObjectTableModel;
 import org.processmining.OCLPMDiscovery.visualization.components.tables.GenericTextDescribableTableComponent;
 import org.processmining.OCLPMDiscovery.visualization.components.tables.TableListener;
@@ -77,6 +78,13 @@ public abstract class AbstractPluginVisualizerTableFactory<T extends TextDescrib
         table.setModel(tableModel); // set the table model
         table.setColumnModel(new VisibilityControllableTableColumnModel()); // set the column model
         table.createDefaultColumnsFromModel(); // create the columns from the model
+
+        // use dots except of commas
+        // Doesn't work... -.-
+        CustomDecimalRenderer renderer = new CustomDecimalRenderer();
+        for (int i = 2; i<((VisibilityControllableTableColumnModel) table.getColumnModel()).getColumnCount(); i++) {
+        	((VisibilityControllableTableColumnModel) table.getColumnModel()).getColumn(i).setCellRenderer(renderer); 	
+        }
         ((VisibilityControllableTableColumnModel) table.getColumnModel()).keepOnlyFirstColumn(); // in the beginning show only the first column
         table.setRowSorter(new TableRowSorter<CustomObjectTableModel<T>>(
                 tableModel) {
@@ -85,7 +93,8 @@ public abstract class AbstractPluginVisualizerTableFactory<T extends TextDescrib
                 if (column == 0)
                     return Comparator.comparingInt(o -> Integer.parseInt((String) o));
                 else if (column > 1)
-                    return Comparator.comparingDouble(o -> Double.parseDouble((String) o));
+//                    return Comparator.comparingDouble(o -> Double.parseDouble((String) o));
+                	return Comparator.comparingDouble(o -> Double.parseDouble(((String) o).replaceFirst(",",".")));
                 return super.getComparator(column);
             }
         });

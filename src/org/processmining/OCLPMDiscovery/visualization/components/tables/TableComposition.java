@@ -7,6 +7,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 
@@ -16,6 +18,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.RowFilter;
 import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -80,6 +83,14 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         // create the table
         GenericTextDescribableTableComponent<T> table = this.tableFactory.getPluginVisualizerTable((SerializableCollection<T>) this.shownResult, controller, this.theme);
         OCLPMScrollPane scrollPane = new OCLPMScrollPane(table, theme); // add the table in a scroll pane
+        int sortColumnIndex = table.getModel().getColumnCount()-1;
+        List<RowSorter.SortKey> sortKeys = new ArrayList<>();
+        sortKeys.add(new RowSorter.SortKey(sortColumnIndex, SortOrder.ASCENDING));
+        table.getRowSorter().setSortKeys(sortKeys);
+        //        table.getRowSorter().toggleSortOrder(table.getColumnModel().getColumnIndex(OCLPMEvaluationMetrics.COMBINED_SCORE.getName()));
+        table.getRowSorter().toggleSortOrder(sortColumnIndex);
+    	// TODO reset first column (model index)
+        table.changeSelection(0, 0, false, false);
 
         // create the filter form
         OCLPMPanel filterForm = new OCLPMPanel(this.theme);
@@ -155,6 +166,9 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         	}
         	String[] columnNames = this.tableFactory.getColumnNames();
         	((DefaultTableModel) table.getModel()).setDataVector(tableData, columnNames);
+        	table.getRowSorter().setSortKeys(sortKeys);
+        	table.getRowSorter().toggleSortOrder(sortColumnIndex); // sort table
+        	// TODO reset first column (model index)
         	
         	((DefaultTableModel) table.getModel()).fireTableDataChanged();
         	table.changeSelection(0, 0, false, false);

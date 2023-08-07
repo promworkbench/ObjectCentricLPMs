@@ -13,7 +13,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.processmining.OCLPMDiscovery.model.additionalinfo.OCLPMAdditionalInfo;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMEvaluationMetrics;
 import org.processmining.models.graphbased.NodeID;
 import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.LPMEvaluationResult;
@@ -32,12 +31,12 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	private static final long serialVersionUID = -1533299531712229854L;
 	
 	// save original LPM, e.g. for LPMAdditionalInfo
-	private LocalProcessModel lpm;
+//	private LocalProcessModel lpm;
 	
 	private String id;
     private final Map<String, Transition> transitions; // label -> transition map
     private final Set<Arc> arcs;
-    private OCLPMAdditionalInfo additionalInfo;
+//    private OCLPMAdditionalInfo additionalInfo;
     
     private final Set<TaggedPlace> places;
 	
@@ -68,16 +67,16 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
         this.transitions = new HashMap<>();
         this.arcs = new HashSet<>();
         // setup additional info
-        this.additionalInfo = new OCLPMAdditionalInfo(this);
+//        this.additionalInfo = new OCLPMAdditionalInfo(this);
         
         // setup lpm
-        this.lpm = new LocalProcessModel();
+//        this.lpm = new LocalProcessModel();
     }
 	
 	public ObjectCentricLocalProcessModel(LocalProcessModel lpm) {
         this();
 
-        this.lpm = lpm;
+//        this.lpm = lpm;
         
         this.id = lpm.getId();
         Set<TaggedPlace> tplaces = new HashSet<TaggedPlace>();
@@ -85,7 +84,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
         	tplaces.add((TaggedPlace) p);
         }
         this.addAllPlaces(tplaces); // adds also the transitions, places, arcs
-        this.setAdditionalInfo(new OCLPMAdditionalInfo(lpm.getAdditionalInfo()));
+//        this.setAdditionalInfo(new OCLPMAdditionalInfo(lpm.getAdditionalInfo()));
         
         // store evaluation score from the lpm into the evaluation map
         Collection<LPMEvaluationResult> results = lpm.getAdditionalInfo().getEvalResults().values();
@@ -132,10 +131,10 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	 */
 	public ObjectCentricLocalProcessModel (ObjectCentricLocalProcessModel oclpm) {
 		this();
-		this.lpm = oclpm.getLpm();
-		this.id = lpm.getId();
+//		this.lpm = oclpm.getLpm();
+		this.id = oclpm.getId();
 		this.addAllPlaces(oclpm.getPlaces());
-		this.setAdditionalInfo(oclpm.getAdditionalInfo());
+//		this.setAdditionalInfo(oclpm.getAdditionalInfo());
 		this.setDiscoveryTypes(oclpm.getDiscoveryTypes());
 		for (OCLPMEvaluationMetrics key : oclpm.getEvaluation().keySet()) {
 			this.evaluation.put(key, oclpm.getEvaluation().get(key));
@@ -225,13 +224,13 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
         return res;
     }
 
-    public OCLPMAdditionalInfo getAdditionalInfo() {
-        return this.additionalInfo;
-    }
-
-    public void setAdditionalInfo(OCLPMAdditionalInfo additionalInfo) {
-        this.additionalInfo = additionalInfo;
-    }
+//    public OCLPMAdditionalInfo getAdditionalInfo() {
+//        return this.additionalInfo;
+//    }
+//
+//    public void setAdditionalInfo(OCLPMAdditionalInfo additionalInfo) {
+//        this.additionalInfo = additionalInfo;
+//    }
 
     public Set<Arc> getArcs() {
         return arcs;
@@ -429,13 +428,13 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
         return null;
     }
 
-	public LocalProcessModel getLpm() {
-		return lpm;
-	}
-
-	public void setLpm(LocalProcessModel lpm) {
-		this.lpm = lpm;
-	}
+//	public LocalProcessModel getLpm() {
+//		return lpm;
+//	}
+//
+//	public void setLpm(LocalProcessModel lpm) {
+//		this.lpm = lpm;
+//	}
 
 	/**
 	 * Check if the OCLPMs have equal places (ignoring object type of places and variable arcs)

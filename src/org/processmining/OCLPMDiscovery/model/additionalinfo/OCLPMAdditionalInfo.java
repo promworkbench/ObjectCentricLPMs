@@ -1,6 +1,5 @@
 package org.processmining.OCLPMDiscovery.model.additionalinfo;
 
-import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
 import org.processmining.placebasedlpmdiscovery.model.LocalProcessModel;
 import org.processmining.placebasedlpmdiscovery.model.additionalinfo.LPMAdditionalInfo;
 
@@ -12,9 +11,9 @@ public class OCLPMAdditionalInfo extends LPMAdditionalInfo{
     	super(lpm);
     }
 	
-	public OCLPMAdditionalInfo(ObjectCentricLocalProcessModel oclpm) {
-    	super(oclpm.getLpm());
-    }
+//	public OCLPMAdditionalInfo(ObjectCentricLocalProcessModel oclpm) {
+//    	super(oclpm.getLpm());
+//    }
 	
 	public OCLPMAdditionalInfo(LPMAdditionalInfo info) {
     	super(info);
