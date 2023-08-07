@@ -82,14 +82,22 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
 
         // create the table
         GenericTextDescribableTableComponent<T> table = this.tableFactory.getPluginVisualizerTable((SerializableCollection<T>) this.shownResult, controller, this.theme);
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
         OCLPMScrollPane scrollPane = new OCLPMScrollPane(table, theme); // add the table in a scroll pane
+        
         int sortColumnIndex = table.getModel().getColumnCount()-1;
         List<RowSorter.SortKey> sortKeys = new ArrayList<>();
         sortKeys.add(new RowSorter.SortKey(sortColumnIndex, SortOrder.ASCENDING));
         table.getRowSorter().setSortKeys(sortKeys);
         //        table.getRowSorter().toggleSortOrder(table.getColumnModel().getColumnIndex(OCLPMEvaluationMetrics.COMBINED_SCORE.getName()));
         table.getRowSorter().toggleSortOrder(sortColumnIndex);
-    	// TODO reset first column (model index)
+     
+        // reset first column (model index)
+        for (int i = 0; i<table.getRowCount(); i++) {
+        	int index = table.convertRowIndexToModel(i);
+        	model.setValueAt(i+1, index, 0);
+        }
+        
         table.changeSelection(0, 0, false, false);
 
         // create the filter form
@@ -168,10 +176,16 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         	((DefaultTableModel) table.getModel()).setDataVector(tableData, columnNames);
         	table.getRowSorter().setSortKeys(sortKeys);
         	table.getRowSorter().toggleSortOrder(sortColumnIndex); // sort table
-        	// TODO reset first column (model index)
+        	
         	
         	((DefaultTableModel) table.getModel()).fireTableDataChanged();
         	table.changeSelection(0, 0, false, false);
+        	
+        	// reset first column (model index)
+        	for (int i = 0; i<table.getRowCount(); i++) {
+            	int index = table.convertRowIndexToModel(i);
+            	model.setValueAt(i+1, index, 0);
+            }
         	
         	// if table isn't expanded only show first column
         	if (!expandBtn.isSelected()) {
