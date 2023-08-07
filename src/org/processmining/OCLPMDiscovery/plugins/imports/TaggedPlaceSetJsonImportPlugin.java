@@ -10,7 +10,7 @@ import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.placebasedlpmdiscovery.model.exporting.importers.JsonImporter;
 
 @Plugin(name = "Import Set of tagged places from a json file", parameterLabels = {"Filename"}, returnLabels = {"Set of places"}, returnTypes = {TaggedPlaceSet.class})
-@UIImportPlugin(description = "Import set of tagged places from a json file", extensions = {"json"})
+@UIImportPlugin(description = "Import set of tagged places from a json file", extensions = {"jsontp"})
 public class TaggedPlaceSetJsonImportPlugin extends AbstractImportPlugin {
 
     protected TaggedPlaceSet importFromStream(PluginContext context, InputStream input, String filename, long fileSizeInBytes)

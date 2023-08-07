@@ -18,8 +18,8 @@ import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
         returnTypes = {},
         parameterLabels = {"Set of tagged places", "Filename"})
 @UIExportPlugin(
-        description = "ProM set of tagged places (json) file",
-        extension = "json")
+        description = "ProM set of tagged places (jsontp) file",
+        extension = "jsontp")
 public class TaggedPlaceSetJsonExportPlugin {
 
     @PluginVariant(variantLabel = "Export set of places into a file", requiredParameterLabels = {0, 1})

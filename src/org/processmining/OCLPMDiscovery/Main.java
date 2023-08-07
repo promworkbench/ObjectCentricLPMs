@@ -541,23 +541,40 @@ public class Main {
 					}
 					
 					// get all events of input activities
-					OcelEventLog filtered = ocel.cloneEmpty();
+					OcelEventLog inputEventsAll = ocel.cloneEmpty();
 					for (OcelEvent eve : ocel.events.values()) {
 						if (inputActivities.contains(eve.activity)) {
-							filtered.cloneEvent(eve);
+							inputEventsAll.cloneEvent(eve);
 						}
 					}
 //					filtered.register(); // registering would duplicate the objects because the cloning already adds the object, not just the identifier
 					
 					// get all objects of input activities
-					Set<String> inputObjects = filtered.objects.keySet(); 
+					Set<String> inputObjects = inputEventsAll.objects.keySet(); 
 					
 					// get all events of output activities with objects from the input activities
+					OcelEventLog filtered = ocel.cloneEmpty();
 					for (OcelEvent eve : ocel.events.values()) {
 						if (outputActivities.contains(eve.activity)) {
 							for (OcelObject object : eve.relatedObjects) {
 								if (	object.objectType.name.equals(type) // same type
 										&& inputObjects.contains(object.id)) { 
+									filtered.cloneEvent(eve);
+									break;
+								}
+							}
+						}
+					}
+					
+					// get all objects of the filtered output events
+					Set<String> outputObjects = filtered.objects.keySet();
+					
+					// get all events of input activities with objects from the filtered output events
+					for (OcelEvent eve : ocel.events.values()) {
+						if (inputActivities.contains(eve.activity)) {
+							for (OcelObject object : eve.relatedObjects) {
+								if (	object.objectType.name.equals(type) // same type
+										&& outputObjects.contains(object.id)) { 
 									filtered.cloneEvent(eve);
 									break;
 								}

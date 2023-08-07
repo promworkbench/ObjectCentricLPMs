@@ -116,6 +116,9 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 
     public ObjectCentricLocalProcessModel(TaggedPlace place) {
         this();
+        for (OCLPMEvaluationMetrics metric : OCLPMEvaluationMetrics.values()) {
+        	this.evaluation.put(metric, -1.0);
+        }
         this.addPlace(place);
     }
     
