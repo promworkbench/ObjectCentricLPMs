@@ -27,10 +27,11 @@ public class ColorMapPanel extends JPanel implements Scrollable {
     private final Font font = new Font("Arial", Font.PLAIN, 14);
     private final Font fontBold = new Font("Arial", Font.BOLD, 16);
     private OCLPMColors theme = new OCLPMColors();
+    private boolean showExternalObjectFlow = true;
 
     public ColorMapPanel(HashMap<String, Color> colorMap) {
         this.colorMap = colorMap;
-        setPreferredSize(new Dimension(200, (colorMap.size()+3) * cellHeight)); // +1 for the legend, +2 for arcs
+        setPreferredSize(new Dimension(200, (colorMap.size()+4) * cellHeight)); // +1 for the legend, +2 for arcs, +1 for start/end place
         this.setBackground(this.theme.BACKGROUND);
         this.setForeground(this.theme.BACKGROUND);
         for (Component component : this.getComponents()) {
@@ -105,6 +106,20 @@ public class ColorMapPanel extends JPanel implements Scrollable {
         // ArrowText
         g.setColor(theme.TEXT);
         g.drawString("Variable Arc", apex+textDistance, (i + 1) * cellHeight - 10);
+        
+        // paint start / end place
+        if (this.showExternalObjectFlow) {
+        	i++;
+        	g.setColor(theme.ACCENT);
+        	int newHeight = (int) (diameter*(2.0/3.0));
+        	g.fillOval(rowSeparation, (i * cellHeight)+rowSeparation+(diameter-newHeight)/2, diameter, newHeight); // circle border
+        	g.setColor(theme.ELEMENTS);
+//        	newHeight *= 0.9;
+        	int borderSize = this.borderSize*2;
+        	g.fillOval(rowSeparation+borderSize, (i * cellHeight)+rowSeparation+borderSize+(diameter-newHeight)/2, diameter-2*borderSize, newHeight-2*borderSize); // circle
+        	g.setColor(theme.TEXT);
+            g.drawString("Starting / Ending Place", diameter+rowSeparation*2+textDistance, (i + 1) * cellHeight - 10);
+        }
     }
 
     // Scrollable implementation

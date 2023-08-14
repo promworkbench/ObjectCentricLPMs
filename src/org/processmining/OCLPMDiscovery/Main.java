@@ -14,6 +14,7 @@ import org.deckfour.xes.model.XTrace;
 import org.deckfour.xes.model.impl.XLogImpl;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
+import org.processmining.OCLPMDiscovery.lpmEvaluation.VariableArcIdentificator;
 import org.processmining.OCLPMDiscovery.model.LPMResultsTagged;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
@@ -35,6 +36,7 @@ import org.processmining.ocel.flattening.Flattening;
 import org.processmining.ocel.ocelobjects.OcelEvent;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
 import org.processmining.ocel.ocelobjects.OcelObject;
+import org.processmining.placebasedlpmdiscovery.main.LPMDiscoveryBuilder;
 import org.processmining.placebasedlpmdiscovery.model.Transition;
 import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
 import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableList;
@@ -599,12 +601,14 @@ public class Main {
 							oclpm.getMapIdVarArcActivities().put(tp.getId(), new HashSet<String>(variableActivities));
 						}
 					}
+					Main.updateProgress("Completed variable arc identification.");
 				}
 				
 				
 				break;
 			case PER_LPM:
-				// Might not be done here. Maybe has to be done during LPM discovery.
+				// Counts are computed during the LPM discovery as an evaluation metric.
+				// Scores are computed when converting LPMs to OCLPMs.
 				break;
 			case WHOLE_LOG:
 			default:
@@ -619,8 +623,8 @@ public class Main {
 						oclpm.getMapIdVarArcActivities().put(tp.getId(), new HashSet<String>(activities));
 					}
 				}
+				Main.updateProgress("Completed variable arc identification.");
 		}
-		Main.updateProgress("Completed variable arc identification.");
 		return placeSet;
 	}
 	
@@ -778,10 +782,21 @@ public class Main {
 	}
 	
 	public static Object[] runLPMPlugin(XLog log, TaggedPlaceSet placeSet, OCLPMDiscoveryParameters parameters) {
-		messageNormal("Starting LPM discovery.");
-		//TODO what happens if Context==null?
-		Object[] lpmResults = new Object[] {PlaceBasedLPMDiscoveryPlugin.mineLPMs(Context, log, placeSet.asPlaceSet(), parameters.getPBLPMDiscoveryParameters())};
-		updateProgress("Finished LPM discovery.");
+		Object[] lpmResults = new Object[] {};
+		if (parameters.getVariableArcIdentification() == VariableArcIdentification.PER_LPM) {
+			messageNormal("Starting LPM discovery and variable arc identification.");
+			LPMDiscoveryBuilder builder = org.processmining.placebasedlpmdiscovery.Main
+					.createDefaultBuilder(log, placeSet.asPlaceSet(), parameters.getPBLPMDiscoveryParameters());
+			builder.registerLPMWindowEvaluator("VariableArcIdentificator",new VariableArcIdentificator(parameters.getObjectTypesAll())); //TODO change name
+			lpmResults = new Object[] {builder.build().run()};
+			updateProgress("Finished LPM discovery.");
+		}
+		else {
+			messageNormal("Starting LPM discovery.");
+			//TODO what happens if Context==null?
+			lpmResults = new Object[] {PlaceBasedLPMDiscoveryPlugin.mineLPMs(Context, log, placeSet.asPlaceSet(), parameters.getPBLPMDiscoveryParameters())};
+			updateProgress("Finished LPM discovery.");
+		}
 		return lpmResults;
 	}
 	

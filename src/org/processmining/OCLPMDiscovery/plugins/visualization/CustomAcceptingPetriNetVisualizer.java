@@ -10,6 +10,7 @@ import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
 import org.processmining.OCLPMDiscovery.utils.OCLPMUtils;
 import org.processmining.OCLPMDiscovery.visualization.components.OCLPMGraphVisualizer;
+import org.processmining.OCLPMDiscovery.visualization.components.shapes.Ellipse;
 import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.contexts.uitopia.annotations.Visualizer;
 import org.processmining.framework.plugin.PluginContext;
@@ -80,6 +81,10 @@ public class CustomAcceptingPetriNetVisualizer {
         		map.putViewSpecific(p, AttributeMap.STROKECOLOR, oclpmResult.getMapTypeColor().get(type));
 //        		map.putViewSpecific(p, AttributeMap.LABEL, type); // looks bad because the label won't fit in there
         		map.putViewSpecific(p, AttributeMap.BORDERWIDTH, 1);
+        		map.putViewSpecific(p, AttributeMap.SHAPE, new Ellipse(3,2));
+//        		map.putViewSpecific(p, AttributeMap.SHAPE, new Triangle()); // works!
+//        		map.putViewSpecific(p, AttributeMap.SHAPE, new RoundedRect(0.75));
+//        		map.putViewSpecific(p, AttributeMap.SIZE, "1,1");
         		//TODO label color?
         	}
         }

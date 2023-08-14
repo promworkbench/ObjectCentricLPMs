@@ -5,8 +5,9 @@ public enum OCLPMEvaluationMetrics {
 	PASSAGE_COVERAGE ("Passage Coverage Score"), //
 	PASSAGE_REPETITION ("Passage Repetition Score"), //
 	TRANSITION_COVERAGE ("Transition Coverage Score"), //
-	COMBINED_SCORE ("Combined Score"), // 
 	TRACE_SUPPORT ("Trace Support Score"), //
+	TYPE_USAGE ("Type Usage Score"), // Measures how well the object types are used in order to most clearly show the process to an observer.
+	COMBINED_SCORE ("Combined Score"), // 
 	;
 	
 	private final String name;

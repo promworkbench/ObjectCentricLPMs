@@ -107,6 +107,8 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
         		case TraceSupportEvaluationResult:
         			this.evaluation.put(OCLPMEvaluationMetrics.TRACE_SUPPORT,result.getNormalizedResult());
         			break;
+//        		case VariableArcIdentificator.getResultKey():
+        		//TODO catch variable arc identification result and store variable arcs
         		default:
         			break;
         	}
@@ -651,7 +653,8 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	 * Calculates the combined score as the average of all scores. 
 	 */
 	public void recalculateEvaluation() {
-		// TODO calculate evaluation which is dependent on the placecompletion
+		// calculate evaluation metrics which are dependent on the placecompletion
+		this.evaluation.put(OCLPMEvaluationMetrics.TYPE_USAGE, this.calculateTypeUsageScore());
 		
 		// calculate combined score
 		Double combinedScore = 0.0;
@@ -661,6 +664,14 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		}
 		combinedScore = combinedScore / (this.evaluation.size()-1);
 		this.setCombinedScore(combinedScore);
+	}
+
+	//TODO compute type usage score
+	private Double calculateTypeUsageScore() {
+		double fractionVariableArcs;
+		double fractionTypesOccurring;
+		double fractionCleanTransitions;
+		return -1.0;
 	}
 
 	public Map<OCLPMEvaluationMetrics,Double> getEvaluation() {

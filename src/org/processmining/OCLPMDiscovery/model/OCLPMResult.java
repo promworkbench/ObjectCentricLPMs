@@ -6,7 +6,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
+import org.processmining.OCLPMDiscovery.parameters.VariableArcIdentification;
 import org.processmining.placebasedlpmdiscovery.model.LocalProcessModel;
 import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableList;
@@ -35,6 +37,9 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 	    		ObjectCentricLocalProcessModel oclpm = new ObjectCentricLocalProcessModel(lpm, res.getCaseNotion());
 	    		oclpms.add(oclpm);
 	    	}
+    	}
+    	if (discoveryParameters.getVariableArcIdentification() == VariableArcIdentification.PER_LPM) {
+    		Main.updateProgress("Finished variable arc identification");
     	}
     	this.addAll(oclpms);
     	copyDiscoveryParameters(discoveryParameters);
@@ -251,6 +256,10 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 			}
 			this.showExternalObjectFlow = false;
 		}
+	}
+	
+	public boolean isShowExternalObjectFlow() {
+		return this.showExternalObjectFlow;
 	}
 
 	public Map<String, Set<String>> getStartingActivities() {
