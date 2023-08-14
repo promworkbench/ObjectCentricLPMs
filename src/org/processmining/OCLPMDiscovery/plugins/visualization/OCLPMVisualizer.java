@@ -6,9 +6,11 @@ import java.awt.Toolkit;
 import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JSplitPane;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 
-import org.processmining.OCLPMDiscovery.gui.OCLPMAutoResizeTextArea;
 import org.processmining.OCLPMDiscovery.gui.OCLPMColors;
+import org.processmining.OCLPMDiscovery.gui.OCLPMEditorPane;
 import org.processmining.OCLPMDiscovery.gui.OCLPMPanel;
 import org.processmining.OCLPMDiscovery.gui.OCLPMScrollPane;
 import org.processmining.OCLPMDiscovery.gui.OCLPMSplitPane;
@@ -42,27 +44,37 @@ public class OCLPMVisualizer {
         // Color Legend
         OCLPMScrollPane colorPane = new OCLPMScrollPane(new ColorMapPanel(oclpmResult.getMapTypeColor(), theme), theme);
         
+        
+        // Set the default font in the StyleSheet
+        HTMLEditorKit editorKit = new HTMLEditorKit();
+        StyleSheet styleSheet = editorKit.getStyleSheet();
+        styleSheet.addRule("body { font-family: Arial, sans-serif; }");
+        
+        
         // model stats
         JComponent evalComponent = new OCLPMPanel(theme);
         OCLPMScrollPane evalPane = new OCLPMScrollPane(evalComponent, theme);
         evalComponent.setLayout(new BoxLayout(evalComponent, BoxLayout.Y_AXIS));
-        OCLPMAutoResizeTextArea ta_evaluation = new OCLPMAutoResizeTextArea("", false, theme);
+        OCLPMEditorPane ta_evaluation = new OCLPMEditorPane("", false, true, theme);
+        ta_evaluation.setEditorKit(editorKit);
+        String evalHtml = "<html><body>";
         
         // add for which leading type this model has been discovered
         if (oclpm.getDiscoveryTypes().size() == 1) {
-        	ta_evaluation.append("Discovered using the leading type:\n"+oclpm.getDiscoveryTypes().toArray()[0]+"\n");
+        	evalHtml += "<b>Discovered using the leading type:</b><br>"+oclpm.getDiscoveryTypes().toArray()[0]+"<br>";
         }
         else if (oclpm.getDiscoveryTypes().size() > 1) {
-        	ta_evaluation.append("Discovered using the leading type:\n");
+        	evalHtml += "Discovered using the leading type:<br>";
         	for (Object curType : oclpm.getDiscoveryTypes().toArray()) {
-        		ta_evaluation.append((String) curType+"\n");
+        		evalHtml += (String) curType+"<br>";
         	}
         }
         
         // oclpm evaluation 
-        ta_evaluation.append("\n"+"Evaluation scores:"+"\n");
-        ta_evaluation.append(oclpm.getEvaluationString());
+        evalHtml += " <br>"+"<b>Evaluation scores:</b>"+"<br>";
+        evalHtml += oclpm.getEvaluationStringHTML();
         
+        ta_evaluation.setText(evalHtml);
         evalComponent.add(ta_evaluation);
 //        evalComponent.add(ComponentFactory.getComplexEvaluationResultComponent(oclpm.getAdditionalInfo().getEvaluationResult()));
         
@@ -71,8 +83,9 @@ public class OCLPMVisualizer {
         JComponent settingsComponent = new OCLPMPanel(theme);
         OCLPMScrollPane settingsPane = new OCLPMScrollPane(settingsComponent, theme);
         settingsComponent.setLayout(new BoxLayout(settingsComponent, BoxLayout.Y_AXIS));
-        OCLPMAutoResizeTextArea ta_discoverySettings = new OCLPMAutoResizeTextArea("", false, theme);
-        ta_discoverySettings.append(oclpmResult.getOclpmDiscoverySettings());
+        OCLPMEditorPane ta_discoverySettings = new OCLPMEditorPane("", false, true, theme);
+        ta_discoverySettings.setEditorKit(editorKit);
+        ta_discoverySettings.setText(oclpmResult.getOclpmDiscoverySettingsHTML());
         
         settingsComponent.add(ta_discoverySettings);
         

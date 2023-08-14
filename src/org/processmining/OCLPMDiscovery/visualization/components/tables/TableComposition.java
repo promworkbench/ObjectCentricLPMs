@@ -121,7 +121,7 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
                 controller.componentExpansion(componentId, true);
                 filterForm.setVisible(true);
             } else { // otherwise
-                expandBtn.setText("Expand"); // set the text to Expand
+                expandBtn.setText("Expand Table"); // set the text to Expand
                 ((VisibilityControllableTableColumnModel) table.getColumnModel()).keepOnlyFirstColumn(); // keep only the first column
                 controller.componentExpansion(componentId, false);
                 filterForm.setVisible(false);
@@ -130,7 +130,7 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         
         // object flow button
         OCLPMToggleButton objectFlowButton = new OCLPMToggleButton(this.theme);
-        objectFlowButton.setText("Extend Object Flow");
+        objectFlowButton.setText("Show Start/End Places");
         objectFlowButton.setSelected(false);
         objectFlowButton.setCornerRadius(0);
         objectFlowButton.addActionListener(actionEvent -> {

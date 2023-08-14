@@ -19,6 +19,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     private Set<String> objectTypes = new HashSet<>(); // all object types from the ocel
     private Set<String> lpmDiscoveryTypes; // types which were used as a case notion for LPM discovery
     private String oclpmDiscoverySettings; // settings used for the discovery of this result
+    private String oclpmDiscoverySettingsHTML; // settings used for the discovery of this result
     private HashMap<String,Color> mapTypeColor; // maps each object type to a color
     private TaggedPlaceSet placeSet; 
     private boolean showExternalObjectFlow = false;
@@ -80,6 +81,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     
     public void copyDiscoveryParameters(OCLPMDiscoveryParameters discoveryParameters) {
     	this.oclpmDiscoverySettings = discoveryParameters.toString();
+    	this.oclpmDiscoverySettingsHTML = discoveryParameters.toHTML();
     	this.objectTypes = discoveryParameters.getObjectTypesAll();
     	this.lpmDiscoveryTypes = discoveryParameters.getObjectTypesLeadingTypes();
     }
@@ -276,6 +278,14 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 
 	public void setEndingActivities(Map<String, Set<String>> endingActivities) {
 		this.placeSet.setEndingActivities(endingActivities);
+	}
+
+	public String getOclpmDiscoverySettingsHTML() {
+		return oclpmDiscoverySettingsHTML;
+	}
+
+	public void setOclpmDiscoverySettingsHTML(String oclpmDiscoverySettingsHTML) {
+		this.oclpmDiscoverySettingsHTML = oclpmDiscoverySettingsHTML;
 	}
 
 }

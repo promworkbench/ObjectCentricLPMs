@@ -161,6 +161,77 @@ public class OCLPMDiscoveryParameters implements EventLog{
         
         return caption + broadParameters + otherParams;
     }
+	
+    public String toHTML() {
+    	String htmlStart = "<html><body>";
+        String caption = "<b>OCLPM Discovery parameters:</b><br>";
+        String broadParameters =
+        		"Place Discovery Algorithm: "+this.getPlaceDiscoveryAlgorithm().getName()+"<br>"
+        		+ "Case Notion Strategy: "+this.getCaseNotionStrategy().getName()+"<br>"
+        		;
+        String otherParams = "";
+        int s,i;
+        
+        otherParams += "Place Discovery Object Types: ";
+        s = this.getObjectTypesPlaceNets().size();
+        i = 0;
+        for (String current : this.getObjectTypesPlaceNets()) {
+        	otherParams += current;
+        	i++;
+        	if (i<s) otherParams+=", ";
+        	else otherParams+="<br>";
+        }
+        
+        otherParams += "LPM Case Notion Object Types: ";
+        s = this.getObjectTypesCaseNotion().size();
+        i = 0;
+        for (String current : this.getObjectTypesCaseNotion()) {
+        	otherParams += current;
+        	i++;
+        	if (i<s) otherParams+=", ";
+        	else otherParams+="<br>";
+        }
+        
+        if (CaseNotionStrategy.typeSelectionNeeded.contains(this.getCaseNotionStrategy())) {
+        	otherParams += "LPM Case Notion Leading Types: ";
+            s = this.getObjectTypesLeadingTypes().size();
+            i = 0;
+            for (String current : this.getObjectTypesLeadingTypes()) {
+            	otherParams += current;
+            	i++;
+            	if (i<s) otherParams+=", ";
+            	else otherParams+="<br>";
+            }
+        }
+        
+        if (this.getPlaceDiscoveryAlgorithm() == Miner.SPECPP) {
+        	if (this.getSpecppParameters() == null) {
+        		otherParams += "SPECpp parameters haven't been saved.<br>";
+        	}
+        	else {
+        		otherParams += "SPECpp parameters:<br>";
+        		otherParams += this.getSpecppParameters().toString();        		
+        	}
+        }
+        
+        else if (this.getPlaceDiscoveryAlgorithm() == Miner.ILP) {
+        	if (this.getPlaceDiscoveryAlgorithm() == null) {
+        		otherParams += "ILP parameters haven't been saved.<br>";
+        	}
+        	else {
+        		otherParams += "ILP parameters:<br>";
+        		otherParams += "Wizard follows now.<br>";
+//        		otherParams += this.getIlpParameters().toString();        		
+        	}
+        }
+        
+        otherParams += "Variable arc identification: "+this.getVariableArcIdentification().getName()+"<br>";
+        otherParams += "Variable arc threshold: "+this.getVariableArcThreshold()+"<br>";
+//        otherParams += "Place completion: "+this.getPlaceCompletion().getName()+"<br>";
+        
+        String htmlEnd = "</body></html>";
+        return htmlStart + caption + broadParameters + otherParams + htmlEnd;
+    }
 
 	public Set<String> getObjectTypesAll() {
 		return objectTypesAll;

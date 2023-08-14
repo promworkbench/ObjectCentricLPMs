@@ -649,6 +649,21 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	}
 	
 	/**
+	 * String consisting of all evaluation metrics to be displayed for this OCLPM
+	 * @return
+	 */
+	public String getEvaluationStringHTML() {
+		String evalString = "";
+		for (OCLPMEvaluationMetrics metric : this.evaluation.keySet()) {
+			if (metric.equals(OCLPMEvaluationMetrics.COMBINED_SCORE)) continue; // print that as last
+			Double score = Math.round(this.evaluation.get(metric)*1000.0)/1000.0;
+			evalString += metric.getName()+": "+score+"<br>";
+		}
+		evalString += OCLPMEvaluationMetrics.COMBINED_SCORE.getName()+": "+Math.round(this.evaluation.get(OCLPMEvaluationMetrics.COMBINED_SCORE)*1000.0)/1000.0+"<br>";
+		return evalString;
+	}
+	
+	/**
 	 * Calculates evaluation metric which are dependent on the exact places and variable arcs.
 	 * Calculates the combined score as the average of all scores. 
 	 */
