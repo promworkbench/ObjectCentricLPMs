@@ -601,8 +601,8 @@ public class Main {
 							oclpm.getMapIdVarArcActivities().put(tp.getId(), new HashSet<String>(variableActivities));
 						}
 					}
-					Main.updateProgress("Completed variable arc identification.");
 				}
+				Main.updateProgress("Completed variable arc identification.");
 				
 				
 				break;

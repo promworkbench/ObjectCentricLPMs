@@ -30,7 +30,8 @@ public class PlaceCompletionUtils {
 	
 	public static OCLPMResult completePlacesCopy(OCLPMResult result, PlaceCompletion placeCompletion) {
 		OCLPMResult newResult = result.copyForPlaceCompletion();
-		return completePlaces(newResult, placeCompletion);
+		newResult = completePlaces(newResult, placeCompletion); 
+		return newResult;
 	}
 	
 	public static OCLPMResult completePlaces (OCLPMResult oclpmResult, PlaceCompletion placeCompletion) {
@@ -75,6 +76,7 @@ public class PlaceCompletionUtils {
 		}
 		
 		Main.updateProgress("Finished place completion.");
+		oclpmResult.recalculateEvaluation();
 		
 		return oclpmResult;
 	}

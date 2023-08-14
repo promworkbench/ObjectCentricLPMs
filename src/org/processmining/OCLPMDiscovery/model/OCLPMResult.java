@@ -36,6 +36,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     	for (TaggedLPMResult res : tlpms.getElements()) { // for all used case notions
 	    	for (LocalProcessModel lpm : res.getElements()) { // for all lpms discovered for that notion
 	    		ObjectCentricLocalProcessModel oclpm = new ObjectCentricLocalProcessModel(lpm, res.getCaseNotion());
+	    		oclpm.setObjectTypesAll(discoveryParameters.getObjectTypesPlaceNets());
 	    		oclpms.add(oclpm);
 	    	}
     	}
@@ -286,6 +287,13 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 
 	public void setOclpmDiscoverySettingsHTML(String oclpmDiscoverySettingsHTML) {
 		this.oclpmDiscoverySettingsHTML = oclpmDiscoverySettingsHTML;
+	}
+
+	public void recalculateEvaluation() {
+		for (ObjectCentricLocalProcessModel oclpm : this.elements) {
+			oclpm.recalculateEvaluation();
+		}
+		
 	}
 
 }

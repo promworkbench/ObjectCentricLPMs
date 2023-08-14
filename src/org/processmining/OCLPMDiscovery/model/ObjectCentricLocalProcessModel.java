@@ -45,6 +45,8 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	
 	// the object types of places in the model 
 	private Set<String> placeTypes = new HashSet<String>();
+	// all object types in the whole place set (for evaluation)
+	private Set<String> objectTypesAll = new HashSet<String>();
 	
 	// maps each place id to the activities with which that place has variable arcs
 	private Map<String,Set<String>> mapIdVarArcActivities = new HashMap<>();
@@ -683,10 +685,30 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 
 	//TODO compute type usage score
 	private Double calculateTypeUsageScore() {
-		double fractionVariableArcs;
-		double fractionTypesOccurring;
+		// importances 1 = full importance
+		double importance_variableArcs = 1.0;
+		double importance_types = 0.5;
+		double importance_transitions = 0.5;
+		
+		// variable arc counting
+		double fractionNonVariableArcs = 0.0;
+		int variableArcs = 0;
+		int totalArcs = 0;
+		for (TaggedPlace tp : this.places) {
+			totalArcs += tp.getInputTransitions().size() + tp.getOutputTransitions().size();
+			if (this.mapIdVarArcActivities.get(tp.getId()) != null) {
+				variableArcs += this.mapIdVarArcActivities.get(tp.getId()).size();
+			}
+		}
+		fractionNonVariableArcs = (double)(totalArcs - (variableArcs * importance_variableArcs)) / (double) totalArcs;
+		
+		// object types
+		double all = this.objectTypesAll.size();
+		double present = this.placeTypes.size();
+		double fractionTypesOccurring = 1- ((all-present) * importance_types / all);
+		
 		double fractionCleanTransitions;
-		return -1.0;
+		return fractionNonVariableArcs * fractionTypesOccurring;
 	}
 
 	public Map<OCLPMEvaluationMetrics,Double> getEvaluation() {
@@ -788,6 +810,14 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 			return this.evaluation.get(metric);
 		}
 		return -1;
+	}
+
+	public Set<String> getObjectTypesAll() {
+		return objectTypesAll;
+	}
+
+	public void setObjectTypesAll(Set<String> objectTypesAll) {
+		this.objectTypesAll = objectTypesAll;
 	}
 
 }
