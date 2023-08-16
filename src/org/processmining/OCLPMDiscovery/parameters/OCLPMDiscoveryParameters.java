@@ -25,10 +25,10 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	private XLogHybridILPMinerParametersImpl ilpParameters;
 	private PlaceBasedLPMDiscoveryParameters PBLPMDiscoveryParameters;
 	private int modelLimit = Integer.MAX_VALUE;
-	private boolean placeSetPostProcessing = true; // remove duplicate places from placeSet
+	private boolean placeSetPostProcessing = true; // remove duplicate places from placeSet (should always be true)
 	
 	// variable arc identification
-	private VariableArcIdentification variableArcIdentification = VariableArcIdentification.PER_PLACE;
+	private VariableArcIdentification variableArcIdentification = VariableArcIdentification.PER_PLACE; // IMO the most accurate should always be chosen, so use PER_LPM and do not make it user adjustable
 	private float variableArcThreshold = 0.95f; // threshold which the score function is compared against
 	
 	// place completion
@@ -40,9 +40,6 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	private CaseNotionStrategy caseNotionStrategy 	= CaseNotionStrategy.PE_CONNECTED;
 	
 	// TODO Make the following also adjustable in the GUI?
-		// placeSetPostProcessing
-		// doVariableArcIdentification
-		// variableArcIdentification
 		// variableArcThreshold
 	
 	public OCLPMDiscoveryParameters(OcelEventLog ocel) {
@@ -215,14 +212,15 @@ public class OCLPMDiscoveryParameters implements EventLog{
         }
         
         else if (this.getPlaceDiscoveryAlgorithm() == Miner.ILP) {
-        	if (this.getPlaceDiscoveryAlgorithm() == null) {
-        		otherParams += "ILP parameters haven't been saved.<br>";
-        	}
-        	else {
-        		otherParams += "ILP parameters:<br>";
-        		otherParams += "Wizard follows now.<br>";
-//        		otherParams += this.getIlpParameters().toString();        		
-        	}
+        	otherParams += "ILP parameters haven't been saved.<br>";
+//        	if (this.getPlaceDiscoveryAlgorithm() == null) {
+//        		otherParams += "ILP parameters haven't been saved.<br>";
+//        	}
+//        	else {
+//        		otherParams += "ILP parameters:<br>";
+//        		otherParams += "Wizard follows now.<br>";
+////        		otherParams += this.getIlpParameters().toString();        		
+//        	}
         }
         
         otherParams += "Variable arc identification: "+this.getVariableArcIdentification().getName()+"<br>";

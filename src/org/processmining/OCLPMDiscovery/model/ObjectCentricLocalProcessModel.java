@@ -615,7 +615,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 
 	private void addVariableArc(String placeId, String activity) {
 		if (this.mapIdVarArcActivities.containsKey(placeId)) {
-			this.mapIdVarArcActivities.get(placeId).add(activity); //TODO does this work?
+			this.mapIdVarArcActivities.get(placeId).add(activity);
 		}
 		else {
 			Set<String> value = new HashSet<>();

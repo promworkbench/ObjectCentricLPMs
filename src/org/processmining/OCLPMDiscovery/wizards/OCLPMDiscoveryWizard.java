@@ -83,7 +83,9 @@ public class OCLPMDiscoveryWizard extends MapWizard<OCLPMDiscoveryParameters, St
 			return INITIAL_KEY;
 		}
 		else {
-			return LPM_TYPE_FILTER; //TODO do LPM_NOTION directly if object graph is provided
+			// Do LPM_NOTION directly if object graph is provided?
+				// No, the user has to select which types are present in the graph.
+			return LPM_TYPE_FILTER; 
 		}
 	}
 

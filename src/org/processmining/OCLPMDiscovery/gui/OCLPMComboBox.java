@@ -57,7 +57,7 @@ public class OCLPMComboBox<E> extends JComboBox/* <E> */{
 		super(model);
 		borderPanel = new OCLPMPanel(15, 3, theme);
 		borderPanel.setOpaque(true);
-		borderPanel.setBackground(theme.ELEMENTS); //TODO change colors
+		borderPanel.setBackground(theme.ELEMENTS);
 		borderPanel.setForeground(theme.NON_FOCUS);
 		buttonPanel = new OCLPMPanel(15, 3, theme);
 		buttonPanel.setOpaque(true);

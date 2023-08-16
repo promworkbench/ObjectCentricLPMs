@@ -156,42 +156,41 @@ public class OCLPMDiscoveryPlugin {
 			requiredParameterLabels = {0,5,1}
 	)
 	public static OCLPMResult mineOCLPMs(PluginContext context, OcelEventLog ocel, LPMResultsTagged lpms, TaggedPlaceSet placeSet) throws Exception {
-		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel); // TODO OCEL necessary?
+		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
 		Main.setUp(context, parameters, false, false);
 		return (OCLPMResult) Main.run(ocel, parameters, lpms, placeSet)[0];
 	}
 	
-	// variant accepting enhanced ocel (ocel which already has case notions to be used for LPM discovery)
-	@UITopiaVariant(
-			affiliation = "RWTH - PADS",
-			author = "Marvin Porsil",
-			email = "marvin.porsil@rwth-aachen.de",
-			uiLabel = "Object-Centric Local Process Model Discovery given place set, hashmap, object graph and OCEL with desired case notions."
-	)
-	@PluginVariant(
-			variantLabel = "Object-Centric Local Process Model Discovery given place set, hashmap, object graph and OCEL with desired case notions.",
-			requiredParameterLabels = {0,1,2,6}
-	)
-	public static OCLPMResult mineOCLPMs (
-			UIPluginContext context, OcelEventLog ocel, ArrayList<String> labels, TaggedPlaceSet placeSet, Graph<String,DefaultEdge> graph
-			) {
-		
-		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
-
-		//TODO adjust for this case where new case notion already given
-		OCLPMDiscoveryWizard wizard = OCLPMDiscoveryWizard.setUp(parameters, false, true);
-		
-		// show wizard
-		parameters = ProMWizardDisplay.show(context, wizard, parameters);
-
-		if (parameters == null)
-			return null;		
-
-		Main.setUp(context, parameters, false, true);
-		Main.setGraph(graph);
-		Object[] result = Main.run(ocel, parameters, placeSet, labels);
-		return (OCLPMResult) result[0];
-	}
+//	// variant accepting enhanced ocel (ocel which already has case notions to be used for LPM discovery)
+//	@UITopiaVariant(
+//			affiliation = "RWTH - PADS",
+//			author = "Marvin Porsil",
+//			email = "marvin.porsil@rwth-aachen.de",
+//			uiLabel = "Object-Centric Local Process Model Discovery given place set and OCEL with desired case notions."
+//	)
+//	@PluginVariant(
+//			variantLabel = "Object-Centric Local Process Model Discovery given place set and OCEL with desired case notions.",
+//			requiredParameterLabels = {0,1,2,6}
+//	)
+//	public static OCLPMResult mineOCLPMs (
+//			UIPluginContext context, OcelEventLog ocel, ArrayList<String> labels, TaggedPlaceSet placeSet
+//			) {
+//		
+//		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
+//
+//		// adjust for this case where new case notion already given
+//		OCLPMDiscoveryWizard wizard = OCLPMDiscoveryWizard.setUp(parameters, false, true);
+//		
+//		// show wizard
+//		parameters = ProMWizardDisplay.show(context, wizard, parameters);
+//
+//		if (parameters == null)
+//			return null;		
+//
+//		Main.setUp(context, parameters, false, true);
+//		Object[] result = Main.run(ocel, parameters, placeSet, labels);
+//		return (OCLPMResult) result[0];
+//	}
 	
 	// just the post processing (only used this for testing)
 //	@UITopiaVariant(
@@ -209,15 +208,80 @@ public class OCLPMDiscoveryPlugin {
 //	}
 	
 	//==============================================
-	// TODO all variants without UI
+	// All variants without UI
 	//==============================================
+	
+	/**
+	 * Complete OCLPM discovery
+	 * @param parameters
+	 * @param ocel
+	 * @return
+	 */
 	public static OCLPMResult mineOCLPMs(OCLPMDiscoveryParameters parameters, OcelEventLog ocel) {
 		Object[] result = Main.run(ocel, parameters); 
 		return (OCLPMResult) result[0];
 	}
 	
+	/**
+	 * OCLPM discovery without place discovery.
+	 * @param parameters
+	 * @param ocel
+	 * @param placeSet
+	 * @return
+	 */
 	public static OCLPMResult mineOCLPMs(OCLPMDiscoveryParameters parameters, OcelEventLog ocel, TaggedPlaceSet placeSet) {
 		Object[] result = Main.run(ocel, parameters, placeSet);
 		return (OCLPMResult) result[0];
 	}
+	
+	/**
+	 * Object-Centric Local Process Model Discovery given place set and object graph. 
+	 * @param parameters
+	 * @param ocel
+	 * @param placeSet
+	 * @param graph
+	 * @return
+	 * @throws Exception
+	 */
+	public static OCLPMResult mineOCLPMs (
+			OCLPMDiscoveryParameters parameters, OcelEventLog ocel, TaggedPlaceSet placeSet, Graph<String,DefaultEdge> graph
+			) throws Exception {
+		
+		if (!(placeSet.getList().getElement(0) instanceof TaggedPlace)) {
+			throw new Exception("Given places aren't tagged with object types.");
+		}
+
+		Main.setGraph(graph);
+		Object[] result = Main.run(ocel, parameters, placeSet);
+		return (OCLPMResult) result[0];
+	}
+	
+	/**
+	 * Object-Centric Local Process Model Discovery given LPMs with tagged places.
+	 * @param parameters
+	 * @param ocel
+	 * @param lpms
+	 * @param placeSet
+	 * @return
+	 * @throws Exception
+	 */
+	public static OCLPMResult mineOCLPMs(OCLPMDiscoveryParameters parameters, OcelEventLog ocel, LPMResultsTagged lpms, TaggedPlaceSet placeSet) throws Exception {
+		return (OCLPMResult) Main.run(ocel, parameters, lpms, placeSet)[0];
+	}
+	
+	/**
+	 *  OCLPM discovery variant accepting enhanced ocel (ocel which already has case notions to be used for LPM discovery).
+	 * @param parameters
+	 * @param ocel
+	 * @param labels Are the names of the columns of the provided case notions.
+	 * @param placeSet
+	 * @return
+	 */
+	public static OCLPMResult mineOCLPMs (
+			OCLPMDiscoveryParameters parameters, OcelEventLog ocel, ArrayList<String> labels, TaggedPlaceSet placeSet
+			) {
+		Object[] result = Main.run(ocel, parameters, placeSet, labels);
+		return (OCLPMResult) result[0];
+	}
+	
 }
