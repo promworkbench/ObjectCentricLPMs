@@ -13,9 +13,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.processmining.OCLPMDiscovery.lpmEvaluation.CustomLPMEvaluatorResultIds;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMEvaluationMetrics;
 import org.processmining.models.graphbased.NodeID;
 import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.LPMEvaluationResult;
+import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.StandardLPMEvaluationResultId;
 import org.processmining.placebasedlpmdiscovery.model.Arc;
 import org.processmining.placebasedlpmdiscovery.model.LocalProcessModel;
 import org.processmining.placebasedlpmdiscovery.model.Place;
@@ -91,29 +93,63 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
         // store evaluation score from the lpm into the evaluation map
         Collection<LPMEvaluationResult> results = lpm.getAdditionalInfo().getEvalResults().values();
         for (LPMEvaluationResult result : results) {
-        	switch (result.getId()) {
-        		case FittingWindowsEvaluationResult:
-        			this.evaluation.put(OCLPMEvaluationMetrics.FITTING_WINDOWS,result.getNormalizedResult());
-        			break;
-        		case TransitionOverlappingEvaluationResult:
-        			break;
-        		case TransitionCoverageEvaluationResult:
-        			this.evaluation.put(OCLPMEvaluationMetrics.TRANSITION_COVERAGE,result.getNormalizedResult());
-        			break;
-        		case PassageCoverageEvaluationResult:
-        			this.evaluation.put(OCLPMEvaluationMetrics.PASSAGE_COVERAGE,result.getNormalizedResult());
-        			break;
-        		case PassageRepetitionEvaluationResult:
-        			this.evaluation.put(OCLPMEvaluationMetrics.PASSAGE_REPETITION,result.getNormalizedResult());
-        			break;
-        		case TraceSupportEvaluationResult:
-        			this.evaluation.put(OCLPMEvaluationMetrics.TRACE_SUPPORT,result.getNormalizedResult());
-        			break;
-//        		case VariableArcIdentificator.getResultKey():
-        		//TODO catch variable arc identification result and store variable arcs
-        		default:
-        			break;
+        	
+        	String name = result.getId().name();
+        	if (name.equals(StandardLPMEvaluationResultId.FittingWindowsEvaluationResult.name())) {
+        		this.evaluation.put(OCLPMEvaluationMetrics.FITTING_WINDOWS,result.getNormalizedResult());
+        		continue;
         	}
+//        	else if(name.equals(StandardLPMEvaluationResultId.TransitionOverlappingEvaluationResult.name())) {
+//        		
+//        	}
+        	else if (name.equals(StandardLPMEvaluationResultId.TransitionCoverageEvaluationResult.name())) {
+        		this.evaluation.put(OCLPMEvaluationMetrics.TRANSITION_COVERAGE,result.getNormalizedResult());
+        		continue;
+        	}
+        	else if (name.equals(StandardLPMEvaluationResultId.PassageCoverageEvaluationResult.name())) {
+        		this.evaluation.put(OCLPMEvaluationMetrics.PASSAGE_COVERAGE,result.getNormalizedResult());
+        		continue;
+        	}
+        	else if (name.equals(StandardLPMEvaluationResultId.PassageRepetitionEvaluationResult.name())) {
+        		this.evaluation.put(OCLPMEvaluationMetrics.PASSAGE_REPETITION,result.getNormalizedResult());
+        		continue;
+        	}
+        	else if (name.equals(StandardLPMEvaluationResultId.TraceSupportEvaluationResult.name())) {
+        		this.evaluation.put(OCLPMEvaluationMetrics.TRACE_SUPPORT,result.getNormalizedResult());
+        		continue;
+        	}
+        	else if (name.equals(CustomLPMEvaluatorResultIds.VariableArcIdentificationResult.name())) {
+        		//TODO catch variable arc identification result and store variable arcs
+        		continue;
+        	}
+        	else {
+        		continue;
+        	}
+        	
+        	// Switch doesn't work because the resultIds are not declared as constants
+//        	switch (result.getId().name()) {
+//        		case StandardLPMEvaluationResultId.FittingWindowsEvaluationResult.name():
+//        			this.evaluation.put(OCLPMEvaluationMetrics.FITTING_WINDOWS,result.getNormalizedResult());
+//        			break;
+//        		case StandardLPMEvaluationResultId.TransitionOverlappingEvaluationResult.name():
+//        			break;
+//        		case StandardLPMEvaluationResultId.TransitionCoverageEvaluationResult.name():
+//        			this.evaluation.put(OCLPMEvaluationMetrics.TRANSITION_COVERAGE,result.getNormalizedResult());
+//        			break;
+//        		case StandardLPMEvaluationResultId.PassageCoverageEvaluationResult.name():
+//        			this.evaluation.put(OCLPMEvaluationMetrics.PASSAGE_COVERAGE,result.getNormalizedResult());
+//        			break;
+//        		case StandardLPMEvaluationResultId.PassageRepetitionEvaluationResult.name():
+//        			this.evaluation.put(OCLPMEvaluationMetrics.PASSAGE_REPETITION,result.getNormalizedResult());
+//        			break;
+//        		case StandardLPMEvaluationResultId.TraceSupportEvaluationResult.name():
+//        			this.evaluation.put(OCLPMEvaluationMetrics.TRACE_SUPPORT,result.getNormalizedResult());
+//        			break;
+////        		case 
+////        		case VariableArcIdentificator.getResultKey():
+//        		default:
+//        			break;
+//        	}
         }
     }
 

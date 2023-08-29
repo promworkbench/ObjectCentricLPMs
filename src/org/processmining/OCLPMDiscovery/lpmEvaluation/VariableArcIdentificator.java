@@ -2,10 +2,8 @@ package org.processmining.OCLPMDiscovery.lpmEvaluation;
 
 import java.util.Set;
 
-import org.processmining.placebasedlpmdiscovery.lpmevaluation.lpmevaluators.LPMEvaluatorId;
 import org.processmining.placebasedlpmdiscovery.lpmevaluation.lpmevaluators.WindowLPMEvaluator;
 import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.LPMEvaluationResult;
-import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.LPMEvaluationResultId;
 import org.processmining.placebasedlpmdiscovery.model.LocalProcessModel;
 import org.processmining.placebasedlpmdiscovery.model.fpgrowth.LPMTemporaryWindowInfo;
 
@@ -40,12 +38,12 @@ public class VariableArcIdentificator implements WindowLPMEvaluator<VariableArcI
 
     @Override
     public String getKey() {
-        return LPMEvaluatorId.FittingWindowEvaluator.name();
+        return CustomLPMEvaluatorIds.VariableArcIdentificator.name();
     }
 
     @Override
     public String getResultKey() {
-        return LPMEvaluationResultId.FittingWindowsEvaluationResult.name();
+        return CustomLPMEvaluatorResultIds.VariableArcIdentificationResult.name();
     }
 
     @Override

@@ -787,7 +787,7 @@ public class Main {
 			messageNormal("Starting LPM discovery and variable arc identification.");
 			LPMDiscoveryBuilder builder = org.processmining.placebasedlpmdiscovery.Main
 					.createDefaultBuilder(log, placeSet.asPlaceSet(), parameters.getPBLPMDiscoveryParameters());
-			builder.registerLPMWindowEvaluator("VariableArcIdentificator",new VariableArcIdentificator(parameters.getObjectTypesAll())); //TODO change name
+			builder.registerLPMWindowEvaluator("VariableArcIdentificator",new VariableArcIdentificator(parameters.getObjectTypesAll())); //TODO change name. to some enum?
 			lpmResults = new Object[] {builder.build().run()};
 			updateProgress("Finished LPM discovery.");
 		}

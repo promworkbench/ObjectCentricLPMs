@@ -39,9 +39,6 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	private Miner placeDiscoveryAlgorithm 			= Miner.SPECPP;
 	private CaseNotionStrategy caseNotionStrategy 	= CaseNotionStrategy.PE_CONNECTED;
 	
-	// TODO Make the following also adjustable in the GUI?
-		// variableArcThreshold
-	
 	public OCLPMDiscoveryParameters(OcelEventLog ocel) {
 		this.setOcel(ocel);
 		Set<String> objectTypes = ocel.getObjectTypes();

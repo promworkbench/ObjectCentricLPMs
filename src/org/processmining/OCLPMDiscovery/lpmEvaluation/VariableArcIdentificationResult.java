@@ -4,14 +4,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.LPMEvaluationResult;
 import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.LPMEvaluationResultId;
-import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.SimpleEvaluationResult;
 import org.processmining.placebasedlpmdiscovery.model.LocalProcessModel;
 
-public class VariableArcIdentificationResult extends SimpleEvaluationResult {
+public class VariableArcIdentificationResult implements LPMEvaluationResult {
 
 	private static final long serialVersionUID = 3670025609204968061L;
-	
+	private final LPMEvaluationResultId id;
+    protected LocalProcessModel lpm;
+    
 	private int windowLastEventPos = -1;
 	private boolean[] overlapCheck = new boolean[7]; // keep track of events already counted
 	private Integer traceVariantId = -1;
@@ -20,8 +22,8 @@ public class VariableArcIdentificationResult extends SimpleEvaluationResult {
 	private HashMap<List<String>,Integer> scoreCountingAll = new  HashMap<>(); // maps [Activity,ObjectType] to #events of activity
 
 	public VariableArcIdentificationResult (LocalProcessModel lpm) {
-//		super(lpm, new LPMEvaluationResultId()); //TODO
-		super(lpm, LPMEvaluationResultId.TransitionOverlappingEvaluationResult);
+		this.lpm = lpm;
+		this.id = CustomLPMEvaluatorResultIds.VariableArcIdentificationResult;
 	}
 	
 	public void countSingle(String activity, String type) {
@@ -95,5 +97,9 @@ public class VariableArcIdentificationResult extends SimpleEvaluationResult {
 	public void resetOverlapCheck(Integer newTraceId, int windowSize) {
 		this.overlapCheck = new boolean[windowSize];
 		this.traceVariantId = newTraceId;
+	}
+
+	public LPMEvaluationResultId getId() {
+		return this.id;
 	}
 }

@@ -35,8 +35,8 @@ public enum VariableArcIdentification {
 	 * 		get all events of input activities
 	 * 		get all objects of the type of the current place which appear in events with input activities
 	 * 		get all events of output activities with objects from the input activities
-	 * !		get all objects actually occurring in those events of filtered output activities 
-	 * !		only keep the input events which include those objects
+	 * 		get all objects actually occurring in those events of filtered output activities 
+	 * 		only keep the input events which include those objects
 	 * 		compute score on the filtered log (input events with output objects + output event which have input objects)
 	 * 		tag the arcs as variable if score is lower than the threshold
 	 * 
