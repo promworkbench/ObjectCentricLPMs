@@ -15,6 +15,7 @@ public class TaggedPlaceSet extends SerializableSet<TaggedPlace> implements Expo
     private static final long serialVersionUID = 1645883969214312641L;
     private Map<String, Set<String>> startingActivities; // object type -> activities
     private Map<String, Set<String>> endingActivities;
+    private Set<String> objectTypesPlaceNets; // object types for which the log is flattened and place nets are discovered
 
     public TaggedPlaceSet() {
 
@@ -58,6 +59,14 @@ public class TaggedPlaceSet extends SerializableSet<TaggedPlace> implements Expo
 
 	public void setEndingActivities(Map<String, Set<String>> endingActivities) {
 		this.endingActivities = endingActivities;
+	}
+
+	public Set<String> getTypes() {
+		return this.objectTypesPlaceNets;
+	}
+	
+	public void setTypes(Set<String> types) {
+		this.objectTypesPlaceNets = types;
 	}
 
 }

@@ -301,6 +301,7 @@ public class Main {
 		TaggedPlaceSet placeSet = new TaggedPlaceSet(placeNetsUnion);
 		placeSet.setStartingActivities(startingActivities);
 		placeSet.setEndingActivities(endingActivities);
+		placeSet.setTypes(parameters.getObjectTypesPlaceNets());
 		
 		// remove duplicate place nets
 		placeSet = postProcessPlaceSet(placeSet);
@@ -503,6 +504,10 @@ public class Main {
 				|| ((TaggedPlace) tlpms.getList().getElement(0).getElements().get(0).getPlaces().toArray()[0]).getObjectType() == null 
 				) {
 			System.out.println("The given LPMs do not have tagged places. Therefore, there won't be any variable arcs.");
+		}
+		
+		if (parameters.getObjectTypesPlaceNets().isEmpty()) {
+			parameters.setObjectTypesPlaceNets(placeSet.getTypes());
 		}
 		
 		OCLPMResult oclpmResult = new OCLPMResult(parameters, tlpms, placeSet);

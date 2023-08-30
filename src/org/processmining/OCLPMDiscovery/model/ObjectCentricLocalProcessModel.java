@@ -741,6 +741,9 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		// object types
 		double all = this.objectTypesAll.size();
 		double present = this.placeTypes.size();
+		if (all < present) {
+			all = present;
+		}
 		double fractionTypesOccurring = 1- ((all-present) * importance_types / all);
 		
 		double fractionCleanTransitions;
