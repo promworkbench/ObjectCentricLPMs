@@ -44,4 +44,23 @@ public enum VariableArcIdentification {
 	 *	produce tokens which can be consumed
 	 *	or consume tokens which can be produced in the net.
 	 */
+	
+	/*
+	 * Score per LPM:
+	 * For each LPM, during the LPM discovery algorithm.
+	 * Every time events are replayed in a certain window, this window and the replayed events are evaluated
+	 * using the VariableArcIdentificator.
+	 * For each window:
+	 * 	Has a boolean array moving with the window which stores which events have already been counted
+	 * 	because consecutive windows might overlap.
+	 * 	For each newly replayed event index:
+	 * 	For each trace of the current variant:
+	 * 		Increase the object counters (single and all) correspondingly for each [Activity, Object Type] pair
+	 * When converting from LPM to OCLPM grab the VariableArcIdentificationResult from the LPM evaluations,
+	 * compute the score for each [Activity, Object Type] pair and
+	 * for each place in the isomorphic set:
+	 * 	Store variable arc activities under the current place id if:
+	 * 		the activity with the current object type has a score lower than the threshold
+	 *  	and the place has an arc connected with the transition corresponding to that activity 
+	 */
 }

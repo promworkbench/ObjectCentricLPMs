@@ -16,6 +16,7 @@ public class VariableArcIdentificationResult implements LPMEvaluationResult {
     
 	private int windowLastEventPos = -1;
 	private boolean[] overlapCheck = new boolean[7]; // keep track of events already counted
+		// e.g., overlapCheck[1] == true if the event at the current window index 1 has already been counted in a previous window
 	private Integer traceVariantId = -1;
 	
 	private HashMap<List<String>,Integer> scoreCountingSingles = new  HashMap<>(); // maps [Activity,ObjectType] to #events of activity and |OT|=1
@@ -42,6 +43,10 @@ public class VariableArcIdentificationResult implements LPMEvaluationResult {
 		this.scoreCountingAll.merge(Arrays.asList(activity, type), amount, Integer::sum);
 	}
 	
+	/**
+	 * Shifts all elements (new position - last position)steps to the front
+	 * @param newLastPosition
+	 */
 	public void shiftOverlapCheck(int newLastPosition) {
 		int stepsize = newLastPosition - this.windowLastEventPos;
 		for (int i = 0; i<this.overlapCheck.length; i++) {
@@ -52,6 +57,21 @@ public class VariableArcIdentificationResult implements LPMEvaluationResult {
 				this.overlapCheck[i] = this.overlapCheck[i+stepsize];
 			}
 		}
+	}
+	
+	/**
+	 * Prepends to or cuts off entries from the front of the overlap check array to match the new size.
+	 * @param newSize
+	 */
+	public void adjustOverlapCheckSize(int newSize) {
+		boolean [] newOverlapCheck = new boolean[newSize];
+		for (int i = 0; i<newSize; i++) {
+			if (i>this.overlapCheck.length-1){
+				break;
+			}
+			newOverlapCheck[newSize-1-i] = this.overlapCheck[this.overlapCheck.length-1-i];
+		}
+		this.overlapCheck = newOverlapCheck;
 	}
 	
 	@Override
@@ -72,6 +92,10 @@ public class VariableArcIdentificationResult implements LPMEvaluationResult {
     
     public HashMap<List<String>,Integer> getScoreCountingSingles(){
     	return this.scoreCountingSingles;
+    }
+    
+    public HashMap<List<String>,Integer> getScoreCountingAll(){
+    	return this.scoreCountingAll;
     }
 
 	public int getWindowLastEventPos() {
@@ -102,4 +126,5 @@ public class VariableArcIdentificationResult implements LPMEvaluationResult {
 	public LPMEvaluationResultId getId() {
 		return this.id;
 	}
+
 }

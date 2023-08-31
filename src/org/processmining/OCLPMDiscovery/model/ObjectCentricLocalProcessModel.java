@@ -14,6 +14,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.processmining.OCLPMDiscovery.lpmEvaluation.CustomLPMEvaluatorResultIds;
+import org.processmining.OCLPMDiscovery.lpmEvaluation.VariableArcIdentificationResult;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMEvaluationMetrics;
 import org.processmining.models.graphbased.NodeID;
 import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.LPMEvaluationResult;
@@ -52,6 +53,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	
 	// maps each place id to the activities with which that place has variable arcs
 	private Map<String,Set<String>> mapIdVarArcActivities = new HashMap<>();
+	private float variableArcThreshold = 0.95f; // threshold which the score function is compared against
 	
 	// stores all the places of the original place set which are isomorphic to the ones present in the model
 	// also stores the place in the model as their ids might be different if Viki changes them...
@@ -90,7 +92,57 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
         this.addAllPlaces(tplaces); // adds also the transitions, places, arcs
 //        this.setAdditionalInfo(new OCLPMAdditionalInfo(lpm.getAdditionalInfo()));
         
-        // store evaluation score from the lpm into the evaluation map
+        this.storeEvaluations(lpm);
+    }
+	
+	public ObjectCentricLocalProcessModel(TaggedPlace place) {
+        this();
+        for (OCLPMEvaluationMetrics metric : OCLPMEvaluationMetrics.values()) {
+        	this.evaluation.put(metric, -1.0);
+        }
+        this.addPlace(place);
+    }
+    
+	public ObjectCentricLocalProcessModel(LocalProcessModel lpm, String discoveryType) {
+		this(lpm);
+		this.discoveryTypes.add(discoveryType);
+	}
+	
+	public ObjectCentricLocalProcessModel(LocalProcessModel lpm, String discoveryType, float variableArcThreshold) {
+		this();
+		this.id = lpm.getId();
+		Set<TaggedPlace> tplaces = new HashSet<TaggedPlace>();
+		for (Place p : lpm.getPlaces()) {
+			tplaces.add((TaggedPlace) p);
+		}
+		this.addAllPlaces(tplaces); // adds also the transitions, places, arcs
+		this.variableArcThreshold = variableArcThreshold;
+		this.discoveryTypes.add(discoveryType);
+		this.storeEvaluations(lpm);
+	}
+	
+	/*
+	 * Create copy of the given oclpm where the places can be swapped without changing the original.
+	 */
+	public ObjectCentricLocalProcessModel (ObjectCentricLocalProcessModel oclpm) {
+		this();
+//		this.lpm = oclpm.getLpm();
+		this.id = oclpm.getId();
+		this.addAllPlaces(oclpm.getPlaces());
+//		this.setAdditionalInfo(oclpm.getAdditionalInfo());
+		this.setDiscoveryTypes(oclpm.getDiscoveryTypes());
+		for (OCLPMEvaluationMetrics key : oclpm.getEvaluation().keySet()) {
+			this.evaluation.put(key, oclpm.getEvaluation().get(key));
+		}
+		this.placeMapAll = oclpm.getPlaceMapAll();
+		this.placeMapIsomorphic.putAll(oclpm.getPlaceMapIsomorphic());
+		this.mapIdVarArcActivities.putAll(oclpm.getMapIdVarArcActivities());
+	}
+	
+	//============================== methods ==============================
+
+    private void storeEvaluations(LocalProcessModel lpm) {
+    	// store evaluation score from the lpm into the evaluation map
         Collection<LPMEvaluationResult> results = lpm.getAdditionalInfo().getEvalResults().values();
         for (LPMEvaluationResult result : results) {
         	
@@ -119,7 +171,8 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
         		continue;
         	}
         	else if (name.equals(CustomLPMEvaluatorResultIds.VariableArcIdentificationResult.name())) {
-        		//TODO catch variable arc identification result and store variable arcs
+        		// catch variable arc identification result and store variable arcs
+        		this.identifyVariableArcs((VariableArcIdentificationResult) result);
         		continue;
         	}
         	else {
@@ -151,37 +204,36 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 //        			break;
 //        	}
         }
-    }
-
-    public ObjectCentricLocalProcessModel(TaggedPlace place) {
-        this();
-        for (OCLPMEvaluationMetrics metric : OCLPMEvaluationMetrics.values()) {
-        	this.evaluation.put(metric, -1.0);
-        }
-        this.addPlace(place);
-    }
-    
-	public ObjectCentricLocalProcessModel(LocalProcessModel lpm, String discoveryType) {
-		this(lpm);
-		this.discoveryTypes.add(discoveryType);
+		
 	}
-	
-	/*
-	 * Create copy of the given oclpm where the places can be swapped without changing the original.
-	 */
-	public ObjectCentricLocalProcessModel (ObjectCentricLocalProcessModel oclpm) {
-		this();
-//		this.lpm = oclpm.getLpm();
-		this.id = oclpm.getId();
-		this.addAllPlaces(oclpm.getPlaces());
-//		this.setAdditionalInfo(oclpm.getAdditionalInfo());
-		this.setDiscoveryTypes(oclpm.getDiscoveryTypes());
-		for (OCLPMEvaluationMetrics key : oclpm.getEvaluation().keySet()) {
-			this.evaluation.put(key, oclpm.getEvaluation().get(key));
+
+	private void identifyVariableArcs(VariableArcIdentificationResult result) {
+
+    	HashMap<List<String>,Integer> scoreCountingSingles = result.getScoreCountingSingles(); // maps [Activity,ObjectType] to #events of activity and |OT|=1
+		HashMap<List<String>,Integer> scoreCountingAll = result.getScoreCountingAll(); // maps [Activity,ObjectType] to #events of activity
+		HashMap<List<String>,Double> score = new HashMap<>(); // maps [Activity,ObjectType] to score (#events of act and |OT|=1 / #events of act)
+		
+    	// compute score from counting
+		scoreCountingAll.forEach((key,value) -> {
+			if (scoreCountingSingles.containsKey(key)) {
+				score.put(key, scoreCountingSingles.get(key)/(double)value);				
+			}
+			else {
+				score.put(key, 0.0);
+			}
+		});
+		
+		// fill the variable arc map
+		for (TaggedPlace tp : this.placeMapIsomorphic.values()) {
+			Set<String> activities = new HashSet<>();
+			for (String activity : tp.getConnectedActivities()) {
+				if (score.get(Arrays.asList(new String[] {activity, tp.getObjectType()})) < this.variableArcThreshold) {
+					activities.add(activity);
+				}
+			}
+			this.mapIdVarArcActivities.put(tp.getId(), activities);
 		}
-		this.placeMapAll = oclpm.getPlaceMapAll();
-		this.placeMapIsomorphic.putAll(oclpm.getPlaceMapIsomorphic());
-		this.mapIdVarArcActivities.putAll(oclpm.getMapIdVarArcActivities());
+		
 	}
 
 	public HashSet<String> getDiscoveryTypes() {
@@ -857,6 +909,10 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 
 	public void setObjectTypesAll(Set<String> objectTypesAll) {
 		this.objectTypesAll = objectTypesAll;
+	}
+
+	public void setVariableArcThreshold(float variableArcThreshold) {
+		this.variableArcThreshold = variableArcThreshold;
 	}
 
 }

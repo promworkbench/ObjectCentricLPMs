@@ -14,6 +14,7 @@ import org.deckfour.xes.model.XTrace;
 import org.deckfour.xes.model.impl.XLogImpl;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
+import org.processmining.OCLPMDiscovery.lpmEvaluation.CustomLPMEvaluatorIds;
 import org.processmining.OCLPMDiscovery.lpmEvaluation.VariableArcIdentificator;
 import org.processmining.OCLPMDiscovery.model.LPMResultsTagged;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
@@ -265,7 +266,7 @@ public class Main {
 		for (String currentType : parameters.getObjectTypesPlaceNets()) {
 			Main.messageNormal("Starting flattening and place net discovery for type "+currentType+".");
 			// flatten ocel
-			XLog flatLog = Main.flattenOCEL(ocel, currentType);
+			XLog flatLog = Main.flattenOCEL(ocel, currentType, false);
 			Main.messageNormal("Flattened ocel for type "+currentType);
 			
 			// TODO discover starting and ending activities
@@ -356,7 +357,7 @@ public class Main {
 		LPMResult lpmResult;
 		for (String currentType : labels) {
 			// flatten ocel
-			log = Main.flattenOCEL(ocel, currentType);
+			log = Main.flattenOCEL(ocel, currentType, parameters.getVariableArcIdentification().equals(VariableArcIdentification.PER_LPM));
 		
 			// discover LPMs (name of the currentType column needs concept:name, which the flattening does)
 			System.out.println("Starting LPM discovery using \""+currentType+"\" as case notion.");
@@ -387,6 +388,7 @@ public class Main {
 		LPMResult lpmResult;
 		Graph<String,DefaultEdge> graph;
 		ArrayList<String> newTypeLabels;
+		boolean perLPMVarArcs = parameters.getVariableArcIdentification().equals(VariableArcIdentification.PER_LPM);
 		
 		switch (parameters.getCaseNotionStrategy()) {
 				
@@ -429,7 +431,7 @@ public class Main {
 					}
 					
 					// flatten ocel
-					log = Main.flattenOCEL(ocel, newTypeLabel);
+					log = Main.flattenOCEL(ocel, newTypeLabel, perLPMVarArcs);
 				
 					// discover LPMs (name of the currentType column needs concept:name, which the flattening does)
 					System.out.println("Starting LPM discovery using leading type "+newTypeLabel+" as case notion.");
@@ -449,7 +451,7 @@ public class Main {
 				ocel = ProcessExecutions.enhanceConnectedComponent(ocel, ot, graph, parameters.getObjectTypesCaseNotion());
 				ProvidingObjects.exportOcel(ocel, new ArrayList<String>(Arrays.asList(ot)));
 				messageNormal("Discovered "+ocel.objectTypes.get(ot).objects.size()+" connected components.");
-				log = Main.flattenOCEL(ocel, ot);
+				log = Main.flattenOCEL(ocel, ot, perLPMVarArcs);
 				System.out.println("Starting LPM discovery using connected components as case notion.");
 				lpmResults = runLPMPlugin(log, placeSet, parameters);
 				assert(lpmResults[0] instanceof LPMResult);
@@ -462,7 +464,7 @@ public class Main {
 				String dummyType = "DummyType";
 				OcelEventLog dummyOcel = OCELUtils.addDummyCaseNotion(ocel,"DummyType","42");
 				System.out.println("Added dummy type to ocel.");
-				log = Main.flattenOCEL(dummyOcel,dummyType);
+				log = Main.flattenOCEL(dummyOcel,dummyType, perLPMVarArcs);
 				System.out.println("Flattened on dummy type.");
 				System.out.println("Starting LPM discovery using a dummy type as case notion.");
 				lpmResults = runLPMPlugin(log, placeSet, parameters);
@@ -792,7 +794,7 @@ public class Main {
 			messageNormal("Starting LPM discovery and variable arc identification.");
 			LPMDiscoveryBuilder builder = org.processmining.placebasedlpmdiscovery.Main
 					.createDefaultBuilder(log, placeSet.asPlaceSet(), parameters.getPBLPMDiscoveryParameters());
-			builder.registerLPMWindowEvaluator("VariableArcIdentificator",new VariableArcIdentificator(parameters.getObjectTypesAll())); //TODO change name. to some enum?
+			builder.registerLPMWindowEvaluator(CustomLPMEvaluatorIds.VariableArcIdentificator.name(),new VariableArcIdentificator(parameters.getObjectTypesAll()));
 			lpmResults = new Object[] {builder.build().run()};
 			updateProgress("Finished LPM discovery.");
 		}
@@ -827,10 +829,14 @@ public class Main {
 		Main.graphProvided = true;
 	}
 	
-	public static XLog flattenOCEL(OcelEventLog ocel, String newTypeLabel) {
+	public static XLog flattenOCEL(OcelEventLog ocel, String newTypeLabel, Boolean flattenCounting) {
 //		PrintStream out = System.out;
 //		System.setOut(new PrintStream(new NullOutputStream()));
-		XLog log = Flattening.flatten(ocel, newTypeLabel); // this pastes a lot of useless stuff in the console
+		XLog log;
+		if (flattenCounting)
+			log = OCELUtils.flattenCounting(ocel, newTypeLabel);
+		else
+			log = Flattening.flatten(ocel, newTypeLabel); // this pastes a lot of useless stuff in the console
 //		System.setOut(out);
 		
 //		int numEventsBefore = ocel.getEvents().size();

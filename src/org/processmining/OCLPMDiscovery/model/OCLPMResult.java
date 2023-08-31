@@ -35,7 +35,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     	// convert LPM objects into OCLPM objects
     	for (TaggedLPMResult res : tlpms.getElements()) { // for all used case notions
 	    	for (LocalProcessModel lpm : res.getElements()) { // for all lpms discovered for that notion
-	    		ObjectCentricLocalProcessModel oclpm = new ObjectCentricLocalProcessModel(lpm, res.getCaseNotion());
+	    		ObjectCentricLocalProcessModel oclpm = new ObjectCentricLocalProcessModel(lpm, res.getCaseNotion(), discoveryParameters.getVariableArcThreshold());
 	    		oclpm.setObjectTypesAll(discoveryParameters.getObjectTypesPlaceNets());
 	    		oclpms.add(oclpm);
 	    	}

@@ -5,10 +5,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.deckfour.xes.model.XAttribute;
+import org.deckfour.xes.model.XAttributeMap;
+import org.deckfour.xes.model.XEvent;
+import org.deckfour.xes.model.XLog;
+import org.deckfour.xes.model.XTrace;
+import org.deckfour.xes.model.impl.XAttributeDiscreteImpl;
+import org.deckfour.xes.model.impl.XAttributeLiteralImpl;
+import org.deckfour.xes.model.impl.XAttributeMapImpl;
+import org.deckfour.xes.model.impl.XAttributeTimestampImpl;
+import org.deckfour.xes.model.impl.XEventImpl;
+import org.deckfour.xes.model.impl.XLogImpl;
+import org.deckfour.xes.model.impl.XTraceImpl;
 import org.processmining.ocel.ocelobjects.OcelEvent;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
 import org.processmining.ocel.ocelobjects.OcelObject;
 import org.processmining.ocel.ocelobjects.OcelObjectType;
+import org.processmining.ocel.utils.TypeFromValue;
 
 public class OCELUtils {
 	
@@ -159,5 +172,66 @@ public class OCELUtils {
 	 */
 	public static HashMap<List<String>,Double> computeScore(OcelEventLog ocel, String objectType){
 		return computeScore(ocel, new HashSet<String>(Arrays.asList(objectType)));
+	}
+	
+	/**
+	 * Flattens OCEL and stores for all object type columns how many objects they had.
+	 * @param ocel
+	 * @param caseNotion
+	 * @return
+	 */
+	public static XLog flattenCounting(OcelEventLog ocel, String caseNotion) {
+		//TODO test if this works
+		XAttributeMap logAttributes = new XAttributeMapImpl();
+		XLog log = new XLogImpl(logAttributes);
+		for (OcelObject ocelObject : ocel.objectTypes.get(caseNotion).objects) {
+			XAttributeMap traceAttributes = new XAttributeMapImpl();
+			XAttribute caseId = new XAttributeLiteralImpl("concept:name", ocelObject.id);
+			traceAttributes.put("concept:name", caseId);
+			XTrace trace = new XTraceImpl(traceAttributes);
+			for (OcelEvent ocelEvent : ocelObject.sortedRelatedEvents) {
+				XAttributeMap eventAttributes = new XAttributeMapImpl();
+				XAttribute eventId = new XAttributeLiteralImpl("event_id", ocelEvent.id);
+				eventAttributes.put("event_id", eventId);
+				XAttribute conceptName = new XAttributeLiteralImpl("concept:name", ocelEvent.activity);
+				eventAttributes.put("concept:name", conceptName);
+				XAttribute timeTimestamp = new XAttributeTimestampImpl("time:timestamp", ocelEvent.timestamp);
+				eventAttributes.put("time:timestamp", timeTimestamp);
+				// Create variables to count objects
+				HashMap<String,Long> objectsCounter = new HashMap<>();
+				for (OcelObjectType typeObject : ocel.objectTypes.values()) {
+					if (typeObject.name.equals(caseNotion)) {
+						continue;
+					}
+					objectsCounter.put(typeObject.name, 0l);
+				}
+				
+				// Count objects
+				for (OcelObject object : ocelEvent.relatedObjects) {
+					if (object.objectType.name.equals(caseNotion)) {
+						continue;
+					}
+					objectsCounter.merge(object.objectType.name, 1l, Long::sum);
+				}
+				
+				// Store counts in the flattened event
+				for (OcelObjectType typeObject : ocel.objectTypes.values()) {
+					if (typeObject.name.equals(caseNotion)) {
+						continue;
+					}
+					XAttribute na = new XAttributeDiscreteImpl(typeObject.name, objectsCounter.get(typeObject.name));
+					eventAttributes.put(typeObject.name, na);
+				}
+				for (String attribute : ocelEvent.attributes.keySet()) {
+					Object attributeValue = ocelEvent.attributes.get(attribute);
+					XAttribute xatt = TypeFromValue.getAttributeForValue(attribute, attributeValue);
+					eventAttributes.put(attribute, xatt);
+				}
+				XEvent event = new XEventImpl(eventAttributes);
+				trace.add(event);
+			}
+			log.add(trace);
+		}
+		return log;
 	}
 }

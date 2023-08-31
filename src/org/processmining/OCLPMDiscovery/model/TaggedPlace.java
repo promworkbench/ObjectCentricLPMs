@@ -167,6 +167,20 @@ public class TaggedPlace extends Place{
 		return intersection;
 	}
 	
+	/**
+	 * Returns the labels of all transitions to which this place is connected.
+	 */
+	public Set<String> getConnectedActivities() {
+		// union of transitions connected to this place
+		Set<Transition> connectedTransitions = Stream.concat(this.getInputTransitions().stream(),this.getOutputTransitions().stream()).collect(Collectors.toSet());
+		Set<String> connectedActivities = new HashSet<String>();
+		
+		for (Transition t : connectedTransitions) {
+			connectedActivities.add(t.getLabel());
+		}
+		return connectedActivities;
+	}
+	
 	@Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -174,4 +188,5 @@ public class TaggedPlace extends Place{
         TaggedPlace place = (TaggedPlace) o;
         return this.isEqual(place);
     }
+
 }
