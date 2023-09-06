@@ -121,6 +121,20 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		this.storeEvaluations(lpm);
 	}
 	
+	public ObjectCentricLocalProcessModel(LocalProcessModel lpm, String discoveryType, float variableArcThreshold, TaggedPlaceSet placeSet) {
+		this();
+		this.id = lpm.getId();
+		Set<TaggedPlace> tplaces = new HashSet<TaggedPlace>();
+		for (Place p : lpm.getPlaces()) {
+			tplaces.add((TaggedPlace) p);
+		}
+		this.addAllPlaces(tplaces); // adds also the transitions, places, arcs
+		this.variableArcThreshold = variableArcThreshold;
+		this.discoveryTypes.add(discoveryType);
+		this.grabIsomorphicPlaces(placeSet);
+		this.storeEvaluations(lpm);
+	}
+	
 	/*
 	 * Create copy of the given oclpm where the places can be swapped without changing the original.
 	 */
@@ -227,7 +241,9 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		for (TaggedPlace tp : this.placeMapIsomorphic.values()) {
 			Set<String> activities = new HashSet<>();
 			for (String activity : tp.getConnectedActivities()) {
-				if (score.get(Arrays.asList(new String[] {activity, tp.getObjectType()})) < this.variableArcThreshold) {
+				List<String> arc = Arrays.asList(new String[] {activity, tp.getObjectType()});
+				Double arcScore = score.get(arc);
+				if (arcScore < this.variableArcThreshold) {
 					activities.add(activity);
 				}
 			}

@@ -50,7 +50,8 @@ public class VariableArcIdentificator implements WindowLPMEvaluator<VariableArcI
         		//TODO Out of bounds because replayed index gets too high
         		// currently window first event pos is excluding and last event pos is including
         		// Added -1 as temporary fix
-        	if (!overlapCheck[indexInWindow]) { // event hasn't been counted yet
+//        	if (!overlapCheck[indexInWindow]) { // event hasn't been counted yet
+        	if (true) { //TODO remove after testing
         		Iterator<XTrace> it = window.getOriginalTraces().iterator();
         		while (it.hasNext()) {
         			// get event

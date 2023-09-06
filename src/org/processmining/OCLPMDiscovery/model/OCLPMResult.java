@@ -57,11 +57,22 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
      * @param placeSet
      */
     public OCLPMResult (OCLPMDiscoveryParameters discoveryParameters, LPMResultsTagged tlpms, TaggedPlaceSet placeSet) {
-    	this(discoveryParameters, tlpms);
-    	this.setPlaceSet(placeSet);
-    	for (ObjectCentricLocalProcessModel oclpm : this.elements) {
-    		oclpm.grabIsomorphicPlaces(placeSet);
+    	HashSet<ObjectCentricLocalProcessModel> oclpms = new HashSet<ObjectCentricLocalProcessModel>(tlpms.size());
+    	// convert LPM objects into OCLPM objects
+    	for (TaggedLPMResult res : tlpms.getElements()) { // for all used case notions
+	    	for (LocalProcessModel lpm : res.getElements()) { // for all lpms discovered for that notion
+	    		ObjectCentricLocalProcessModel oclpm = new ObjectCentricLocalProcessModel(lpm, res.getCaseNotion(), discoveryParameters.getVariableArcThreshold(), placeSet);
+	    		oclpm.setObjectTypesAll(discoveryParameters.getObjectTypesPlaceNets());
+	    		oclpms.add(oclpm);
+	    	}
     	}
+    	if (discoveryParameters.getVariableArcIdentification() == VariableArcIdentification.PER_LPM) {
+    		Main.updateProgress("Finished variable arc identification");
+    	}
+    	this.addAll(oclpms);
+    	copyDiscoveryParameters(discoveryParameters);
+    	this.refreshColors();
+    	this.setPlaceSet(placeSet);
     }
     
     /**
