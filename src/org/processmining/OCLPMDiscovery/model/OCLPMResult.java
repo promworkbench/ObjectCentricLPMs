@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.processmining.OCLPMDiscovery.Main;
+import org.processmining.OCLPMDiscovery.parameters.ExternalObjectFlow;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.parameters.VariableArcIdentification;
 import org.processmining.placebasedlpmdiscovery.model.LocalProcessModel;
@@ -22,7 +23,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     private String oclpmDiscoverySettingsHTML; // settings used for the discovery of this result
     private HashMap<String,Color> mapTypeColor; // maps each object type to a color
     private TaggedPlaceSet placeSet; 
-    private boolean showExternalObjectFlow = false;
+    private ExternalObjectFlow showExternalObjectFlow = ExternalObjectFlow.NONE;
     
     public OCLPMResult() {
     	
@@ -252,28 +253,49 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 		return newResult;
 	}
 
-	public void showExternalObjectFlow(boolean selected) {
-		if (this.showExternalObjectFlow == selected) {
+	public void showExternalObjectFlow(ExternalObjectFlow selected) {
+		if (this.showExternalObjectFlow.equals(selected)) {
 			return; // already in correct state
 		}
-		else if (selected) {
-			// add external flow places
-			for (ObjectCentricLocalProcessModel oclpm : this.getElements()) {
-				oclpm.addExternalObjectFlow(this.getStartingActivities(), this.getEndingActivities());
-			}
-			this.showExternalObjectFlow = true;
+		
+		// remove external object flow places if present
+		if (this.isShowExternalObjectFlow()) {
+			this.removeExternalObjectFlow();
 		}
-		else {
-			// remove external flow places
-			for (ObjectCentricLocalProcessModel oclpm : this.getElements()) {
-				oclpm.removeExternalObjectFlow(this.getStartingActivities(), this.getEndingActivities());
-			}
-			this.showExternalObjectFlow = false;
+		
+		// add places
+		switch (selected) {
+			case NONE:
+				// places have already been removed
+				break;
+			case ALL:
+				// Add all places so that all object flow interruptions are fixed ?
+				for (ObjectCentricLocalProcessModel oclpm : this.getElements()) {
+					oclpm.addExternalObjectFlowAll();
+				}
+				this.showExternalObjectFlow = ExternalObjectFlow.ALL;
+				break;
+			case START_END:
+				// Add places for starting and ending transitions
+				for (ObjectCentricLocalProcessModel oclpm : this.getElements()) {
+					oclpm.addExternalObjectFlowStartEnd(this.getStartingActivities(), this.getEndingActivities());
+				}
+				this.showExternalObjectFlow = ExternalObjectFlow.START_END;
+				break;
+			default:
+				break;
 		}
 	}
 	
+	public void removeExternalObjectFlow() {
+		for (ObjectCentricLocalProcessModel oclpm : this.getElements()) {
+			oclpm.removeExternalObjectFlow(this.getStartingActivities(), this.getEndingActivities());
+		}
+		this.showExternalObjectFlow = ExternalObjectFlow.NONE;
+	}
+	
 	public boolean isShowExternalObjectFlow() {
-		return this.showExternalObjectFlow;
+		return !this.showExternalObjectFlow.equals(ExternalObjectFlow.NONE);
 	}
 
 	public Map<String, Set<String>> getStartingActivities() {

@@ -28,7 +28,7 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	private boolean placeSetPostProcessing = true; // remove duplicate places from placeSet (should always be true)
 	
 	// variable arc identification
-	private VariableArcIdentification variableArcIdentification = VariableArcIdentification.PER_LPM; // IMO the most accurate should always be chosen, so use PER_LPM and do not make it user adjustable
+	private VariableArcIdentification variableArcIdentification = VariableArcIdentification.PER_PLACE; // IMO the most accurate should always be chosen, so use PER_LPM and do not make it user adjustable
 	private float variableArcThreshold = 0.95f; // threshold which the score function is compared against
 	
 	// place completion

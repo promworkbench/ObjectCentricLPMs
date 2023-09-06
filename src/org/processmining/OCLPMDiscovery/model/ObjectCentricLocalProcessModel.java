@@ -609,7 +609,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	 * @param typeMap 
 	 * @param variableArcActivities 
 	 */
-	public void addExternalObjectFlow(
+	public void addExternalObjectFlowStartEnd(
 			Map<String, Set<String>> startingActivities, 
 			Map<String, Set<String>> endingActivities
 			){
@@ -715,6 +715,10 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 			}
 		}
 		this.addAllPlaces(newPlaces);
+	}
+	
+	public void addExternalObjectFlowAll() {
+		//TODO
 	}
 
 	private void addVariableArc(String placeId, String activity) {
