@@ -30,6 +30,7 @@ import org.processmining.OCLPMDiscovery.gui.OCLPMScrollPane;
 import org.processmining.OCLPMDiscovery.gui.OCLPMToggleButton;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
 import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
+import org.processmining.OCLPMDiscovery.parameters.ExternalObjectFlow;
 import org.processmining.OCLPMDiscovery.parameters.PlaceCompletion;
 import org.processmining.OCLPMDiscovery.utils.PlaceCompletionUtils;
 import org.processmining.OCLPMDiscovery.visualization.components.ComponentId;
@@ -128,13 +129,28 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
             }
         });
         
-        // object flow button
-        OCLPMToggleButton objectFlowButton = new OCLPMToggleButton(this.theme);
-        objectFlowButton.setText("Show Start/End Places");
-        objectFlowButton.setSelected(false);
-        objectFlowButton.setCornerRadius(0);
-        objectFlowButton.addActionListener(actionEvent -> {
-        	this.shownResult.showExternalObjectFlow(objectFlowButton.isSelected());
+//        // object flow button
+//        OCLPMToggleButton objectFlowButton = new OCLPMToggleButton(this.theme);
+//        objectFlowButton.setText("Show Start/End Places");
+//        objectFlowButton.setSelected(false);
+//        objectFlowButton.setCornerRadius(0);
+//        objectFlowButton.addActionListener(actionEvent -> {
+//        	this.shownResult.showExternalObjectFlow(objectFlowButton.isSelected());
+//        	// refresh visualizer to show new places
+//        	int row = table.getSelectedRow();
+//        	int column = table.getSelectedColumn();
+//        	table.clearSelection();
+//        	table.changeSelection(row, column, false, false);
+//        });
+        
+        // external object flow label
+        JLabel objectFlowLabel = new JLabel("External Object Flow:");
+        objectFlowLabel.setMinimumSize(new Dimension(1,30));
+        
+        // external object flow box
+        OCLPMComboBox objectFlowBox = new OCLPMComboBox(ExternalObjectFlow.values(), this.theme);
+        objectFlowBox.addActionListener(actionEvent -> {
+        	this.shownResult.showExternalObjectFlow((ExternalObjectFlow) objectFlowBox.getSelectedItem());
         	// refresh visualizer to show new places
         	int row = table.getSelectedRow();
         	int column = table.getSelectedColumn();
@@ -192,10 +208,11 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         		((VisibilityControllableTableColumnModel) table.getColumnModel()).keepOnlyFirstColumn(); // keep only the first column
         	}
         	
-        	// add external object flow if the button is selected
-        	if (objectFlowButton.isSelected()) {
-        		objectFlowButton.setSelected(false);
-        		objectFlowButton.doClick();
+        	// add external object flow if something else than NONE is selected
+        	ExternalObjectFlow currentObjectFlowSelection = (ExternalObjectFlow) (objectFlowBox.getSelectedItem()); 
+        	if (!currentObjectFlowSelection.equals(ExternalObjectFlow.NONE)) {
+        		objectFlowBox.setSelectedItem(ExternalObjectFlow.NONE);
+        		objectFlowBox.setSelectedItem(currentObjectFlowSelection);
         	}
         });
         
@@ -224,7 +241,9 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         
         // object flow
         gbc.gridy = gridy++;
-        this.add(objectFlowButton, gbc);
+        this.add(objectFlowLabel, gbc);
+        gbc.gridy = gridy++;
+        this.add(objectFlowBox, gbc);
         
         // place completion
         gbc.gridy = gridy++;
