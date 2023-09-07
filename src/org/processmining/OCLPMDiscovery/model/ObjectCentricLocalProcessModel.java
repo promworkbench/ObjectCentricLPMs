@@ -717,8 +717,110 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		this.addAllPlaces(newPlaces);
 	}
 	
+	/**
+	 * 
+	 */
 	public void addExternalObjectFlowAll() {
-		//TODO
+		// check current flow situation
+		HashMap<List<String>,Set<TaggedPlace>> transitionMap = new HashMap<>(); // maps (transitionName,TypeName,"in"/"out") -> TaggedPlaces
+		for (TaggedPlace tp : this.getPlaces()) {
+			for (Transition t : tp.getInputTransitions()) {
+				String[] key = new String[3];
+				key[0] = t.getLabel();
+				key[1] = tp.getObjectType();
+				key[2] = "out"; // this transition is input to a place
+				if (transitionMap.containsKey(Arrays.asList(key))) {
+					transitionMap.get(Arrays.asList(key)).add(tp);
+				}
+				else {
+					Set<TaggedPlace> value = new HashSet<>();
+					value.add(tp);
+					transitionMap.put(Arrays.asList(key),value);					
+				}
+			}
+			for (Transition t : tp.getOutputTransitions()) {
+				String[] key = new String[3];
+				key[0] = t.getLabel();
+				key[1] = tp.getObjectType();
+				key[2] = "in"; // this transition is output to a place
+				if (transitionMap.containsKey(Arrays.asList(key))) {
+					transitionMap.get(Arrays.asList(key)).add(tp);
+				}
+				else {
+					Set<TaggedPlace> value = new HashSet<>();
+					value.add(tp);
+					transitionMap.put(Arrays.asList(key),value);					
+				}
+			}
+		}
+		//TODO change so that special places only have one transition connected
+		// add special places
+		Set<TaggedPlace> newPlaces = new HashSet<>();
+		for (String type : this.getPlaceTypes()) {
+			for (String activity : this.transitions.keySet()) {
+				List<String> keyOut = Arrays.asList(new String[] {activity,type,"out"});
+				List<String> keyIn = Arrays.asList(new String[] {activity,type,"in"});
+				// ingoing but no outgoing arcs
+				if ((!transitionMap.containsKey(keyOut) || transitionMap.get(keyOut).isEmpty())
+						&& (transitionMap.containsKey(keyIn) && !transitionMap.get(keyIn).isEmpty())) {
+					// check if arc already connected to the transition is variable
+					Boolean variableArc = this.getVariableArcActivities(transitionMap.get(keyIn).iterator().next()).contains(activity);
+					// then add the special ending place
+					// if there already is a place "EndingPlace:type" only add the new transitions
+					boolean placeExists = false;
+					for (TaggedPlace tmp_place : newPlaces) {
+						if (tmp_place.getId().equals("EndingPlace:"+type)) {
+							placeExists = true;
+							tmp_place.addInputTransition(this.transitions.get(activity));
+							if (variableArc) {
+								// add this as variable arc if the arc going in to the transition is variable
+								this.addVariableArc(tmp_place.getId(),activity);
+							}
+							break;
+						}
+					}
+					if (!placeExists) {
+						TaggedPlace p = new TaggedPlace(type, "EndingPlace:"+type);
+						p.addInputTransition(this.transitions.get(activity));
+						if (variableArc) {
+							// add this as variable arc if the arc going in to the transition is variable
+							this.addVariableArc(p.getId(),activity);
+						}
+						newPlaces.add(p);
+					}
+				}
+				// outgoing but no ingoing arcs
+				if ((!transitionMap.containsKey(keyIn) || transitionMap.get(keyIn).isEmpty())
+						&& (transitionMap.containsKey(keyOut) && !transitionMap.get(keyOut).isEmpty())) {
+					// check if arc already connected to the transition is variable
+					Boolean variableArc = this.getVariableArcActivities(transitionMap.get(keyOut).iterator().next()).contains(activity);
+					// then add the special ending place
+					// if there already is a place "EndingPlace:type" only add the new transitions
+					boolean placeExists = false;
+					for (TaggedPlace tmp_place : newPlaces) {
+						if (tmp_place.getId().equals("StartingPlace:"+type)) {
+							placeExists = true;
+							tmp_place.addOutputTransition(this.transitions.get(activity));
+							if (variableArc) {
+								// add this as variable arc if the arc going in to the transition is variable
+								this.addVariableArc(tmp_place.getId(),activity);
+							}
+							break;
+						}
+					}
+					if (!placeExists) {
+						TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type);
+						p.addOutputTransition(this.transitions.get(activity));
+						if (variableArc) {
+							// add this as variable arc if the arc going in to the transition is variable
+							this.addVariableArc(p.getId(),activity);
+						}
+						newPlaces.add(p);
+					}
+				}
+			}
+		}
+		this.addAllPlaces(newPlaces);
 	}
 
 	private void addVariableArc(String placeId, String activity) {
