@@ -86,7 +86,8 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         OCLPMScrollPane scrollPane = new OCLPMScrollPane(table, theme); // add the table in a scroll pane
         
-        int sortColumnIndex = table.getModel().getColumnCount()-1;
+//        int sortColumnIndex = table.getModel().getColumnCount()-1;
+        int sortColumnIndex = 2; //combined score is at index 2 (see in OCLPMResultPluginVisualizerTableFactory)
         List<RowSorter.SortKey> sortKeys = new ArrayList<>();
         sortKeys.add(new RowSorter.SortKey(sortColumnIndex, SortOrder.ASCENDING));
         table.getRowSorter().setSortKeys(sortKeys);
@@ -128,20 +129,6 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
                 filterForm.setVisible(false);
             }
         });
-        
-//        // object flow button
-//        OCLPMToggleButton objectFlowButton = new OCLPMToggleButton(this.theme);
-//        objectFlowButton.setText("Show Start/End Places");
-//        objectFlowButton.setSelected(false);
-//        objectFlowButton.setCornerRadius(0);
-//        objectFlowButton.addActionListener(actionEvent -> {
-//        	this.shownResult.showExternalObjectFlow(objectFlowButton.isSelected());
-//        	// refresh visualizer to show new places
-//        	int row = table.getSelectedRow();
-//        	int column = table.getSelectedColumn();
-//        	table.clearSelection();
-//        	table.changeSelection(row, column, false, false);
-//        });
         
         // external object flow label
         JLabel objectFlowLabel = new JLabel("External Object Flow:");

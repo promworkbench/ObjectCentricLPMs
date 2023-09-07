@@ -825,14 +825,20 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	public void recalculateEvaluation() {
 		// calculate evaluation metrics which are dependent on the placecompletion
 		this.evaluation.put(OCLPMEvaluationMetrics.TYPE_USAGE, this.calculateTypeUsageScore());
+		this.evaluation.put(OCLPMEvaluationMetrics.NUM_TYPES, (double) this.getPlaceTypes().size());
+		this.evaluation.put(OCLPMEvaluationMetrics.NUM_PLACES, (double) this.getPlaces().size());
+		this.evaluation.put(OCLPMEvaluationMetrics.NUM_TRANSITIONS, (double) this.getTransitions().size());
 		
 		// calculate combined score
 		Double combinedScore = 0.0;
+		int numUsedMetric = 0;
 		for (OCLPMEvaluationMetrics metric : this.evaluation.keySet()) {
-			if (metric.equals(OCLPMEvaluationMetrics.COMBINED_SCORE)) continue;
-			combinedScore+=this.evaluation.get(metric);
+			if (metric.isUsedInCombinedScore()) {
+				combinedScore+=this.evaluation.get(metric);	
+				numUsedMetric++;
+			}
 		}
-		combinedScore = combinedScore / (this.evaluation.size()-1);
+		combinedScore = combinedScore / numUsedMetric;
 		this.setCombinedScore(combinedScore);
 	}
 

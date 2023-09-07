@@ -62,12 +62,16 @@ public class OCLPMResultPluginVisualizerTableFactory extends AbstractPluginVisua
     	new String[]{
                 "LPM Index",
                 "LPM Short Name",
+                OCLPMEvaluationMetrics.COMBINED_SCORE.getName(), // keep at index 2 for default sorting
                 OCLPMEvaluationMetrics.FITTING_WINDOWS.getName(),
                 OCLPMEvaluationMetrics.PASSAGE_COVERAGE.getName(),
                 OCLPMEvaluationMetrics.PASSAGE_REPETITION.getName(),
                 OCLPMEvaluationMetrics.TRANSITION_COVERAGE.getName(),
                 OCLPMEvaluationMetrics.TRACE_SUPPORT.getName(),
-                OCLPMEvaluationMetrics.COMBINED_SCORE.getName()
+                OCLPMEvaluationMetrics.TYPE_USAGE.getName(),
+                OCLPMEvaluationMetrics.NUM_TYPES.getName(),
+                OCLPMEvaluationMetrics.NUM_PLACES.getName(),
+                OCLPMEvaluationMetrics.NUM_TRANSITIONS.getName(),
         };
     }
     
@@ -77,12 +81,16 @@ public class OCLPMResultPluginVisualizerTableFactory extends AbstractPluginVisua
     		(ind, oclpm) -> new Object[]{
                 ind + 1,
                 oclpm.getShortString(),
+                df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.COMBINED_SCORE)),
                 df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.FITTING_WINDOWS)),
                 df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.PASSAGE_COVERAGE)),
                 df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.PASSAGE_REPETITION)),
                 df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.TRANSITION_COVERAGE)),
                 df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.TRACE_SUPPORT)),
-                df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.COMBINED_SCORE)),
+                df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.TYPE_USAGE)),
+                df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.NUM_TYPES)),
+                df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.NUM_PLACES)),
+                df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.NUM_TRANSITIONS)),
     		};
     }
 }
