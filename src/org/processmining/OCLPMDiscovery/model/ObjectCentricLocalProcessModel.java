@@ -845,9 +845,10 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	//TODO compute type usage score
 	private Double calculateTypeUsageScore() {
 		// importances 1 = full importance
-		double importance_variableArcs = 1.0;
-		double importance_types = 0.5;
-		double importance_transitions = 0.5;
+		// used importance fractions should sum up to 1
+		double importance_variableArcs = 0.7;
+		double importance_types = 0.3;
+		double importance_transitions = 0.0;
 		
 		// variable arc counting
 		double fractionNonVariableArcs = 0.0;
@@ -859,7 +860,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 				variableArcs += this.mapIdVarArcActivities.get(tp.getId()).size();
 			}
 		}
-		fractionNonVariableArcs = (double)(totalArcs - (variableArcs * importance_variableArcs)) / (double) totalArcs;
+		fractionNonVariableArcs = (double)(totalArcs - variableArcs) / (double) totalArcs;
 		
 		// object types
 		double all = this.objectTypesAll.size();
@@ -867,10 +868,11 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		if (all < present) {
 			all = present;
 		}
-		double fractionTypesOccurring = 1- ((all-present) * importance_types / all);
+		double fractionTypesOccurring = present / all;
 		
 		double fractionCleanTransitions;
-		return fractionNonVariableArcs * fractionTypesOccurring;
+		
+		return fractionNonVariableArcs * importance_variableArcs + fractionTypesOccurring * importance_types;
 	}
 
 	public Map<OCLPMEvaluationMetrics,Double> getEvaluation() {
