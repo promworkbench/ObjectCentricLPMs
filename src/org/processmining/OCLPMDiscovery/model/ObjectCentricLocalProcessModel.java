@@ -243,7 +243,18 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 			for (String activity : tp.getConnectedActivities()) {
 				List<String> arc = Arrays.asList(new String[] {activity, tp.getObjectType()});
 				Double arcScore = score.get(arc);
-				if (arcScore < this.variableArcThreshold) {
+				/* PER_LPM variable arc identification: 
+					Some scores are null because the LPM discovery ignores self loops.
+					Models with self loops are kept even if the self loop is never executed.
+					In such situations there is no score information because 0 events of that 
+					activity are in the "filtered log" with the events replayed by the LPM
+					where the score is computed on.
+					Here we decide to just tag those arcs as non-variable.
+				*/
+				if (arcScore == null) { 
+					continue;
+				}
+				else if (arcScore < this.variableArcThreshold) {
 					activities.add(activity);
 				}
 			}
@@ -842,7 +853,6 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		this.setCombinedScore(combinedScore);
 	}
 
-	//TODO compute type usage score
 	private Double calculateTypeUsageScore() {
 		// importances 1 = full importance
 		// used importance fractions should sum up to 1
