@@ -11,6 +11,7 @@ public enum OCLPMEvaluationMetrics {
 	NUM_TYPES("Number of Types"), // number of different place types in the model
 	NUM_PLACES("Number of Places"),
 	NUM_TRANSITIONS("Number of Transitions"),
+	NUM_VARIABLEARCS("Number of Variable Arcs"),
 	;
 	
 	private final String name;

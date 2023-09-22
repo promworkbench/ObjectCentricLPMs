@@ -840,6 +840,15 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		this.evaluation.put(OCLPMEvaluationMetrics.NUM_PLACES, (double) this.getPlaces().size());
 		this.evaluation.put(OCLPMEvaluationMetrics.NUM_TRANSITIONS, (double) this.getTransitions().size());
 		
+		// variable arc counting
+		int variableArcs = 0;
+		for (TaggedPlace tp : this.places) {
+			if (this.mapIdVarArcActivities.get(tp.getId()) != null) {
+				variableArcs += this.mapIdVarArcActivities.get(tp.getId()).size();
+			}
+		}
+		this.evaluation.put(OCLPMEvaluationMetrics.NUM_VARIABLEARCS, (double) variableArcs);
+		
 		// calculate combined score
 		Double combinedScore = 0.0;
 		int numUsedMetric = 0;
