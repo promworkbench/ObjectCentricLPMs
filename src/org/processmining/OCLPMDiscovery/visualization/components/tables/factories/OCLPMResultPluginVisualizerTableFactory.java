@@ -73,6 +73,8 @@ public class OCLPMResultPluginVisualizerTableFactory extends AbstractPluginVisua
                 OCLPMEvaluationMetrics.NUM_PLACES.getName(),
                 OCLPMEvaluationMetrics.NUM_TRANSITIONS.getName(),
                 OCLPMEvaluationMetrics.NUM_VARIABLEARCS.getName(),
+                OCLPMEvaluationMetrics.NUM_ARCS.getName(),
+                OCLPMEvaluationMetrics.FRAC_NONVARIABLEARCS.getName(),
         };
     }
     
@@ -93,6 +95,8 @@ public class OCLPMResultPluginVisualizerTableFactory extends AbstractPluginVisua
                 df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.NUM_PLACES)),
                 df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.NUM_TRANSITIONS)),
                 df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.NUM_VARIABLEARCS)),
+                df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.NUM_ARCS)),
+                df.format(oclpm.getEvaluation(OCLPMEvaluationMetrics.FRAC_NONVARIABLEARCS)),
     		};
     }
 }

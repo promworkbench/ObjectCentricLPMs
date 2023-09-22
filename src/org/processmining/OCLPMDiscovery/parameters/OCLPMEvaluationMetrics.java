@@ -12,6 +12,8 @@ public enum OCLPMEvaluationMetrics {
 	NUM_PLACES("Number of Places"),
 	NUM_TRANSITIONS("Number of Transitions"),
 	NUM_VARIABLEARCS("Number of Variable Arcs"),
+	NUM_ARCS("Number of Arcs"),
+	FRAC_NONVARIABLEARCS("Fraction Non-Variable Arcs"),
 	;
 	
 	private final String name;

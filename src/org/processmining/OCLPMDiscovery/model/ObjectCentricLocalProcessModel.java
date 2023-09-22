@@ -840,14 +840,18 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		this.evaluation.put(OCLPMEvaluationMetrics.NUM_PLACES, (double) this.getPlaces().size());
 		this.evaluation.put(OCLPMEvaluationMetrics.NUM_TRANSITIONS, (double) this.getTransitions().size());
 		
-		// variable arc counting
+		// arc counting
 		int variableArcs = 0;
+		int totalArcs = 0;
 		for (TaggedPlace tp : this.places) {
+			totalArcs += tp.getInputTransitions().size() + tp.getOutputTransitions().size();
 			if (this.mapIdVarArcActivities.get(tp.getId()) != null) {
 				variableArcs += this.mapIdVarArcActivities.get(tp.getId()).size();
 			}
 		}
 		this.evaluation.put(OCLPMEvaluationMetrics.NUM_VARIABLEARCS, (double) variableArcs);
+		this.evaluation.put(OCLPMEvaluationMetrics.NUM_ARCS, (double) totalArcs);
+		this.evaluation.put(OCLPMEvaluationMetrics.FRAC_NONVARIABLEARCS, (double)(totalArcs - variableArcs) / (double) totalArcs);
 		
 		// calculate combined score
 		Double combinedScore = 0.0;
@@ -869,17 +873,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		double importance_types = 0.3;
 		double importance_transitions = 0.0;
 		
-		// variable arc counting
-		double fractionNonVariableArcs = 0.0;
-		int variableArcs = 0;
-		int totalArcs = 0;
-		for (TaggedPlace tp : this.places) {
-			totalArcs += tp.getInputTransitions().size() + tp.getOutputTransitions().size();
-			if (this.mapIdVarArcActivities.get(tp.getId()) != null) {
-				variableArcs += this.mapIdVarArcActivities.get(tp.getId()).size();
-			}
-		}
-		fractionNonVariableArcs = (double)(totalArcs - variableArcs) / (double) totalArcs;
+		double fractionNonVariableArcs = this.evaluation.get(OCLPMEvaluationMetrics.FRAC_NONVARIABLEARCS);
 		
 		// object types
 		double all = this.objectTypesAll.size();
