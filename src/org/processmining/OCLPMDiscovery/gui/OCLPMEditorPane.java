@@ -59,18 +59,31 @@ public class OCLPMEditorPane extends JEditorPane{
         int maxWidth = 0;
         int totalHeight = 0;
 
-        String[] lines = text.split("\n");
+        String[] lines; 
+        if (this.getContentType()=="text/html") {
+        	lines = text.split("<br>");
+        }
+        else {
+	        lines = text.split("\n");
+        	
+        }
+        int prevLineHeight = 0;
         for (String line : lines) {
+        	if (line.length() == 0) {
+        		totalHeight += prevLineHeight;
+        		continue;
+        	}
             TextLayout layout = new TextLayout(line, font, fontMetrics.getFontRenderContext());
             Rectangle2D bounds = layout.getBounds();
             int lineWidth = (int) Math.ceil(bounds.getWidth());
             int lineHeight = (int) Math.ceil(bounds.getHeight());
+            prevLineHeight = lineHeight;
             maxWidth = Math.max(maxWidth, lineWidth);
             totalHeight += lineHeight;
         }
 
         int width = maxWidth + getInsets().left + getInsets().right;
-        int height = totalHeight + getInsets().top + getInsets().bottom;
+        int height = (int) (1.7*totalHeight) + getInsets().top + getInsets().bottom;
 
         return new Dimension((int) (width*1.05), height);
     }

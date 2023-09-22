@@ -76,6 +76,8 @@ public class OCLPMVisualizer {
         
         ta_evaluation.setText(evalHtml);
         evalComponent.add(ta_evaluation);
+        evalComponent.setPreferredSize(ta_evaluation.getPreferredSize());
+//        evalComponent.setPreferredSize(new Dimension(windowWidth, 80 * windowHeight / 100));
 //        evalComponent.add(ComponentFactory.getComplexEvaluationResultComponent(oclpm.getAdditionalInfo().getEvaluationResult()));
         
         
