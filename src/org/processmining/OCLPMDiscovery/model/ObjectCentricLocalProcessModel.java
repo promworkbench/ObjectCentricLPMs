@@ -876,6 +876,33 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		
 		double fractionNonVariableArcs = this.evaluation.get(OCLPMEvaluationMetrics.FRAC_NONVARIABLEARCS);
 		
+		// places with variable arcs coming in and going out
+		int countInOutVarPlaces = 0;
+		for (TaggedPlace tp : this.getPlaces()) {
+			boolean inVar = false;
+			for (Transition t : tp.getInputTransitions()) {
+				if (this.getVariableArcActivities(tp).contains(t.getLabel())) {
+					// place tp has a variable arc going in
+					inVar = true;
+				}
+			}
+			if (!inVar) {
+				continue; // no variable arc goes into tp
+			}
+			boolean outVar = false;
+			for (Transition t : tp.getOutputTransitions()) {
+				if (this.getVariableArcActivities(tp).contains(t.getLabel())) {
+					// place tp has a variable arc coming out
+					outVar = true;
+				}
+			}
+			if (inVar && outVar) {
+				// variable arcs go in and come out of tp
+				countInOutVarPlaces++;
+			}
+		}
+		double fractionNotInOutVarPlaces = (double) (this.getPlaces().size() - countInOutVarPlaces)/ (double) this.getPlaces().size();
+		
 		// object types
 		double all = this.objectTypesAll.size();
 		double present = this.placeTypes.size();
@@ -886,7 +913,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		
 		double fractionCleanTransitions;
 		
-		return fractionNonVariableArcs * importance_variableArcs + fractionTypesOccurring * importance_types;
+		return fractionNotInOutVarPlaces * importance_variableArcs + fractionTypesOccurring * importance_types;
 	}
 
 	public Map<OCLPMEvaluationMetrics,Double> getEvaluation() {
