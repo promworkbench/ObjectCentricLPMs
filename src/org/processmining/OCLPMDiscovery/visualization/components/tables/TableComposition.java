@@ -203,6 +203,11 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         	}
         });
         
+        placeCompletionBox.setSelectedItem(PlaceCompletion.FEWVARIABLE);
+        
+        /* 
+         * Layout
+         */
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(0,0,0,0);

@@ -355,13 +355,25 @@ public class Main {
 		XLog log;
 		Object[] lpmResults;
 		LPMResult lpmResult;
+		
+		/*Create copy of placeSet and remove all duplicates
+			We do not need to discover the same model for all combinations of different types in the LPM discovery
+			because in the conversion to OCLPMs do an isomorphism swap with the initial place set anyway
+			and in the PlaceCompletion step we create the models with different types for the places.
+			The LPM discovery doesn't care about the types and takes the longest time.
+			Therefore, we should give it as few input places as possible.
+		 */
+		TaggedPlaceSet placeSetTrimmed = new TaggedPlaceSet(placeSet);
+		placeSetTrimmed.removeIsomorphic();
+		messageNormal("LPM discovery will start with "+placeSetTrimmed.size()+" unique place nets.");
+		
 		for (String currentType : labels) {
 			// flatten ocel
 			log = Main.flattenOCEL(ocel, currentType, parameters.getVariableArcIdentification().equals(VariableArcIdentification.PER_LPM));
 		
 			// discover LPMs (name of the currentType column needs concept:name, which the flattening does)
 			System.out.println("Starting LPM discovery using \""+currentType+"\" as case notion.");
-			lpmResults = runLPMPlugin(log, placeSet, parameters);
+			lpmResults = runLPMPlugin(log, placeSetTrimmed, parameters);
 			assert(lpmResults[0] instanceof LPMResult);
 			lpmResult = (LPMResult) lpmResults[0];
 			lpmsTagged.add(lpmResult, currentType);
@@ -389,6 +401,17 @@ public class Main {
 		Graph<String,DefaultEdge> graph;
 		ArrayList<String> newTypeLabels;
 		boolean perLPMVarArcs = parameters.getVariableArcIdentification().equals(VariableArcIdentification.PER_LPM);
+		
+		/*Create copy of placeSet and remove all duplicates
+			We do not need to discover the same model for all combinations of different types in the LPM discovery
+			because in the conversion to OCLPMs do an isomorphism swap with the initial place set anyway
+			and in the PlaceCompletion step we create the models with different types for the places.
+			The LPM discovery doesn't care about the types and takes the longest time.
+			Therefore, we should give it as few input places as possible.
+		 */
+		TaggedPlaceSet placeSetTrimmed = new TaggedPlaceSet(placeSet);
+		placeSetTrimmed.removeIsomorphic();
+		messageNormal("LPM discovery will start with "+placeSetTrimmed.size()+" unique place nets.");
 		
 		switch (parameters.getCaseNotionStrategy()) {
 				
@@ -435,7 +458,7 @@ public class Main {
 				
 					// discover LPMs (name of the currentType column needs concept:name, which the flattening does)
 					System.out.println("Starting LPM discovery using leading type "+newTypeLabel+" as case notion.");
-					lpmResults = runLPMPlugin(log, placeSet, parameters);
+					lpmResults = runLPMPlugin(log, placeSetTrimmed, parameters);
 					assert(lpmResults[0] instanceof LPMResult);
 					lpmResult = (LPMResult) lpmResults[0];
 					lpmsTagged.add(lpmResult, currentType);
@@ -453,7 +476,7 @@ public class Main {
 				messageNormal("Discovered "+ocel.objectTypes.get(ot).objects.size()+" connected components.");
 				log = Main.flattenOCEL(ocel, ot, perLPMVarArcs);
 				System.out.println("Starting LPM discovery using connected components as case notion.");
-				lpmResults = runLPMPlugin(log, placeSet, parameters);
+				lpmResults = runLPMPlugin(log, placeSetTrimmed, parameters);
 				assert(lpmResults[0] instanceof LPMResult);
 				lpmResult = (LPMResult) lpmResults[0];
 				lpmsTagged.add(lpmResult, ot);
@@ -467,7 +490,7 @@ public class Main {
 				log = Main.flattenOCEL(dummyOcel,dummyType, perLPMVarArcs);
 				System.out.println("Flattened on dummy type.");
 				System.out.println("Starting LPM discovery using a dummy type as case notion.");
-				lpmResults = runLPMPlugin(log, placeSet, parameters);
+				lpmResults = runLPMPlugin(log, placeSetTrimmed, parameters);
 				assert(lpmResults[0] instanceof LPMResult);
 				lpmResult = (LPMResult) lpmResults[0];
 				lpmsTagged.add(lpmResult, dummyType);
@@ -788,12 +811,13 @@ public class Main {
 		}
 	}
 	
-	public static Object[] runLPMPlugin(XLog log, TaggedPlaceSet placeSet, OCLPMDiscoveryParameters parameters) {
+	public static Object[] runLPMPlugin(XLog log, TaggedPlaceSet placeSetTrimmed, OCLPMDiscoveryParameters parameters) {
 		Object[] lpmResults = new Object[] {};
+		
 		if (parameters.getVariableArcIdentification() == VariableArcIdentification.PER_LPM) {
 			messageNormal("Starting LPM discovery and variable arc identification.");
 			LPMDiscoveryBuilder builder = org.processmining.placebasedlpmdiscovery.Main
-					.createDefaultBuilder(log, placeSet.asPlaceSet(), parameters.getPBLPMDiscoveryParameters());
+					.createDefaultBuilder(log, placeSetTrimmed.asPlaceSet(), parameters.getPBLPMDiscoveryParameters());
 			builder.registerLPMWindowEvaluator(CustomLPMEvaluatorIds.VariableArcIdentificator.name(),new VariableArcIdentificator(parameters.getObjectTypesAll()));
 			lpmResults = new Object[] {builder.build().run()};
 			updateProgress("Finished LPM discovery.");
@@ -801,7 +825,7 @@ public class Main {
 		else {
 			messageNormal("Starting LPM discovery.");
 			//TODO what happens if Context==null?
-			lpmResults = new Object[] {PlaceBasedLPMDiscoveryPlugin.mineLPMs(Context, log, placeSet.asPlaceSet(), parameters.getPBLPMDiscoveryParameters())};
+			lpmResults = new Object[] {PlaceBasedLPMDiscoveryPlugin.mineLPMs(Context, log, placeSetTrimmed.asPlaceSet(), parameters.getPBLPMDiscoveryParameters())};
 			updateProgress("Finished LPM discovery.");
 		}
 		return lpmResults;

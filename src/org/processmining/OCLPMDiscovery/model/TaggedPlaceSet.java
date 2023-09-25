@@ -1,6 +1,7 @@
 package org.processmining.OCLPMDiscovery.model;
 
 import java.io.OutputStream;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,6 +30,13 @@ public class TaggedPlaceSet extends SerializableSet<TaggedPlace> implements Expo
     	super();
     	for (Place p : placeSet.getElements()) {
     		this.add((TaggedPlace)p);
+    	}
+    }
+    
+    public TaggedPlaceSet(TaggedPlaceSet placeSet) {
+    	super();
+    	for (TaggedPlace p : placeSet.getElements()) {
+    		this.add(p);
     	}
     }
 
@@ -68,5 +76,30 @@ public class TaggedPlaceSet extends SerializableSet<TaggedPlace> implements Expo
 	public void setTypes(Set<String> types) {
 		this.objectTypesPlaceNets = types;
 	}
+
+	public void removeIsomorphic() {
+        Set<TaggedPlace> uniqueRepresentations = new HashSet<>();
+        Set<TaggedPlace> toRemove = new HashSet<>();
+
+        for (TaggedPlace current : this.getElements()) {
+            boolean isDuplicate = false;
+
+            for (TaggedPlace unique : uniqueRepresentations) {
+                if (current.isIsomorphic(unique)) {
+                    toRemove.add(current);
+                    isDuplicate = true;
+                    break;
+                }
+            }
+
+            if (!isDuplicate) {
+                uniqueRepresentations.add(current);
+            }
+        }
+
+        for (TaggedPlace tp : toRemove) {
+        	this.remove(tp);
+        }
+    }
 
 }
