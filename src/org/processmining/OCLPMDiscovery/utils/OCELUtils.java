@@ -181,7 +181,6 @@ public class OCELUtils {
 	 * @return
 	 */
 	public static XLog flattenCounting(OcelEventLog ocel, String caseNotion) {
-		//TODO test if this works
 		XAttributeMap logAttributes = new XAttributeMapImpl();
 		XLog log = new XLogImpl(logAttributes);
 		for (OcelObject ocelObject : ocel.objectTypes.get(caseNotion).objects) {

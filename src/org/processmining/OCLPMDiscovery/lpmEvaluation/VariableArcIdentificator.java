@@ -46,11 +46,8 @@ public class VariableArcIdentificator implements WindowLPMEvaluator<VariableArcI
         
         // count events
         for (int replayedEventIndex : window.getReplayedEventsIndices()) {
-        	int indexInWindow = replayedEventIndex - window.getWindowFirstEventPos(); 
-        		//TODO Out of bounds because replayed index gets too high
-        		// currently window first event pos is excluding and last event pos is including
-//        	if (!overlapCheck[indexInWindow]) { // event hasn't been counted yet
-        	if (true) { //TODO remove after testing
+        	int indexInWindow = replayedEventIndex - window.getWindowFirstEventPos();
+        	if (!overlapCheck[indexInWindow]) { // event hasn't been counted yet
         		Iterator<XTrace> it = window.getOriginalTraces().iterator();
         		while (it.hasNext()) {
         			// get event
@@ -64,7 +61,6 @@ public class VariableArcIdentificator implements WindowLPMEvaluator<VariableArcI
         				if (count == 1) {
         					result.countSingle(activity, type);
         				}
-        				//TODO Do I really want to count all events and not just the events with at least one object of that type?
         				result.countAll(activity, type); 
         			}
         		}

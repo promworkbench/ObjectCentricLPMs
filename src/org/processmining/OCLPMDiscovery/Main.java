@@ -188,66 +188,6 @@ public class Main {
         return new Object[] {oclpmResult};
     }
 	
-	
-	//TODO deal with the variants where no place set is given. (Maybe just delete them as place completion just isn't possible at all)
-	/**
-	 * OCLPMs discovery starting from LPMs of a single case notion
-	 * @param ocel
-	 * @param parameters
-	 * @return {oclpmResult, tlpms}
-	 */
-	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, LPMResult lpms) {
-        LPMResultsTagged tlpms = new LPMResultsTagged(lpms,"Single Case Notion");
-        ProvidingObjects.exportTlpms(tlpms);
-		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms);
-		
-		// OCLPM place completion not possible as the place nets aren't available.
-		
-//		// identify variable arcs
-//		oclpmResult = Main.identifyVariableArcs(parameters, oclpmResult);
-		
-		// reevaluation of OCLPMs
-		oclpmResult = Main.evaluateOCLPMs(parameters, oclpmResult);
-		
-		// post processing
-		oclpmResult = Main.postProcessing(parameters, oclpmResult);
-
-		Main.printExecutionTime();
-        return new Object[] {oclpmResult, tlpms};
-    }
-	
-	/**
-	 * Discover only LPMs starting from ocel
-	 * @param ocel
-	 * @param parameters
-	 * @return
-	 */
-	public static LPMResultsTagged runLPMDiscovery(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
-        
-		TaggedPlaceSet placeSet = discoverPlaceSet(ocel,parameters);
-		ProvidingObjects.exportPlaceSet(placeSet);
-		
-		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
-
-		Main.printExecutionTime();
-        return tlpms;
-    }
-	
-	/**
-	 * Discover only LPMs starting with place set
-	 * @param ocel
-	 * @param parameters
-	 * @param placeSet
-	 * @return
-	 */
-	public static LPMResultsTagged runLPMDiscovery(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, TaggedPlaceSet placeSet) {
-        	
-		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
-
-		Main.printExecutionTime();
-        return tlpms;
-    }
-	
 	//===================================================================
 	//		logic
 	//===================================================================
@@ -269,7 +209,7 @@ public class Main {
 			XLog flatLog = Main.flattenOCEL(ocel, currentType, false);
 			Main.messageNormal("Flattened ocel for type "+currentType);
 			
-			// TODO discover starting and ending activities
+			// discover starting and ending activities
 //			XLogInfo info = flatLog.getInfo(new XEventNameClassifier());
 			Iterator<XTrace> traceIterator = ((XLogImpl)flatLog).iterator();
 			XTrace trace;
@@ -289,7 +229,7 @@ public class Main {
 			// discover petri net using est-miner (use specpp)
 			// split petri net into place nets
 			// tag places with current object type
-			Set<TaggedPlace> placeNets = FlatLogProcessing.processFlatLog(Context, flatLog, currentType, parameters); //TODO what happens if Context==null?
+			Set<TaggedPlace> placeNets = FlatLogProcessing.processFlatLog(Context, flatLog, currentType, parameters);
 			// testing if it does work when not creating places from casted taggedPlaces: Yes it works! :(
 //			Set<Place> placeNets = FlatLogProcessing.processFlatLogNoTagging(Context, flatLog, currentType, parameters);
 			Main.updateProgress("Finished discovery of place nets for object type "+currentType+".");
@@ -824,7 +764,6 @@ public class Main {
 		}
 		else {
 			messageNormal("Starting LPM discovery.");
-			//TODO what happens if Context==null?
 			lpmResults = new Object[] {PlaceBasedLPMDiscoveryPlugin.mineLPMs(Context, log, placeSetTrimmed.asPlaceSet(), parameters.getPBLPMDiscoveryParameters())};
 			updateProgress("Finished LPM discovery.");
 		}
