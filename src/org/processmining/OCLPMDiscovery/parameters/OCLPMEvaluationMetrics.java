@@ -14,6 +14,7 @@ public enum OCLPMEvaluationMetrics {
 	NUM_VARIABLEARCS("Number of Variable Arcs"),
 	NUM_ARCS("Number of Arcs"),
 	FRAC_NONVARIABLEARCS("Fraction Non-Variable Arcs"),
+	DISCOVERY_TYPES("Case Notion Used"),
 	;
 	
 	private final String name;

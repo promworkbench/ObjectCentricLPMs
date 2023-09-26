@@ -64,7 +64,7 @@ public class OCLPMVisualizer {
         	evalHtml += "<b>Discovered using the leading type:</b><br>"+oclpm.getDiscoveryTypes().toArray()[0]+"<br>";
         }
         else if (oclpm.getDiscoveryTypes().size() > 1) {
-        	evalHtml += "Discovered using the leading type:<br>";
+        	evalHtml += "<b>Discovered using the leading types:</b><br>";
         	for (Object curType : oclpm.getDiscoveryTypes().toArray()) {
         		evalHtml += (String) curType+"<br>";
         	}
@@ -91,11 +91,11 @@ public class OCLPMVisualizer {
         settingsHtml += oclpmResult.getOclpmDiscoverySettingsHTMLBody();
         
         String executionTimesHtml = " <br>"+"<b>Execution Times:</b>"+"<br>";
-        executionTimesHtml += "Execution time starting with " + oclpmResult.getTimeStartingVariant() + ": " + oclpmResult.getExecutionTimeMinutes() + " minutes <br>";
+        executionTimesHtml += "Discovery starting with " + oclpmResult.getTimeStartingVariant() + ": " + oclpmResult.getExecutionTimeMinutes() + " minutes <br>";
         if (oclpmResult.getExecutionTimePlaceCompletion() != 0)
-        	executionTimesHtml += "Execution Time of Place Completion: "+ oclpmResult.getExecutionTimePlaceCompletion() + " ms <br>";
+        	executionTimesHtml += "Place Completion: "+ oclpmResult.getExecutionTimePlaceCompletion() + " ms <br>";
         if (oclpmResult.getExecutionTimeExternalObjectFlow() != 0)
-        	executionTimesHtml += "Execution Time of External Object Flow: "+ oclpmResult.getExecutionTimeExternalObjectFlow() + " ms <br>";
+        	executionTimesHtml += "External Object Flow: "+ oclpmResult.getExecutionTimeExternalObjectFlow() + " ms <br>";
         
         ta_discoverySettings.setText(settingsHtml + executionTimesHtml + "</body></html>");
         

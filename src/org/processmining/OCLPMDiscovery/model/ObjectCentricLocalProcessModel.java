@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -265,6 +266,18 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 
 	public HashSet<String> getDiscoveryTypes() {
 		return discoveryTypes;
+	}
+	
+	public String getDiscoveryTypesString() {
+		String types = "";
+		Iterator<String> it = this.discoveryTypes.iterator();
+		for (int i = 0; i<this.discoveryTypes.size(); i++) {
+			types += it.next();
+			if (i<this.discoveryTypes.size()-1) {
+				types +=", ";
+			}
+		}
+		return types;
 	}
 	
 	public void setDiscoveryTypes(HashSet<String> types) {

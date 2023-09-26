@@ -68,7 +68,15 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 	    	for (LocalProcessModel lpm : res.getElements()) { // for all lpms discovered for that notion
 	    		ObjectCentricLocalProcessModel oclpm = new ObjectCentricLocalProcessModel(lpm, res.getCaseNotion(), discoveryParameters.getVariableArcThreshold(), placeSet);
 	    		oclpm.setObjectTypesAll(discoveryParameters.getObjectTypesPlaceNets());
-	    		oclpms.add(oclpm);
+	    		if (!oclpms.add(oclpm)) {
+	    			// oclpm is already contained (but with different discovery type)
+	    			// Yeah this for loop is bad but there is no option to get the equal element from the HashSet
+	    			for (ObjectCentricLocalProcessModel oclpm2 : oclpms) {
+	    				if (oclpm.equals(oclpm2)) {
+	    					oclpm2.getDiscoveryTypes().addAll(oclpm.getDiscoveryTypes());
+	    				}
+	    			}
+	    		}
 	    	}
     	}
     	if (discoveryParameters.getVariableArcIdentification() == VariableArcIdentification.PER_LPM) {

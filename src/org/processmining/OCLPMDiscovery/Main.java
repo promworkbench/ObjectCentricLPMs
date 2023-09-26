@@ -335,7 +335,7 @@ public class Main {
 		ArrayList<String> newTypeLabels;
 		boolean perLPMVarArcs = parameters.getVariableArcIdentification().equals(VariableArcIdentification.PER_LPM);
 		
-		/*Create copy of placeSet and remove all duplicates
+		/*Create copy of placeSet and remove all isomorphic
 			We do not need to discover the same model for all combinations of different types in the LPM discovery
 			because in the conversion to OCLPMs do an isomorphism swap with the initial place set anyway
 			and in the PlaceCompletion step we create the models with different types for the places.
