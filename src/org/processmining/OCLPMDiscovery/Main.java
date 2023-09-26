@@ -50,7 +50,7 @@ public class Main {
 	public static boolean UsingContext = false;
 	public static Graph<String,DefaultEdge> graph;
 	public static boolean graphProvided = false;
-	public static long startTime = System.currentTimeMillis();
+	public static long startTime = 0;
 	
 	
 	//===================================================================
@@ -67,6 +67,8 @@ public class Main {
 		// place discovery
 		TaggedPlaceSet placeSet = discoverPlaceSet(ocel,parameters);
 		ProvidingObjects.exportPlaceSet(placeSet);
+		
+		startTimer();
 		
 		// LPM discovery
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
@@ -87,7 +89,7 @@ public class Main {
 		// post processing
 		oclpmResult = Main.postProcessing(parameters, oclpmResult);
 		
-		Main.printExecutionTime();
+		Main.endTimer(oclpmResult, "places");
         return new Object[] {oclpmResult, tlpms, placeSet};
     }
 	
@@ -98,12 +100,7 @@ public class Main {
 	 * @return {oclpmResult, tlpms}
 	 */
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, TaggedPlaceSet placeSet) {
-		
-		// remove duplicate places from placeSet
-		if (parameters.doPlaceSetPostProcessing()) {
-			placeSet = Main.postProcessPlaceSet(placeSet);
-			ProvidingObjects.exportPlaceSet(placeSet);
-		}
+		startTimer();
 		
 		// discover LPMs
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet);
@@ -123,7 +120,7 @@ public class Main {
 		// post processing
 		oclpmResult = Main.postProcessing(parameters, oclpmResult);
 
-		Main.printExecutionTime();
+		Main.endTimer(oclpmResult, "places");
         return new Object[] {oclpmResult, tlpms};
     }
 	
@@ -134,11 +131,7 @@ public class Main {
 	 * @return {oclpmResult, tlpms}
 	 */
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, TaggedPlaceSet placeSet, ArrayList<String> labels) {
-		// remove duplicate places from placeSet
-		if (parameters.doPlaceSetPostProcessing()) {
-			placeSet = Main.postProcessPlaceSet(placeSet);
-			ProvidingObjects.exportPlaceSet(placeSet);
-		}
+		startTimer();
 		
 		// discover LPMs
 		LPMResultsTagged tlpms = discoverLPMs(ocel, parameters, placeSet, labels);
@@ -158,7 +151,7 @@ public class Main {
 		// post processing
 		oclpmResult = Main.postProcessing(parameters, oclpmResult);
 
-		Main.printExecutionTime();
+		Main.endTimer(oclpmResult, "enhanced OCEL");
         return new Object[] {oclpmResult, tlpms};
     }
 	
@@ -169,7 +162,8 @@ public class Main {
 	 * @return {oclpmResult}
 	 */
 	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, LPMResultsTagged tlpms, TaggedPlaceSet placeSet) {
-        		
+		startTimer();
+		
 		OCLPMResult oclpmResult = convertLPMstoOCLPMs(parameters, tlpms, placeSet);
 		
 		// identify variable arcs
@@ -184,7 +178,7 @@ public class Main {
 		// post processing
 		oclpmResult = Main.postProcessing(parameters, oclpmResult);
 
-		Main.printExecutionTime();
+		Main.endTimer(oclpmResult, "LPMs");
         return new Object[] {oclpmResult};
     }
 	
@@ -245,9 +239,6 @@ public class Main {
 		placeSet.setStartingActivities(startingActivities);
 		placeSet.setEndingActivities(endingActivities);
 		placeSet.setTypes(parameters.getObjectTypesPlaceNets());
-		
-		//TODO remove after testing
-		postProcessPlaceSet(placeSet);
 		
 		return placeSet;
 	}
@@ -668,7 +659,6 @@ public class Main {
 	//===================================================================
 	
 	public static void setUp(PluginContext context) {
-		Main.startTime = System.currentTimeMillis();
 		Main.Context = context;
         if (context != null) {
         	Main.UsingContext = true;
@@ -810,9 +800,21 @@ public class Main {
 		return log;
 	}
 	
+	public static void startTimer() {
+		startTime = System.currentTimeMillis();
+	}
+
 	public static void printExecutionTime() {
 		long endTime = System.currentTimeMillis();
 		long elapsedTime = endTime - Main.startTime;
+		
+		System.out.println("OCLPM Discovery Execution time: "+Math.round((elapsedTime/1000.0/60.0) * 1000.0)/1000.0+" Minutes");
+	}
+	
+	public static void endTimer(OCLPMResult oclpmResult, String startingFrom) {
+		long endTime = System.currentTimeMillis();
+		long elapsedTime = endTime - Main.startTime;
+		oclpmResult.setExecutionTime(elapsedTime, startingFrom);
 		
 		System.out.println("OCLPM Discovery Execution time: "+Math.round((elapsedTime/1000.0/60.0) * 1000.0)/1000.0+" Minutes");
 	}

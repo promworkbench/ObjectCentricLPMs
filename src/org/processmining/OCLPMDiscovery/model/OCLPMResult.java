@@ -20,10 +20,14 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     private Set<String> objectTypes = new HashSet<>(); // all object types from the ocel
     private Set<String> lpmDiscoveryTypes; // types which were used as a case notion for LPM discovery
     private String oclpmDiscoverySettings; // settings used for the discovery of this result
-    private String oclpmDiscoverySettingsHTML; // settings used for the discovery of this result
+    private String oclpmDiscoverySettingsHTML; // settings used for the discovery of this result, no html start & end
     private HashMap<String,Color> mapTypeColor; // maps each object type to a color
     private TaggedPlaceSet placeSet; 
     private ExternalObjectFlow showExternalObjectFlow = ExternalObjectFlow.NONE;
+    private long executionTime = -1; // execution time starting after the place discovery in milliseconds, excluding place completion (which is done in the visualizer)
+    private long executionTimePlaceCompletion = 0; // in milliseconds
+    private long executionTimeExternalObjectFlow = 0; // in milliseconds
+    private String timeStartingFrom = "";
     
     public OCLPMResult() {
     	
@@ -94,7 +98,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     
     public void copyDiscoveryParameters(OCLPMDiscoveryParameters discoveryParameters) {
     	this.oclpmDiscoverySettings = discoveryParameters.toString();
-    	this.oclpmDiscoverySettingsHTML = discoveryParameters.toHTML();
+    	this.oclpmDiscoverySettingsHTML = discoveryParameters.toHTMLBody();
     	this.objectTypes = discoveryParameters.getObjectTypesAll();
     	this.lpmDiscoveryTypes = discoveryParameters.getObjectTypesLeadingTypes();
     }
@@ -315,6 +319,10 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 	}
 
 	public String getOclpmDiscoverySettingsHTML() {
+		return "<html><body>" + oclpmDiscoverySettingsHTML + "</body></html>";
+	}
+	
+	public String getOclpmDiscoverySettingsHTMLBody() {
 		return oclpmDiscoverySettingsHTML;
 	}
 
@@ -327,6 +335,47 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 			oclpm.recalculateEvaluation();
 		}
 		
+	}
+
+	public void setExecutionTime(long elapsedTime, String startingFrom) {
+		this.executionTime = elapsedTime;
+		this.timeStartingFrom = startingFrom;
+	}
+	
+	public double getExecutionTimeMinutes() {
+		return Math.round((this.executionTime/1000.0/60.0) * 1000.0)/1000.0;
+	}
+	
+	/**
+	 * Returns when the timer was started. E.g., "places" when the timer was started after the place discovery.
+	 * Other variants are "enhanced OCEL" and "LPMs".
+	 */
+	public String getTimeStartingVariant() {
+		return this.timeStartingFrom;
+	}
+
+	public long getExecutionTimePlaceCompletion() {
+		return executionTimePlaceCompletion;
+	}
+	
+	public long getExecutionTimeExternalObjectFlow() {
+		return executionTimeExternalObjectFlow;
+	}
+	
+	public double getExecutionTimePlaceCompletionSeconds() {
+		return Math.round((executionTimePlaceCompletion/1000.0)*1000.0)/1000.0;
+	}
+	
+	public double getExecutionTimeExternalObjectFlowSeconds() {
+		return Math.round((executionTimeExternalObjectFlow/1000.0)*1000.0)/1000.0;
+	}
+	
+	public void setExecutionTimePlaceCompletion(long time) {
+		this.executionTimePlaceCompletion = time;
+	}
+	
+	public void setExecutionTimeExternalObjectFlow(long time) {
+		this.executionTimeExternalObjectFlow = time;
 	}
 
 }

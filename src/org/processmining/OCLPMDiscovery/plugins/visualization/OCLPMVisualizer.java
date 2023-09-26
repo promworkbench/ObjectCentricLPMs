@@ -87,7 +87,17 @@ public class OCLPMVisualizer {
         settingsComponent.setLayout(new BoxLayout(settingsComponent, BoxLayout.Y_AXIS));
         OCLPMEditorPane ta_discoverySettings = new OCLPMEditorPane("", false, true, theme);
         ta_discoverySettings.setEditorKit(editorKit);
-        ta_discoverySettings.setText(oclpmResult.getOclpmDiscoverySettingsHTML());
+        String settingsHtml = "<html><body>";
+        settingsHtml += oclpmResult.getOclpmDiscoverySettingsHTMLBody();
+        
+        String executionTimesHtml = " <br>"+"<b>Execution Times:</b>"+"<br>";
+        executionTimesHtml += "Execution time starting with " + oclpmResult.getTimeStartingVariant() + ": " + oclpmResult.getExecutionTimeMinutes() + " minutes <br>";
+        if (oclpmResult.getExecutionTimePlaceCompletion() != 0)
+        	executionTimesHtml += "Execution Time of Place Completion: "+ oclpmResult.getExecutionTimePlaceCompletion() + " ms <br>";
+        if (oclpmResult.getExecutionTimeExternalObjectFlow() != 0)
+        	executionTimesHtml += "Execution Time of External Object Flow: "+ oclpmResult.getExecutionTimeExternalObjectFlow() + " ms <br>";
+        
+        ta_discoverySettings.setText(settingsHtml + executionTimesHtml + "</body></html>");
         
         settingsComponent.add(ta_discoverySettings);
         

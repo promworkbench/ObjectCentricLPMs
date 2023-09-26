@@ -158,15 +158,16 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	
     public String toHTML() {
     	String htmlStart = "<html><body>";
-        String caption = "<b>OCLPM Discovery parameters:</b><br>";
-        String broadParameters =
-        		"Place Discovery Algorithm: "+this.getPlaceDiscoveryAlgorithm().getName()+"<br>"
-        		+ "Case Notion Strategy: "+this.getCaseNotionStrategy().getName()+"<br>"
-        		;
+        String htmlEnd = "</body></html>";
+        return htmlStart + this.toHTMLBody() + htmlEnd;
+    }
+    
+    public String toHTMLBody() {
+    	String caption = "<b>OCLPM Discovery parameters:</b><br>";
         String otherParams = "";
         int s,i;
         
-        otherParams += "Place Discovery Object Types: ";
+        otherParams += "Object Types in place set: ";
         s = this.getObjectTypesPlaceNets().size();
         i = 0;
         for (String current : this.getObjectTypesPlaceNets()) {
@@ -176,6 +177,7 @@ public class OCLPMDiscoveryParameters implements EventLog{
         	else otherParams+="<br>";
         }
         
+        otherParams += "Case Notion Strategy: "+this.getCaseNotionStrategy().getName()+"<br>";
         otherParams += "LPM Case Notion Object Types: ";
         s = this.getObjectTypesCaseNotion().size();
         i = 0;
@@ -198,34 +200,34 @@ public class OCLPMDiscoveryParameters implements EventLog{
             }
         }
         
-        if (this.getPlaceDiscoveryAlgorithm() == Miner.SPECPP) {
-        	if (this.getSpecppParameters() == null) {
-        		otherParams += "SPECpp parameters haven't been saved.<br>";
-        	}
-        	else {
-        		otherParams += "SPECpp parameters:<br>";
-        		otherParams += this.getSpecppParameters().toString();        		
-        	}
-        }
-        
-        else if (this.getPlaceDiscoveryAlgorithm() == Miner.ILP) {
-        	otherParams += "ILP parameters haven't been saved.<br>";
-//        	if (this.getPlaceDiscoveryAlgorithm() == null) {
-//        		otherParams += "ILP parameters haven't been saved.<br>";
+//        otherParams += "Place Discovery Algorithm: "+this.getPlaceDiscoveryAlgorithm().getName()+"<br>";
+//        if (this.getPlaceDiscoveryAlgorithm() == Miner.SPECPP) {
+//        	if (this.getSpecppParameters() == null) {
+//        		otherParams += "SPECpp parameters haven't been saved.<br>";
 //        	}
 //        	else {
-//        		otherParams += "ILP parameters:<br>";
-//        		otherParams += "Wizard follows now.<br>";
-////        		otherParams += this.getIlpParameters().toString();        		
+//        		otherParams += "SPECpp parameters:<br>";
+//        		otherParams += this.getSpecppParameters().toString();        		
 //        	}
-        }
+//        }
+        
+//        else if (this.getPlaceDiscoveryAlgorithm() == Miner.ILP) {
+//        	otherParams += "ILP parameters haven't been saved.<br>";
+////        	if (this.getPlaceDiscoveryAlgorithm() == null) {
+////        		otherParams += "ILP parameters haven't been saved.<br>";
+////        	}
+////        	else {
+////        		otherParams += "ILP parameters:<br>";
+////        		otherParams += "Wizard follows now.<br>";
+//////        		otherParams += this.getIlpParameters().toString();        		
+////        	}
+//        }
         
         otherParams += "Variable arc identification: "+this.getVariableArcIdentification().getName()+"<br>";
         otherParams += "Variable arc threshold: "+this.getVariableArcThreshold()+"<br>";
 //        otherParams += "Place completion: "+this.getPlaceCompletion().getName()+"<br>";
         
-        String htmlEnd = "</body></html>";
-        return htmlStart + caption + broadParameters + otherParams + htmlEnd;
+        return caption + otherParams;
     }
 
 	public Set<String> getObjectTypesAll() {

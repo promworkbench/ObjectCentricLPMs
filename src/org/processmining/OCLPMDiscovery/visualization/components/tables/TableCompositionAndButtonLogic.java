@@ -41,7 +41,7 @@ import org.processmining.placebasedlpmdiscovery.model.TextDescribable;
 import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableCollection;
 import org.processmining.placebasedlpmdiscovery.prom.plugins.visualization.utils.RegexConverter;
 
-public class TableComposition<T extends TextDescribable & Serializable> extends JComponent implements ICommunicativePanel {
+public class TableCompositionAndButtonLogic<T extends TextDescribable & Serializable> extends JComponent implements ICommunicativePanel {
 
     private final ComponentId componentId;
     private final OCLPMResult result; // original unaltered result
@@ -50,7 +50,7 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
     private final TableListener<T> controller;
     private OCLPMColors theme = new OCLPMColors();
 
-    public TableComposition(OCLPMResult result,
+    public TableCompositionAndButtonLogic(OCLPMResult result,
     						OCLPMResult resultCopy,
                             AbstractPluginVisualizerTableFactory<T> tableFactory,
                             TableListener<T> controller) {
@@ -63,7 +63,7 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         init();
     }
     
-    public TableComposition(OCLPMResult result,
+    public TableCompositionAndButtonLogic(OCLPMResult result,
 			OCLPMResult resultCopy,
             AbstractPluginVisualizerTableFactory<T> tableFactory,
             TableListener<T> controller,
@@ -137,7 +137,12 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         // external object flow box
         OCLPMComboBox objectFlowBox = new OCLPMComboBox(ExternalObjectFlow.values(), this.theme);
         objectFlowBox.addActionListener(actionEvent -> {
+        	long startTime = System.currentTimeMillis();
         	this.shownResult.showExternalObjectFlow((ExternalObjectFlow) objectFlowBox.getSelectedItem());
+        	long elapsedTime = System.currentTimeMillis() - startTime;
+        	this.shownResult.setExecutionTimeExternalObjectFlow(elapsedTime);
+        	this.result.setExecutionTimeExternalObjectFlow(elapsedTime);
+        	System.out.println("Change in External Object Flow took took "+elapsedTime+" ms.");
         	// refresh visualizer to show new places
         	int row = table.getSelectedRow();
         	int column = table.getSelectedColumn();
@@ -152,7 +157,12 @@ public class TableComposition<T extends TextDescribable & Serializable> extends 
         // place completion box
         OCLPMComboBox placeCompletionBox = new OCLPMComboBox(PlaceCompletion.values(), this.theme);
         placeCompletionBox.addActionListener(actionEvent -> {
+        	long startTime = System.currentTimeMillis();
         	OCLPMResult newResult = PlaceCompletionUtils.completePlacesCopy(this.result, (PlaceCompletion) placeCompletionBox.getSelectedItem());
+    		long elapsedTime = System.currentTimeMillis() - startTime;
+    		newResult.setExecutionTimePlaceCompletion(elapsedTime);
+    		result.setExecutionTimePlaceCompletion(elapsedTime);
+    		System.out.println("Place Completion took "+elapsedTime+" ms.");
         	this.shownResult = newResult;
         	
         	// show all columns (otherwise it doesn't work)

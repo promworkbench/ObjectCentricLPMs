@@ -16,7 +16,7 @@ import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
 import org.processmining.OCLPMDiscovery.model.TaggedPlace;
 import org.processmining.OCLPMDiscovery.plugins.visualization.OCLPMVisualizer;
 import org.processmining.OCLPMDiscovery.plugins.visualization.TaggedPlaceVisualizer;
-import org.processmining.OCLPMDiscovery.visualization.components.tables.TableComposition;
+import org.processmining.OCLPMDiscovery.visualization.components.tables.TableCompositionAndButtonLogic;
 import org.processmining.OCLPMDiscovery.visualization.components.tables.TableListener;
 import org.processmining.OCLPMDiscovery.visualization.components.tables.factories.AbstractPluginVisualizerTableFactory;
 import org.processmining.contexts.uitopia.UIPluginContext;
@@ -61,7 +61,7 @@ public class SimpleCollectionOfElementsComponent<T extends TextDescribable & Ser
 
         // create the table and LPM visualization containers
         visualizerComponent = createVisualizerComponent();
-        JComponent tableContainer = new TableComposition<>(this.result, this.result.copyForPlaceCompletion(), this.tableFactory, this, theme);
+        JComponent tableContainer = new TableCompositionAndButtonLogic<>(this.result, this.result.copyForPlaceCompletion(), this.tableFactory, this, theme);
 
         // set the preferred dimension of the two containers
         int windowHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
