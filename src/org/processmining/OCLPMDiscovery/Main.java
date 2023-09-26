@@ -229,10 +229,12 @@ public class Main {
 			// discover petri net using est-miner (use specpp)
 			// split petri net into place nets
 			// tag places with current object type
-			Set<TaggedPlace> placeNets = FlatLogProcessing.processFlatLog(Context, flatLog, currentType, parameters);
+			HashSet<TaggedPlace> placeNets = FlatLogProcessing.processFlatLog(Context, flatLog, currentType, parameters);
 			// testing if it does work when not creating places from casted taggedPlaces: Yes it works! :(
 //			Set<Place> placeNets = FlatLogProcessing.processFlatLogNoTagging(Context, flatLog, currentType, parameters);
 			Main.updateProgress("Finished discovery of place nets for object type "+currentType+".");
+			
+			// duplicates do not have to be removed, hashset handles that
 
 			// unite place nets
 			placeNetsUnion.addAll(placeNets);
@@ -244,8 +246,8 @@ public class Main {
 		placeSet.setEndingActivities(endingActivities);
 		placeSet.setTypes(parameters.getObjectTypesPlaceNets());
 		
-		// remove duplicate place nets
-		placeSet = postProcessPlaceSet(placeSet);
+		//TODO remove after testing
+		postProcessPlaceSet(placeSet);
 		
 		return placeSet;
 	}

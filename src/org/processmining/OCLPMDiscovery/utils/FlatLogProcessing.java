@@ -1,5 +1,6 @@
 package org.processmining.OCLPMDiscovery.utils;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.deckfour.xes.model.XLog;
@@ -30,9 +31,9 @@ public class FlatLogProcessing {
 //		return results;
 //	}
 	
-	public static Set<TaggedPlace> processFlatLog (PluginContext context, XLog log, String objectType, OCLPMDiscoveryParameters parameters){
+	public static HashSet<TaggedPlace> processFlatLog (PluginContext context, XLog log, String objectType, OCLPMDiscoveryParameters parameters){
 		Petrinet petrinet = discoverPetriNet (context, log, parameters);
-		Set<TaggedPlace> result = convertPetriNetToTaggedPlaceNets (context, petrinet, objectType);
+		HashSet<TaggedPlace> result = convertPetriNetToTaggedPlaceNets (context, petrinet, objectType);
 		return result;
 	}
 	
@@ -99,7 +100,7 @@ public class FlatLogProcessing {
 		return converter.convertCasted(acceptingPetriNet);
 	}
 	
-	public static Set<TaggedPlace> convertPetriNetToTaggedPlaceNets (PluginContext context, Petrinet petrinet, String objectType){
+	public static HashSet<TaggedPlace> convertPetriNetToTaggedPlaceNets (PluginContext context, Petrinet petrinet, String objectType){
 		AcceptingPetriNet acceptingPetriNet = new AcceptingPetriNetImpl(petrinet);
 		PetriNetTaggedPlaceConverter converter = new PetriNetTaggedPlaceConverter(objectType);
 		return converter.convertToTagged(acceptingPetriNet);

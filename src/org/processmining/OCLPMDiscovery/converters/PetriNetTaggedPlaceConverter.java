@@ -225,11 +225,11 @@ public class PetriNetTaggedPlaceConverter extends AbstractPlaceConverter<Accepti
         return discoveredPlaces;
     }
     
-    public Set<TaggedPlace> convertToTagged(AcceptingPetriNet result) {
-        Set<TaggedPlace> discoveredTaggedPlaces = new HashSet<>();
-        Set<Place> discoveredPlaces = new HashSet<>();
+    public HashSet<TaggedPlace> convertToTagged(AcceptingPetriNet result) {
+        HashSet<TaggedPlace> discoveredTaggedPlaces = new HashSet<>();
+        HashSet<Place> discoveredPlaces = new HashSet<>();
         // create transitions
-        Set<Transition> transitions = new HashSet<>();
+        HashSet<Transition> transitions = new HashSet<>();
         for (org.processmining.models.graphbased.directed.petrinet.elements.Transition t : result.getNet().getTransitions()) {
             String label = t.getLabel();
             if (t.isInvisible())

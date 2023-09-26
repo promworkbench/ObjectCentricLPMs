@@ -1,6 +1,7 @@
 package org.processmining.OCLPMDiscovery.model;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -100,7 +101,7 @@ public class TaggedPlace extends Place{
 	}
 
 	/**
-	 * Checks if all the transition are equal (doesn't check variable arcs)
+	 * Checks if all the transition are equal and the object type (doesn't check variable arcs)
 	 * @param tp
 	 * @return
 	 */
@@ -187,6 +188,11 @@ public class TaggedPlace extends Place{
         if (o == null || getClass() != o.getClass()) return false;
         TaggedPlace place = (TaggedPlace) o;
         return this.isEqual(place);
+    }
+	
+	@Override
+    public int hashCode() {
+        return Objects.hash(getInputTransitions(), getOutputTransitions(), objectType);
     }
 
 }
