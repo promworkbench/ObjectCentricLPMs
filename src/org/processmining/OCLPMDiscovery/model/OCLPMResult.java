@@ -9,6 +9,7 @@ import java.util.Set;
 import org.processmining.OCLPMDiscovery.Main;
 import org.processmining.OCLPMDiscovery.parameters.ExternalObjectFlow;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
+import org.processmining.OCLPMDiscovery.parameters.PlaceCompletion;
 import org.processmining.OCLPMDiscovery.parameters.VariableArcIdentification;
 import org.processmining.placebasedlpmdiscovery.model.LocalProcessModel;
 import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
@@ -265,7 +266,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 		return newResult;
 	}
 
-	public void showExternalObjectFlow(ExternalObjectFlow selected) {
+	public void showExternalObjectFlow(ExternalObjectFlow selected, PlaceCompletion currentPlaceCompletion) {
 		if (this.showExternalObjectFlow.equals(selected)) {
 			return; // already in correct state
 		}
@@ -283,14 +284,14 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 			case ALL:
 				// Add all places so that all object flow interruptions are fixed ?
 				for (ObjectCentricLocalProcessModel oclpm : this.getElements()) {
-					oclpm.addExternalObjectFlowAll();
+					oclpm.addExternalObjectFlowAll(currentPlaceCompletion);
 				}
 				this.showExternalObjectFlow = ExternalObjectFlow.ALL;
 				break;
 			case START_END:
 				// Add places for starting and ending transitions
 				for (ObjectCentricLocalProcessModel oclpm : this.getElements()) {
-					oclpm.addExternalObjectFlowStartEnd(this.getStartingActivities(), this.getEndingActivities());
+					oclpm.addExternalObjectFlowStartEnd(this.getStartingActivities(), this.getEndingActivities(), currentPlaceCompletion);
 				}
 				this.showExternalObjectFlow = ExternalObjectFlow.START_END;
 				break;

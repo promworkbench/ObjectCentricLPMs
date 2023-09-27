@@ -15,6 +15,7 @@ import org.deckfour.xes.model.impl.XLogImpl;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.processmining.OCLPMDiscovery.lpmEvaluation.CustomLPMEvaluatorIds;
+import org.processmining.OCLPMDiscovery.lpmEvaluation.ObjectTypesPerTransitionIdentificator;
 import org.processmining.OCLPMDiscovery.lpmEvaluation.VariableArcIdentificator;
 import org.processmining.OCLPMDiscovery.model.LPMResultsTagged;
 import org.processmining.OCLPMDiscovery.model.OCLPMResult;
@@ -33,7 +34,6 @@ import org.processmining.OCLPMDiscovery.utils.ProvidingObjects;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.events.Logger.MessageLevel;
-import org.processmining.ocel.flattening.Flattening;
 import org.processmining.ocel.ocelobjects.OcelEvent;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
 import org.processmining.ocel.ocelobjects.OcelObject;
@@ -41,7 +41,6 @@ import org.processmining.placebasedlpmdiscovery.main.LPMDiscoveryBuilder;
 import org.processmining.placebasedlpmdiscovery.model.Transition;
 import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
 import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableList;
-import org.processmining.placebasedlpmdiscovery.prom.plugins.mining.PlaceBasedLPMDiscoveryPlugin;
 
 public class Main {
 	public static PluginContext Context;
@@ -562,6 +561,13 @@ public class Main {
 					for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
 						if (oclpm.getPlaceMapIsomorphic().keySet().contains(tp.getId())) {
 							oclpm.getMapIdVarArcActivities().put(tp.getId(), new HashSet<String>(variableActivities));
+							// fill other map used for new external object flow
+							if (oclpm.getMapTypeToVarArcActivities().containsKey(tp.getObjectType())) {
+								oclpm.getMapTypeToVarArcActivities().get(tp.getObjectType()).addAll(new HashSet<String>(variableActivities));
+							}
+							else {
+								oclpm.getMapTypeToVarArcActivities().put(tp.getObjectType(), new HashSet<String>(variableActivities));
+							}
 						}
 					}
 				}
@@ -580,6 +586,7 @@ public class Main {
 				
 				// iterate through OCLPMs and fill the map there with (place id -> var arc activities)
 				for (ObjectCentricLocalProcessModel oclpm : oclpmResult.getElements()) {
+					oclpm.setMapTypeToVarArcActivities(typeToActivities);
 					for (TaggedPlace tp : oclpm.getIsomorphicPlaces()) {
 						// only add activities with which the place is connected
 						Set<String> activities = tp.getConnectedActivitiesOf(typeToActivities.get(tp.getObjectType()));
@@ -746,19 +753,22 @@ public class Main {
 	public static Object[] runLPMPlugin(XLog log, TaggedPlaceSet placeSetTrimmed, OCLPMDiscoveryParameters parameters) {
 		Object[] lpmResults = new Object[] {};
 		
+		LPMDiscoveryBuilder builder = org.processmining.placebasedlpmdiscovery.Main
+				.createDefaultBuilder(log, placeSetTrimmed.asPlaceSet(), parameters.getPBLPMDiscoveryParameters());
+		
 		if (parameters.getVariableArcIdentification() == VariableArcIdentification.PER_LPM) {
 			messageNormal("Starting LPM discovery and variable arc identification.");
-			LPMDiscoveryBuilder builder = org.processmining.placebasedlpmdiscovery.Main
-					.createDefaultBuilder(log, placeSetTrimmed.asPlaceSet(), parameters.getPBLPMDiscoveryParameters());
 			builder.registerLPMWindowEvaluator(CustomLPMEvaluatorIds.VariableArcIdentificator.name(),new VariableArcIdentificator(parameters.getObjectTypesAll()));
-			lpmResults = new Object[] {builder.build().run()};
-			updateProgress("Finished LPM discovery.");
 		}
 		else {
 			messageNormal("Starting LPM discovery.");
-			lpmResults = new Object[] {PlaceBasedLPMDiscoveryPlugin.mineLPMs(Context, log, placeSetTrimmed.asPlaceSet(), parameters.getPBLPMDiscoveryParameters())};
-			updateProgress("Finished LPM discovery.");
 		}
+		
+		// store object types replayed by transitions
+		builder.registerLPMWindowEvaluator(CustomLPMEvaluatorIds.ObjectTypesPerTransitionIdentificator.name(),new ObjectTypesPerTransitionIdentificator(parameters.getObjectTypesAll()));
+		
+		lpmResults = new Object[] {builder.build().run()};
+		updateProgress("Finished LPM discovery.");
 		return lpmResults;
 	}
 	
@@ -788,10 +798,12 @@ public class Main {
 //		PrintStream out = System.out;
 //		System.setOut(new PrintStream(new NullOutputStream()));
 		XLog log;
-		if (flattenCounting)
-			log = OCELUtils.flattenCounting(ocel, newTypeLabel);
-		else
-			log = Flattening.flatten(ocel, newTypeLabel); // this pastes a lot of useless stuff in the console
+//		if (flattenCounting)
+//			log = OCELUtils.flattenCounting(ocel, newTypeLabel);
+//		else
+//			log = Flattening.flatten(ocel, newTypeLabel); // this pastes a lot of useless stuff in the console
+		// always do flatten counting because the new external object flow needs it
+		log = OCELUtils.flattenCounting(ocel, newTypeLabel);
 //		System.setOut(out);
 		
 //		int numEventsBefore = ocel.getEvents().size();

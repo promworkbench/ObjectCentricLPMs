@@ -9,5 +9,6 @@ public enum CustomLPMEvaluatorResultIds implements LPMEvaluationResultId{
 //    PassageCoverageEvaluator,
 //    TransitionCoverageEvaluator,
 //    TraceSupportCountEvaluator;
-	VariableArcIdentificationResult;
+	VariableArcIdentificationResult,
+	ObjectTypesPerTransitionResult;
 }

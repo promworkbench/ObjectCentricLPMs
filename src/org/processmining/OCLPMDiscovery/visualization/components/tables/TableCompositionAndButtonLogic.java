@@ -130,15 +130,20 @@ public class TableCompositionAndButtonLogic<T extends TextDescribable & Serializ
             }
         });
         
-        // external object flow label
+        // external object flow label and box
         JLabel objectFlowLabel = new JLabel("External Object Flow:");
         objectFlowLabel.setMinimumSize(new Dimension(1,30));
-        
-        // external object flow box
         OCLPMComboBox objectFlowBox = new OCLPMComboBox(ExternalObjectFlow.values(), this.theme);
+        
+        // place completion label and box
+        JLabel placeCompletionLabel = new JLabel("Place Completion:");
+        placeCompletionLabel.setMinimumSize(new Dimension(1,30));
+        OCLPMComboBox placeCompletionBox = new OCLPMComboBox(PlaceCompletion.values(), this.theme);
+        
+        // external object flow logic
         objectFlowBox.addActionListener(actionEvent -> {
         	long startTime = System.currentTimeMillis();
-        	this.shownResult.showExternalObjectFlow((ExternalObjectFlow) objectFlowBox.getSelectedItem());
+        	this.shownResult.showExternalObjectFlow((ExternalObjectFlow) objectFlowBox.getSelectedItem(), (PlaceCompletion) placeCompletionBox.getSelectedItem());
         	long elapsedTime = System.currentTimeMillis() - startTime;
         	this.shownResult.setExecutionTimeExternalObjectFlow(elapsedTime);
         	this.result.setExecutionTimeExternalObjectFlow(elapsedTime);
@@ -150,12 +155,7 @@ public class TableCompositionAndButtonLogic<T extends TextDescribable & Serializ
         	table.changeSelection(row, column, false, false);
         });
         
-        // place completion label
-        JLabel placeCompletionLabel = new JLabel("Place Completion:");
-        placeCompletionLabel.setMinimumSize(new Dimension(1,30));
-        
-        // place completion box
-        OCLPMComboBox placeCompletionBox = new OCLPMComboBox(PlaceCompletion.values(), this.theme);
+        // place completion logic
         placeCompletionBox.addActionListener(actionEvent -> {
         	long startTime = System.currentTimeMillis();
         	OCLPMResult newResult = PlaceCompletionUtils.completePlacesCopy(this.result, (PlaceCompletion) placeCompletionBox.getSelectedItem());

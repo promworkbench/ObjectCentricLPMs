@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -15,8 +16,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.processmining.OCLPMDiscovery.lpmEvaluation.CustomLPMEvaluatorResultIds;
+import org.processmining.OCLPMDiscovery.lpmEvaluation.ObjectTypesPerTransitionResult;
 import org.processmining.OCLPMDiscovery.lpmEvaluation.VariableArcIdentificationResult;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMEvaluationMetrics;
+import org.processmining.OCLPMDiscovery.parameters.PlaceCompletion;
 import org.processmining.models.graphbased.NodeID;
 import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.LPMEvaluationResult;
 import org.processmining.placebasedlpmdiscovery.lpmevaluation.results.StandardLPMEvaluationResultId;
@@ -55,6 +58,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	// maps each place id to the activities with which that place has variable arcs
 	private Map<String,Set<String>> mapIdVarArcActivities = new HashMap<>();
 	private float variableArcThreshold = 0.95f; // threshold which the score function is compared against
+	private HashMap<String,HashSet<String>> mapTypeToVarArcActivities = new HashMap<>(); // stores for each object type the activities for variable arcs (only used for the external object flow mode)
 	
 	// stores all the places of the original place set which are isomorphic to the ones present in the model
 	// also stores the place in the model as their ids might be different if Viki changes them...
@@ -66,6 +70,9 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	
 	// evaluation
 	private Map<OCLPMEvaluationMetrics,Double> evaluation = new HashMap<>();
+	
+	// stores for each activity the object types for which objects have been observed during LPM discovery
+	private HashMap<String,HashSet<String>> mapActivityToTypes = new HashMap<>();
 	
 	public ObjectCentricLocalProcessModel() {
         // setup oclpm
@@ -152,6 +159,8 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		this.placeMapAll = oclpm.getPlaceMapAll();
 		this.placeMapIsomorphic.putAll(oclpm.getPlaceMapIsomorphic());
 		this.mapIdVarArcActivities.putAll(oclpm.getMapIdVarArcActivities());
+		this.mapActivityToTypes = oclpm.getMapActivityToTypes();
+		this.objectTypesAll = oclpm.getObjectTypesAll();
 	}
 	
 	//============================== methods ==============================
@@ -188,6 +197,10 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
         	else if (name.equals(CustomLPMEvaluatorResultIds.VariableArcIdentificationResult.name())) {
         		// catch variable arc identification result and store variable arcs
         		this.identifyVariableArcs((VariableArcIdentificationResult) result);
+        		continue;
+        	}
+        	else if (name.equals(CustomLPMEvaluatorResultIds.ObjectTypesPerTransitionResult.name())) {
+        		this.mapActivityToTypes = ((ObjectTypesPerTransitionResult) result).getMap();
         		continue;
         	}
         	else {
@@ -235,6 +248,20 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 			}
 			else {
 				score.put(key, 0.0);
+			}
+		});
+		
+		// fill mapTypeToVarArcActivities
+		scoreCountingAll.forEach((key,value) -> {
+			String activity = key.get(0);
+			String type = key.get(1);
+			if (score.get(key)<this.variableArcThreshold) {
+				if (this.mapTypeToVarArcActivities.containsKey(type)) {
+					this.mapTypeToVarArcActivities.get(type).add(activity);
+				}
+				else {
+					this.mapTypeToVarArcActivities.put(type, new HashSet<>(Collections.singleton(activity)));
+				}
 			}
 		});
 		
@@ -630,14 +657,15 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	 * add special places for starting and ending transitions
 	 * @param startingActivities
 	 * @param endingActivities
+	 * @param currentPlaceCompletion 
 	 * @param typeMap 
 	 * @param variableArcActivities 
 	 */
 	public void addExternalObjectFlowStartEnd(
 			Map<String, Set<String>> startingActivities, 
-			Map<String, Set<String>> endingActivities
+			Map<String, Set<String>> endingActivities,
+			PlaceCompletion currentPlaceCompletion
 			){
-		
 		// check current flow situation
 		HashMap<List<String>,Set<TaggedPlace>> transitionMap = new HashMap<>(); // maps (transitionName,TypeName,"in"/"out") -> TaggedPlaces
 		for (TaggedPlace tp : this.getPlaces()) {
@@ -710,13 +738,72 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 				}
 			}
 		}
+			
+		// starting / ending places for types not present
+		for (String type : this.objectTypesAll) {
+			for (String activity : this.transitions.keySet()) {
+				List<String> keyOut = Arrays.asList(new String[] {activity,type,"out"});
+				List<String> keyIn = Arrays.asList(new String[] {activity,type,"in"});
+				// no arcs for that type at all but the activity interacts with objects of that type
+				if (	this.mapActivityToTypes.containsKey(activity)
+						&& !this.mapActivityToTypes.get(activity).isEmpty()
+						&& this.mapActivityToTypes.get(activity).contains(type)
+						&& (!transitionMap.containsKey(keyIn) || transitionMap.get(keyIn).isEmpty())
+						&& (!transitionMap.containsKey(keyOut) || transitionMap.get(keyOut).isEmpty())) {
+					Boolean variableArc = false;
+					if (this.mapTypeToVarArcActivities.containsKey(type)
+							&& this.mapTypeToVarArcActivities.get(type).contains(activity)) {
+						variableArc = true;
+					}
+					if (currentPlaceCompletion.equals(PlaceCompletion.ALL)) {
+						// add in and out special places
+						if (startingActivities.get(type).contains(activity)) {
+							TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type+":"+newPlaceID);
+							p.addOutputTransition(this.transitions.get(activity));
+							if (variableArc) {
+								// add this as variable arc if the arc going in to the transition is variable
+								this.addVariableArc(p.getId(),activity);
+							}
+							newPlaceID++;
+							newPlaces.add(p);
+						}
+						if (endingActivities.get(type).contains(activity)) {
+							TaggedPlace p = new TaggedPlace(type, "EndingPlace:"+type+":"+newPlaceID);
+							p.addInputTransition(this.transitions.get(activity));
+							if (variableArc) {
+								// add this as variable arc if the arc going in to the transition is variable
+								this.addVariableArc(p.getId(),activity);
+							}
+							newPlaceID++;
+							newPlaces.add(p);
+						}
+					}
+					else if (!variableArc){ // in all other place completion modes
+						// add in and out special places if the arcs aren't variable
+						if (startingActivities.get(type).contains(activity)) {
+							TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type+":"+newPlaceID);
+							p.addOutputTransition(this.transitions.get(activity));
+							newPlaceID++;
+							newPlaces.add(p);
+						}
+						if (endingActivities.get(type).contains(activity)) {
+							TaggedPlace p = new TaggedPlace(type, "EndingPlace:"+type+":"+newPlaceID);
+							p.addInputTransition(this.transitions.get(activity));
+							newPlaceID++;
+							newPlaces.add(p);
+						}
+					}
+				}
+			}
+		}
 		this.addAllPlaces(newPlaces);
 	}
 	
 	/**
+	 * @param currentPlaceCompletion 
 	 * 
 	 */
-	public void addExternalObjectFlowAll() {
+	public void addExternalObjectFlowAll(PlaceCompletion currentPlaceCompletion) {
 		// check current flow situation
 		HashMap<List<String>,Set<TaggedPlace>> transitionMap = new HashMap<>(); // maps (transitionName,TypeName,"in"/"out") -> TaggedPlaces
 		for (TaggedPlace tp : this.getPlaces()) {
@@ -784,6 +871,56 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 					}
 					newPlaceID++;
 					newPlaces.add(p);
+				}
+			}
+		}
+		
+		// for all object types
+		for (String type : this.objectTypesAll) {
+			for (String activity : this.transitions.keySet()) {
+				List<String> keyOut = Arrays.asList(new String[] {activity,type,"out"});
+				List<String> keyIn = Arrays.asList(new String[] {activity,type,"in"});
+				// no arcs for that type at all but the activity interacts with objects of that type
+				if (	this.mapActivityToTypes.containsKey(activity)
+						&& !this.mapActivityToTypes.get(activity).isEmpty()
+						&& this.mapActivityToTypes.get(activity).contains(type)
+						&& (!transitionMap.containsKey(keyIn) || transitionMap.get(keyIn).isEmpty())
+						&& (!transitionMap.containsKey(keyOut) || transitionMap.get(keyOut).isEmpty())) {
+					Boolean variableArc = false;
+					if (this.mapTypeToVarArcActivities.containsKey(type)
+							&& this.mapTypeToVarArcActivities.get(type).contains(activity)) {
+						variableArc = true;
+					}
+					if (currentPlaceCompletion.equals(PlaceCompletion.ALL)) {
+						// add in and out special places
+						TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type+":"+newPlaceID);
+						p.addOutputTransition(this.transitions.get(activity));
+						if (variableArc) {
+							// add this as variable arc if the arc going in to the transition is variable
+							this.addVariableArc(p.getId(),activity);
+						}
+						newPlaceID++;
+						newPlaces.add(p);
+						p = new TaggedPlace(type, "EndingPlace:"+type+":"+newPlaceID);
+						p.addInputTransition(this.transitions.get(activity));
+						if (variableArc) {
+							// add this as variable arc if the arc going in to the transition is variable
+							this.addVariableArc(p.getId(),activity);
+						}
+						newPlaceID++;
+						newPlaces.add(p);
+					}
+					else if (!variableArc){ // in all other place completion modes
+						// add in and out special places if the arcs aren't variable
+						TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type+":"+newPlaceID);
+						p.addOutputTransition(this.transitions.get(activity));
+						newPlaceID++;
+						newPlaces.add(p);
+						p = new TaggedPlace(type, "EndingPlace:"+type+":"+newPlaceID);
+						p.addInputTransition(this.transitions.get(activity));
+						newPlaceID++;
+						newPlaces.add(p);
+					}
 				}
 			}
 		}
@@ -1040,6 +1177,18 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 
 	public void setVariableArcThreshold(float variableArcThreshold) {
 		this.variableArcThreshold = variableArcThreshold;
+	}
+
+	public HashMap<String, HashSet<String>> getMapActivityToTypes() {
+		return mapActivityToTypes;
+	}
+
+	public void setMapTypeToVarArcActivities(HashMap<String, HashSet<String>> mapTypeToVarArcActivities) {
+		this.mapTypeToVarArcActivities = mapTypeToVarArcActivities;
+	}
+
+	public HashMap<String, HashSet<String>> getMapTypeToVarArcActivities() {
+		return mapTypeToVarArcActivities;
 	}
 
 }
