@@ -282,18 +282,20 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 				// places have already been removed
 				break;
 			case ALL:
+			case ALL_VISIBLE:
 				// Add all places so that all object flow interruptions are fixed ?
 				for (ObjectCentricLocalProcessModel oclpm : this.getElements()) {
-					oclpm.addExternalObjectFlowAll(currentPlaceCompletion);
+					oclpm.addExternalObjectFlowAll(selected, currentPlaceCompletion);
 				}
-				this.showExternalObjectFlow = ExternalObjectFlow.ALL;
+				this.showExternalObjectFlow = selected;
 				break;
 			case START_END:
+			case START_END_VISIBLE:
 				// Add places for starting and ending transitions
 				for (ObjectCentricLocalProcessModel oclpm : this.getElements()) {
-					oclpm.addExternalObjectFlowStartEnd(this.getStartingActivities(), this.getEndingActivities(), currentPlaceCompletion);
+					oclpm.addExternalObjectFlowStartEnd(this.getStartingActivities(), this.getEndingActivities(), selected, currentPlaceCompletion);
 				}
-				this.showExternalObjectFlow = ExternalObjectFlow.START_END;
+				this.showExternalObjectFlow = selected;
 				break;
 			default:
 				break;

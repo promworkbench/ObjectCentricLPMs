@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import org.processmining.OCLPMDiscovery.lpmEvaluation.CustomLPMEvaluatorResultIds;
 import org.processmining.OCLPMDiscovery.lpmEvaluation.ObjectTypesPerTransitionResult;
 import org.processmining.OCLPMDiscovery.lpmEvaluation.VariableArcIdentificationResult;
+import org.processmining.OCLPMDiscovery.parameters.ExternalObjectFlow;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMEvaluationMetrics;
 import org.processmining.OCLPMDiscovery.parameters.PlaceCompletion;
 import org.processmining.models.graphbased.NodeID;
@@ -657,6 +658,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	 * add special places for starting and ending transitions
 	 * @param startingActivities
 	 * @param endingActivities
+	 * @param selectedEOF 
 	 * @param currentPlaceCompletion 
 	 * @param typeMap 
 	 * @param variableArcActivities 
@@ -664,7 +666,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	public void addExternalObjectFlowStartEnd(
 			Map<String, Set<String>> startingActivities, 
 			Map<String, Set<String>> endingActivities,
-			PlaceCompletion currentPlaceCompletion
+			ExternalObjectFlow selectedEOF, PlaceCompletion currentPlaceCompletion
 			){
 		// check current flow situation
 		HashMap<List<String>,Set<TaggedPlace>> transitionMap = new HashMap<>(); // maps (transitionName,TypeName,"in"/"out") -> TaggedPlaces
@@ -738,59 +740,61 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 				}
 			}
 		}
-			
-		// starting / ending places for types not present
-		for (String type : this.objectTypesAll) {
-			for (String activity : this.transitions.keySet()) {
-				List<String> keyOut = Arrays.asList(new String[] {activity,type,"out"});
-				List<String> keyIn = Arrays.asList(new String[] {activity,type,"in"});
-				// no arcs for that type at all but the activity interacts with objects of that type
-				if (	this.mapActivityToTypes.containsKey(activity)
-						&& !this.mapActivityToTypes.get(activity).isEmpty()
-						&& this.mapActivityToTypes.get(activity).contains(type)
-						&& (!transitionMap.containsKey(keyIn) || transitionMap.get(keyIn).isEmpty())
-						&& (!transitionMap.containsKey(keyOut) || transitionMap.get(keyOut).isEmpty())) {
-					Boolean variableArc = false;
-					if (this.mapTypeToVarArcActivities.containsKey(type)
-							&& this.mapTypeToVarArcActivities.get(type).contains(activity)) {
-						variableArc = true;
-					}
-					if (currentPlaceCompletion.equals(PlaceCompletion.ALL)) {
-						// add in and out special places
-						if (startingActivities.get(type).contains(activity)) {
-							TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type+":"+newPlaceID);
-							p.addOutputTransition(this.transitions.get(activity));
-							if (variableArc) {
-								// add this as variable arc if the arc going in to the transition is variable
-								this.addVariableArc(p.getId(),activity);
+		
+		if(selectedEOF.equals(ExternalObjectFlow.START_END)) {
+			// starting / ending places for types not present
+			for (String type : this.objectTypesAll) {
+				for (String activity : this.transitions.keySet()) {
+					List<String> keyOut = Arrays.asList(new String[] {activity,type,"out"});
+					List<String> keyIn = Arrays.asList(new String[] {activity,type,"in"});
+					// no arcs for that type at all but the activity interacts with objects of that type
+					if (	this.mapActivityToTypes.containsKey(activity)
+							&& !this.mapActivityToTypes.get(activity).isEmpty()
+							&& this.mapActivityToTypes.get(activity).contains(type)
+							&& (!transitionMap.containsKey(keyIn) || transitionMap.get(keyIn).isEmpty())
+							&& (!transitionMap.containsKey(keyOut) || transitionMap.get(keyOut).isEmpty())) {
+						Boolean variableArc = false;
+						if (this.mapTypeToVarArcActivities.containsKey(type)
+								&& this.mapTypeToVarArcActivities.get(type).contains(activity)) {
+							variableArc = true;
+						}
+						if (currentPlaceCompletion.equals(PlaceCompletion.ALL)) {
+							// add in and out special places
+							if (startingActivities.get(type).contains(activity)) {
+								TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type+":"+newPlaceID);
+								p.addOutputTransition(this.transitions.get(activity));
+								if (variableArc) {
+									// add this as variable arc if the arc going in to the transition is variable
+									this.addVariableArc(p.getId(),activity);
+								}
+								newPlaceID++;
+								newPlaces.add(p);
 							}
-							newPlaceID++;
-							newPlaces.add(p);
-						}
-						if (endingActivities.get(type).contains(activity)) {
-							TaggedPlace p = new TaggedPlace(type, "EndingPlace:"+type+":"+newPlaceID);
-							p.addInputTransition(this.transitions.get(activity));
-							if (variableArc) {
-								// add this as variable arc if the arc going in to the transition is variable
-								this.addVariableArc(p.getId(),activity);
+							if (endingActivities.get(type).contains(activity)) {
+								TaggedPlace p = new TaggedPlace(type, "EndingPlace:"+type+":"+newPlaceID);
+								p.addInputTransition(this.transitions.get(activity));
+								if (variableArc) {
+									// add this as variable arc if the arc going in to the transition is variable
+									this.addVariableArc(p.getId(),activity);
+								}
+								newPlaceID++;
+								newPlaces.add(p);
 							}
-							newPlaceID++;
-							newPlaces.add(p);
 						}
-					}
-					else if (!variableArc){ // in all other place completion modes
-						// add in and out special places if the arcs aren't variable
-						if (startingActivities.get(type).contains(activity)) {
-							TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type+":"+newPlaceID);
-							p.addOutputTransition(this.transitions.get(activity));
-							newPlaceID++;
-							newPlaces.add(p);
-						}
-						if (endingActivities.get(type).contains(activity)) {
-							TaggedPlace p = new TaggedPlace(type, "EndingPlace:"+type+":"+newPlaceID);
-							p.addInputTransition(this.transitions.get(activity));
-							newPlaceID++;
-							newPlaces.add(p);
+						else if (!variableArc){ // in all other place completion modes
+							// add in and out special places if the arcs aren't variable
+							if (startingActivities.get(type).contains(activity)) {
+								TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type+":"+newPlaceID);
+								p.addOutputTransition(this.transitions.get(activity));
+								newPlaceID++;
+								newPlaces.add(p);
+							}
+							if (endingActivities.get(type).contains(activity)) {
+								TaggedPlace p = new TaggedPlace(type, "EndingPlace:"+type+":"+newPlaceID);
+								p.addInputTransition(this.transitions.get(activity));
+								newPlaceID++;
+								newPlaces.add(p);
+							}
 						}
 					}
 				}
@@ -800,10 +804,11 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	}
 	
 	/**
+	 * @param selectedEOF 
 	 * @param currentPlaceCompletion 
 	 * 
 	 */
-	public void addExternalObjectFlowAll(PlaceCompletion currentPlaceCompletion) {
+	public void addExternalObjectFlowAll(ExternalObjectFlow selectedEOF, PlaceCompletion currentPlaceCompletion) {
 		// check current flow situation
 		HashMap<List<String>,Set<TaggedPlace>> transitionMap = new HashMap<>(); // maps (transitionName,TypeName,"in"/"out") -> TaggedPlaces
 		for (TaggedPlace tp : this.getPlaces()) {
@@ -875,51 +880,53 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 			}
 		}
 		
-		// for all object types
-		for (String type : this.objectTypesAll) {
-			for (String activity : this.transitions.keySet()) {
-				List<String> keyOut = Arrays.asList(new String[] {activity,type,"out"});
-				List<String> keyIn = Arrays.asList(new String[] {activity,type,"in"});
-				// no arcs for that type at all but the activity interacts with objects of that type
-				if (	this.mapActivityToTypes.containsKey(activity)
-						&& !this.mapActivityToTypes.get(activity).isEmpty()
-						&& this.mapActivityToTypes.get(activity).contains(type)
-						&& (!transitionMap.containsKey(keyIn) || transitionMap.get(keyIn).isEmpty())
-						&& (!transitionMap.containsKey(keyOut) || transitionMap.get(keyOut).isEmpty())) {
-					Boolean variableArc = false;
-					if (this.mapTypeToVarArcActivities.containsKey(type)
-							&& this.mapTypeToVarArcActivities.get(type).contains(activity)) {
-						variableArc = true;
-					}
-					if (currentPlaceCompletion.equals(PlaceCompletion.ALL)) {
-						// add in and out special places
-						TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type+":"+newPlaceID);
-						p.addOutputTransition(this.transitions.get(activity));
-						if (variableArc) {
-							// add this as variable arc if the arc going in to the transition is variable
-							this.addVariableArc(p.getId(),activity);
+		if (selectedEOF.equals(ExternalObjectFlow.ALL)) {
+			// for all object types
+			for (String type : this.objectTypesAll) {
+				for (String activity : this.transitions.keySet()) {
+					List<String> keyOut = Arrays.asList(new String[] {activity,type,"out"});
+					List<String> keyIn = Arrays.asList(new String[] {activity,type,"in"});
+					// no arcs for that type at all but the activity interacts with objects of that type
+					if (	this.mapActivityToTypes.containsKey(activity)
+							&& !this.mapActivityToTypes.get(activity).isEmpty()
+							&& this.mapActivityToTypes.get(activity).contains(type)
+							&& (!transitionMap.containsKey(keyIn) || transitionMap.get(keyIn).isEmpty())
+							&& (!transitionMap.containsKey(keyOut) || transitionMap.get(keyOut).isEmpty())) {
+						Boolean variableArc = false;
+						if (this.mapTypeToVarArcActivities.containsKey(type)
+								&& this.mapTypeToVarArcActivities.get(type).contains(activity)) {
+							variableArc = true;
 						}
-						newPlaceID++;
-						newPlaces.add(p);
-						p = new TaggedPlace(type, "EndingPlace:"+type+":"+newPlaceID);
-						p.addInputTransition(this.transitions.get(activity));
-						if (variableArc) {
-							// add this as variable arc if the arc going in to the transition is variable
-							this.addVariableArc(p.getId(),activity);
+						if (currentPlaceCompletion.equals(PlaceCompletion.ALL)) {
+							// add in and out special places
+							TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type+":"+newPlaceID);
+							p.addOutputTransition(this.transitions.get(activity));
+							if (variableArc) {
+								// add this as variable arc if the arc going in to the transition is variable
+								this.addVariableArc(p.getId(),activity);
+							}
+							newPlaceID++;
+							newPlaces.add(p);
+							p = new TaggedPlace(type, "EndingPlace:"+type+":"+newPlaceID);
+							p.addInputTransition(this.transitions.get(activity));
+							if (variableArc) {
+								// add this as variable arc if the arc going in to the transition is variable
+								this.addVariableArc(p.getId(),activity);
+							}
+							newPlaceID++;
+							newPlaces.add(p);
 						}
-						newPlaceID++;
-						newPlaces.add(p);
-					}
-					else if (!variableArc){ // in all other place completion modes
-						// add in and out special places if the arcs aren't variable
-						TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type+":"+newPlaceID);
-						p.addOutputTransition(this.transitions.get(activity));
-						newPlaceID++;
-						newPlaces.add(p);
-						p = new TaggedPlace(type, "EndingPlace:"+type+":"+newPlaceID);
-						p.addInputTransition(this.transitions.get(activity));
-						newPlaceID++;
-						newPlaces.add(p);
+						else if (!variableArc){ // in all other place completion modes
+							// add in and out special places if the arcs aren't variable
+							TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type+":"+newPlaceID);
+							p.addOutputTransition(this.transitions.get(activity));
+							newPlaceID++;
+							newPlaces.add(p);
+							p = new TaggedPlace(type, "EndingPlace:"+type+":"+newPlaceID);
+							p.addInputTransition(this.transitions.get(activity));
+							newPlaceID++;
+							newPlaces.add(p);
+						}
 					}
 				}
 			}
