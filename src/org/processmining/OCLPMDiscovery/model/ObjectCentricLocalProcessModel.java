@@ -162,6 +162,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		this.mapIdVarArcActivities.putAll(oclpm.getMapIdVarArcActivities());
 		this.mapActivityToTypes = oclpm.getMapActivityToTypes();
 		this.objectTypesAll = oclpm.getObjectTypesAll();
+		this.mapTypeToVarArcActivities = oclpm.getMapTypeToVarArcActivities();
 	}
 	
 	//============================== methods ==============================
