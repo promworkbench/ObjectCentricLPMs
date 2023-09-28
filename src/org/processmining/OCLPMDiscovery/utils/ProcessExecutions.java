@@ -63,6 +63,7 @@ public class ProcessExecutions {
 		String currentComponent;
 		for (OcelEvent event : ocel.getEvents().values()) {
 			for (OcelObject o : event.relatedObjects) {
+				if (o == null) continue;
 				// get one of the considered objects
 				if (objectTypesCaseNotion.contains(o.objectType.name)) {
 					currentComponent = mapComponent.get(o.id);

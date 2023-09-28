@@ -207,6 +207,7 @@ public class OCELUtils {
 				
 				// Count objects
 				for (OcelObject object : ocelEvent.relatedObjects) {
+					if (object == null) continue;
 					if (object.objectType.name.equals(caseNotion)) {
 						continue;
 					}

@@ -61,7 +61,9 @@ public class Main {
 	 * @param parameters
 	 * @return {oclpmResult, tlpms, placeSet}
 	 */
-	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
+	public static Object[] run(OcelEventLog ocelOriginal, OCLPMDiscoveryParameters parameters) {
+		// copy ocel so that we do not alter the input ocel when adding a new case notion
+		OcelEventLog ocel = OCELUtils.deepCopy(ocelOriginal);
 		
 		// place discovery
 		TaggedPlaceSet placeSet = discoverPlaceSet(ocel,parameters);
@@ -98,7 +100,9 @@ public class Main {
 	 * @param parameters
 	 * @return {oclpmResult, tlpms}
 	 */
-	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, TaggedPlaceSet placeSet) {
+	public static Object[] run(OcelEventLog ocelOriginal, OCLPMDiscoveryParameters parameters, TaggedPlaceSet placeSet) {
+		OcelEventLog ocel = OCELUtils.deepCopy(ocelOriginal);
+		
 		startTimer();
 		
 		// discover LPMs
@@ -129,7 +133,9 @@ public class Main {
 	 * @param parameters
 	 * @return {oclpmResult, tlpms}
 	 */
-	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, TaggedPlaceSet placeSet, ArrayList<String> labels) {
+	public static Object[] run(OcelEventLog ocelOriginal, OCLPMDiscoveryParameters parameters, TaggedPlaceSet placeSet, ArrayList<String> labels) {
+		OcelEventLog ocel = OCELUtils.deepCopy(ocelOriginal);
+		
 		startTimer();
 		
 		// discover LPMs
