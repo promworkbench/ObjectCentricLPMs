@@ -197,6 +197,8 @@ public class Main {
 	 * @return PlaceSet
 	 */
 	public static TaggedPlaceSet discoverPlaceSet(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
+		long startTimePD = System.currentTimeMillis();
+		
 		Set<TaggedPlace> placeNetsUnion = new HashSet<>();
 		Map<String,Set<String>> startingActivities = new HashMap<>(); // maps object type -> activity label
 		Map<String,Set<String>> endingActivities = new HashMap<>();
@@ -244,6 +246,11 @@ public class Main {
 		placeSet.setStartingActivities(startingActivities);
 		placeSet.setEndingActivities(endingActivities);
 		placeSet.setTypes(parameters.getObjectTypesPlaceNets());
+		
+		long elapsedTimePD = System.currentTimeMillis() - startTimePD;
+		System.out.println("Execution Time of Place Discovery: "
+				+Math.round((elapsedTimePD/1000.0/60.0) * 1000.0)/1000.0+" Minutes  ("
+				+Math.round((elapsedTimePD/1000.0) * 1000.0)/1000.0+" seconds)");
 		
 		return placeSet;
 	}
@@ -781,9 +788,14 @@ public class Main {
 	public static Graph<String,DefaultEdge> buildObjectGraph(OcelEventLog ocel, OCLPMDiscoveryParameters parameters){
 		if (!graphProvided) {
 			messageNormal("Starting object graph construction.");
+			long startTimeGC = System.currentTimeMillis();
 			Main.graph = ProcessExecutions.buildObjectGraph(ocel, parameters);
 			ProvidingObjects.exportObjectGraph(graph);
 			updateProgress("Constructed object graph with "+graph.vertexSet().size()+" vertices and "+graph.edgeSet().size()+" edges.");
+			long elapsedTimeGC = System.currentTimeMillis() - startTimeGC;
+			System.out.println("Execution Time of Graph Construction: "
+					+Math.round((elapsedTimeGC/1000.0/60.0) * 1000.0)/1000.0+" Minutes  ("
+					+Math.round((elapsedTimeGC/1000.0) * 1000.0)/1000.0+" seconds)");
 		}
 		else {
 			updateProgress("Object graph provided with "+graph.vertexSet().size()+" vertices and "+graph.edgeSet().size()+" edges.");
