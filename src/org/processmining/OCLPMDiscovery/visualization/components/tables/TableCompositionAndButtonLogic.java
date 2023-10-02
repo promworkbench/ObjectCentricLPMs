@@ -133,21 +133,24 @@ public class TableCompositionAndButtonLogic<T extends TextDescribable & Serializ
         // external object flow label and box
         JLabel objectFlowLabel = new JLabel("External Object Flow:");
         objectFlowLabel.setMinimumSize(new Dimension(1,30));
-        OCLPMComboBox objectFlowBox = new OCLPMComboBox(ExternalObjectFlow.values(), this.theme);
+        OCLPMComboBox objectFlowBox = new OCLPMComboBox(ExternalObjectFlow.names(), this.theme);
         
         // place completion label and box
         JLabel placeCompletionLabel = new JLabel("Place Completion:");
         placeCompletionLabel.setMinimumSize(new Dimension(1,30));
-        OCLPMComboBox placeCompletionBox = new OCLPMComboBox(PlaceCompletion.values(), this.theme);
+        OCLPMComboBox placeCompletionBox = new OCLPMComboBox(PlaceCompletion.names(), this.theme);
         
         // external object flow logic
         objectFlowBox.addActionListener(actionEvent -> {
         	long startTime = System.currentTimeMillis();
-        	this.shownResult.showExternalObjectFlow((ExternalObjectFlow) objectFlowBox.getSelectedItem(), (PlaceCompletion) placeCompletionBox.getSelectedItem());
+        	this.shownResult.showExternalObjectFlow(
+        			ExternalObjectFlow.getValueFromName((String) objectFlowBox.getSelectedItem()), 
+        			PlaceCompletion.getValueFromName((String) placeCompletionBox.getSelectedItem())
+        			);
         	long elapsedTime = System.currentTimeMillis() - startTime;
         	this.shownResult.setExecutionTimeExternalObjectFlow(elapsedTime);
         	this.result.setExecutionTimeExternalObjectFlow(elapsedTime);
-        	System.out.println("Change in External Object Flow took took "+elapsedTime+" ms.");
+        	System.out.println("Change in External Object Flow took "+elapsedTime+" ms.");
         	// refresh visualizer to show new places
         	int row = table.getSelectedRow();
         	int column = table.getSelectedColumn();
@@ -158,7 +161,7 @@ public class TableCompositionAndButtonLogic<T extends TextDescribable & Serializ
         // place completion logic
         placeCompletionBox.addActionListener(actionEvent -> {
         	long startTime = System.currentTimeMillis();
-        	OCLPMResult newResult = PlaceCompletionUtils.completePlacesCopy(this.result, (PlaceCompletion) placeCompletionBox.getSelectedItem());
+        	OCLPMResult newResult = PlaceCompletionUtils.completePlacesCopy(this.result, PlaceCompletion.getValueFromName((String) placeCompletionBox.getSelectedItem()));
     		long elapsedTime = System.currentTimeMillis() - startTime;
     		newResult.setExecutionTimePlaceCompletion(elapsedTime);
     		result.setExecutionTimePlaceCompletion(elapsedTime);
@@ -206,14 +209,14 @@ public class TableCompositionAndButtonLogic<T extends TextDescribable & Serializ
         	}
         	
         	// add external object flow if something else than NONE is selected
-        	ExternalObjectFlow currentObjectFlowSelection = (ExternalObjectFlow) (objectFlowBox.getSelectedItem()); 
+        	ExternalObjectFlow currentObjectFlowSelection = ExternalObjectFlow.getValueFromName((String) objectFlowBox.getSelectedItem()); 
         	if (!currentObjectFlowSelection.equals(ExternalObjectFlow.NONE)) {
-        		objectFlowBox.setSelectedItem(ExternalObjectFlow.NONE);
-        		objectFlowBox.setSelectedItem(currentObjectFlowSelection);
+        		objectFlowBox.setSelectedItem(ExternalObjectFlow.NONE.getName());
+        		objectFlowBox.setSelectedItem(currentObjectFlowSelection.getName());
         	}
         });
         
-        placeCompletionBox.setSelectedItem(PlaceCompletion.FEWVARIABLE);
+        placeCompletionBox.setSelectedItem(PlaceCompletion.FEWVARIABLE.getName());
         
         /* 
          * Layout
