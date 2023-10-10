@@ -138,7 +138,7 @@ public class TableCompositionAndButtonLogic<T extends TextDescribable & Serializ
         // place completion label and box
         JLabel placeCompletionLabel = new JLabel("Place Completion:");
         placeCompletionLabel.setMinimumSize(new Dimension(1,30));
-        OCLPMComboBox placeCompletionBox = new OCLPMComboBox(PlaceCompletion.names(), this.theme);
+        OCLPMComboBox placeCompletionBox = new OCLPMComboBox(PlaceCompletion.namesUserAccessible(), this.theme);
         
         // external object flow logic
         objectFlowBox.addActionListener(actionEvent -> {
