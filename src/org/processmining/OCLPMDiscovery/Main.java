@@ -1,5 +1,6 @@
 package org.processmining.OCLPMDiscovery;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.parameters.PlaceCompletion;
 import org.processmining.OCLPMDiscovery.parameters.VariableArcIdentification;
 import org.processmining.OCLPMDiscovery.utils.FlatLogProcessing;
+import org.processmining.OCLPMDiscovery.utils.NullOutputStream;
 import org.processmining.OCLPMDiscovery.utils.OCELUtils;
 import org.processmining.OCLPMDiscovery.utils.PlaceCompletionUtils;
 import org.processmining.OCLPMDiscovery.utils.ProcessExecutions;
@@ -35,6 +37,7 @@ import org.processmining.OCLPMDiscovery.utils.ProvidingObjects;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.events.Logger.MessageLevel;
+import org.processmining.ocel.flattening.Flattening;
 import org.processmining.ocel.ocelobjects.OcelEvent;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
 import org.processmining.ocel.ocelobjects.OcelObject;
@@ -62,9 +65,7 @@ public class Main {
 	 * @param parameters
 	 * @return {oclpmResult, tlpms, placeSet}
 	 */
-	public static Object[] run(OcelEventLog ocelOriginal, OCLPMDiscoveryParameters parameters) {
-		// copy ocel so that we do not alter the input ocel when adding a new case notion
-		OcelEventLog ocel = OCELUtils.deepCopy(ocelOriginal);
+	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
 		
 		// place discovery
 		TaggedPlaceSet placeSet = discoverPlaceSet(ocel,parameters);
@@ -101,8 +102,7 @@ public class Main {
 	 * @param parameters
 	 * @return {oclpmResult, tlpms}
 	 */
-	public static Object[] run(OcelEventLog ocelOriginal, OCLPMDiscoveryParameters parameters, TaggedPlaceSet placeSet) {
-		OcelEventLog ocel = OCELUtils.deepCopy(ocelOriginal);
+	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, TaggedPlaceSet placeSet) {
 		
 		startTimer();
 		
@@ -134,8 +134,7 @@ public class Main {
 	 * @param parameters
 	 * @return {oclpmResult, tlpms}
 	 */
-	public static Object[] run(OcelEventLog ocelOriginal, OCLPMDiscoveryParameters parameters, TaggedPlaceSet placeSet, ArrayList<String> labels) {
-		OcelEventLog ocel = OCELUtils.deepCopy(ocelOriginal);
+	public static Object[] run(OcelEventLog ocel, OCLPMDiscoveryParameters parameters, TaggedPlaceSet placeSet, ArrayList<String> labels) {
 		
 		startTimer();
 		
@@ -198,6 +197,9 @@ public class Main {
 	 * @return PlaceSet
 	 */
 	public static TaggedPlaceSet discoverPlaceSet(OcelEventLog ocel, OCLPMDiscoveryParameters parameters) {
+		// print ocel stats
+		messageNormal("Ocel statistics: Events: "+ocel.events.size()+" Objects: "+ocel.objects.size()+" Types: "+ocel.objectTypes.size());
+		
 		long startTimePD = System.currentTimeMillis();
 		
 		Set<TaggedPlace> placeNetsUnion = new HashSet<>();
@@ -319,7 +321,7 @@ public class Main {
 		
 		for (String currentType : labels) {
 			// flatten ocel
-			log = Main.flattenOCEL(ocel, currentType, parameters.getVariableArcIdentification().equals(VariableArcIdentification.PER_LPM));
+			log = Main.flattenOCEL(ocel, currentType, true);
 		
 			// discover LPMs (name of the currentType column needs concept:name, which the flattening does)
 			System.out.println("Starting LPM discovery using \""+currentType+"\" as case notion.");
@@ -405,7 +407,7 @@ public class Main {
 					}
 					
 					// flatten ocel
-					log = Main.flattenOCEL(ocel, newTypeLabel, perLPMVarArcs);
+					log = Main.flattenOCEL(ocel, newTypeLabel, true);
 				
 					// discover LPMs (name of the currentType column needs concept:name, which the flattening does)
 					System.out.println("Starting LPM discovery using leading type "+newTypeLabel+" as case notion.");
@@ -425,7 +427,7 @@ public class Main {
 				ocel = ProcessExecutions.enhanceConnectedComponent(ocel, ot, graph, parameters.getObjectTypesCaseNotion());
 				ProvidingObjects.exportOcel(ocel, new ArrayList<String>(Arrays.asList(ot)));
 				messageNormal("Discovered "+ocel.objectTypes.get(ot).objects.size()+" connected components.");
-				log = Main.flattenOCEL(ocel, ot, perLPMVarArcs);
+				log = Main.flattenOCEL(ocel, ot, true);
 				System.out.println("Starting LPM discovery using connected components as case notion.");
 				lpmResults = runLPMPlugin(log, placeSetTrimmed, parameters);
 				assert(lpmResults[0] instanceof LPMResult);
@@ -438,7 +440,7 @@ public class Main {
 				String dummyType = "DummyType";
 				OcelEventLog dummyOcel = OCELUtils.addDummyCaseNotion(ocel,"DummyType","42");
 				System.out.println("Added dummy type to ocel.");
-				log = Main.flattenOCEL(dummyOcel,dummyType, perLPMVarArcs);
+				log = Main.flattenOCEL(dummyOcel,dummyType, true);
 				System.out.println("Flattened on dummy type.");
 				System.out.println("Starting LPM discovery using a dummy type as case notion.");
 				lpmResults = runLPMPlugin(log, placeSetTrimmed, parameters);
@@ -476,11 +478,11 @@ public class Main {
 	 */
 	public static OCLPMResult convertLPMstoOCLPMs (OCLPMDiscoveryParameters parameters, LPMResultsTagged tlpms, TaggedPlaceSet placeSet) {
 
-		if (!(tlpms.getList().getElement(0).getElements().get(0).getPlaces().toArray()[0] instanceof TaggedPlace)
-				|| ((TaggedPlace) tlpms.getList().getElement(0).getElements().get(0).getPlaces().toArray()[0]).getObjectType() == null 
-				) {
-			System.out.println("The given LPMs do not have tagged places. Therefore, there won't be any variable arcs.");
-		}
+//		if (!(tlpms.getList().getElement(0).getElements().get(0).getPlaces().toArray()[0] instanceof TaggedPlace)
+//				|| ((TaggedPlace) tlpms.getList().getElement(0).getElements().get(0).getPlaces().toArray()[0]).getObjectType() == null 
+//				) {
+//			System.out.println("The given LPMs do not have tagged places. Therefore, there won't be any variable arcs.");
+//		}
 		
 		if (parameters.getObjectTypesPlaceNets().isEmpty()) {
 			parameters.setObjectTypesPlaceNets(placeSet.getTypes());
@@ -819,16 +821,15 @@ public class Main {
 	}
 	
 	public static XLog flattenOCEL(OcelEventLog ocel, String newTypeLabel, Boolean flattenCounting) {
-//		PrintStream out = System.out;
-//		System.setOut(new PrintStream(new NullOutputStream()));
+		PrintStream out = System.out;
+		System.setOut(new PrintStream(new NullOutputStream())); // suppress strange output stream from logs like O2C 
 		XLog log;
-//		if (flattenCounting)
-//			log = OCELUtils.flattenCounting(ocel, newTypeLabel);
-//		else
-//			log = Flattening.flatten(ocel, newTypeLabel); // this pastes a lot of useless stuff in the console
-		// always do flatten counting because the new external object flow needs it
-		log = OCELUtils.flattenCounting(ocel, newTypeLabel);
-//		System.setOut(out);
+		if (flattenCounting)
+			log = OCELUtils.flattenCounting(ocel, newTypeLabel);
+		else
+			// flatten without counting (for the place discovery)
+			log = Flattening.flatten(ocel, newTypeLabel); // this pastes a lot of useless stuff in the console
+		System.setOut(out);
 		
 //		int numEventsBefore = ocel.getEvents().size();
 //		int numEventsAfter = log.size();

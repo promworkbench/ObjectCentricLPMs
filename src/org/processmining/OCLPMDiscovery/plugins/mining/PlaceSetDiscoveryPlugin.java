@@ -7,6 +7,7 @@ import org.processmining.OCLPMDiscovery.model.TaggedPlace;
 import org.processmining.OCLPMDiscovery.model.TaggedPlaceSet;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.utils.FlatLogProcessing;
+import org.processmining.OCLPMDiscovery.utils.OCELUtils;
 import org.processmining.OCLPMDiscovery.wizards.OCLPMDiscoveryWizard;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
@@ -35,7 +36,11 @@ public class PlaceSetDiscoveryPlugin {
 			variantLabel = "Discovery of Place Set on OCEL",
 			requiredParameterLabels = {0}
 	)
-	public static TaggedPlaceSet minePlaceSet (UIPluginContext context, OcelEventLog ocel) {
+	public static TaggedPlaceSet minePlaceSet (UIPluginContext context, OcelEventLog ocelOriginal) {
+		
+		// copy ocel so that we do not alter the input ocel when adding a new case notion
+			// this removes empty object types from the log 
+		OcelEventLog ocel = OCELUtils.deepCopy(ocelOriginal);
 		
 		OCLPMDiscoveryParameters parameters = new OCLPMDiscoveryParameters(ocel);
 

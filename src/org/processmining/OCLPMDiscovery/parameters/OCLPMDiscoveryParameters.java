@@ -1,5 +1,6 @@
 package org.processmining.OCLPMDiscovery.parameters;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -47,6 +48,8 @@ public class OCLPMDiscoveryParameters implements EventLog{
 		this.setObjectTypesLeadingTypes(objectTypes);
 		this.setActivities(OCELUtils.getActivities(ocel));
 		this.setObjectTypesCaseNotion(objectTypes);
+		
+//		this.removeEmptyObjectTypes();
 		
 		// list all object types
         for (String curType : this.objectTypesAll) {
@@ -357,5 +360,22 @@ public class OCLPMDiscoveryParameters implements EventLog{
 
 	public void setModelLimit(int modelLimit) {
 		this.modelLimit = modelLimit;
+	}
+
+	// removes all empty object types from the sets so they will be ignored
+	public void removeEmptyObjectTypes() {
+		Set<String> removeTypes = new HashSet<>();
+		for (String type : ocel.getObjectTypes()) {
+			if (ocel.objectTypes.get(type) == null) {
+				removeTypes.add(type);
+			}
+		}
+		this.objectTypesAll.removeAll(removeTypes);
+		this.objectTypesCaseNotion.removeAll(removeTypes);
+		this.objectTypesLeadingTypes.removeAll(removeTypes);
+		for (String t : removeTypes) {
+			this.objectTypesList.removeElement(t);
+		}
+		this.objectTypesPlaceNets.removeAll(removeTypes);
 	}
 }

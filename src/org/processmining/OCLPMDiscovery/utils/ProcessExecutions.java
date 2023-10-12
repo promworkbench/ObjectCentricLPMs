@@ -810,6 +810,7 @@ public class ProcessExecutions {
 		Graph<String,DefaultEdge> graph = new SimpleGraph<>(DefaultEdge.class);
 		
 		for (String type : parameters.getObjectTypesCaseNotion()) {
+			if (ocel.objectTypes.get(type) == null) continue; // some logs have empty object types
 			for (OcelObject o : ocel.objectTypes.get(type).objects) {
 				graph.addVertex(o.id);
 			}
@@ -835,7 +836,7 @@ public class ProcessExecutions {
 				}
 			}
 		}
-		System.out.println("Contructed object graph with "+graph.vertexSet().size()+" vertices and "+graph.edgeSet().size()+" edges.");
+//		System.out.println("Constructed object graph with "+graph.vertexSet().size()+" vertices and "+graph.edgeSet().size()+" edges.");
 		return graph;
 	}
 	
