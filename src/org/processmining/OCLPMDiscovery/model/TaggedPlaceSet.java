@@ -18,6 +18,10 @@ public class TaggedPlaceSet extends SerializableSet<TaggedPlace> implements Expo
     private Map<String, Set<String>> endingActivities;
     private Set<String> objectTypesPlaceNets; // object types for which the log is flattened and place nets are discovered
 
+    private int numberOfUniquePlaces = -1;
+    private long discoveryTime = -1; // in milliseconds
+    private double tauThreshold = -1.0f; // tau threshold when SPECpp (eST-Miner) was used
+    
     public TaggedPlaceSet() {
 
     }
@@ -101,5 +105,33 @@ public class TaggedPlaceSet extends SerializableSet<TaggedPlace> implements Expo
         	this.remove(tp);
         }
     }
+
+	public int getNumberOfPlaces() {
+		return this.getElements().size();
+	}
+
+	public int getNumberOfUniquePlaces() {
+		return numberOfUniquePlaces;
+	}
+
+	public void setNumberOfUniquePlaces(int numberOfUniquePlaces) {
+		this.numberOfUniquePlaces = numberOfUniquePlaces;
+	}
+
+	public long getDiscoveryTime() {
+		return discoveryTime;
+	}
+
+	public void setDiscoveryTime(long discoveryTime) {
+		this.discoveryTime = discoveryTime;
+	}
+
+	public double getTauThreshold() {
+		return tauThreshold;
+	}
+
+	public void setTauThreshold(double tauThreshold) {
+		this.tauThreshold = tauThreshold;
+	}
 
 }

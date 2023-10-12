@@ -23,6 +23,7 @@ import org.processmining.OCLPMDiscovery.model.ObjectCentricLocalProcessModel;
 import org.processmining.OCLPMDiscovery.model.TaggedPlace;
 import org.processmining.OCLPMDiscovery.model.TaggedPlaceSet;
 import org.processmining.OCLPMDiscovery.parameters.CaseNotionStrategy;
+import org.processmining.OCLPMDiscovery.parameters.Miner;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.parameters.PlaceCompletion;
 import org.processmining.OCLPMDiscovery.parameters.VariableArcIdentification;
@@ -251,7 +252,10 @@ public class Main {
 		System.out.println("Execution Time of Place Discovery: "
 				+Math.round((elapsedTimePD/1000.0/60.0) * 1000.0)/1000.0+" Minutes  ("
 				+Math.round((elapsedTimePD/1000.0) * 1000.0)/1000.0+" seconds)");
-		
+		placeSet.setDiscoveryTime(elapsedTimePD);
+		if (parameters.getPlaceDiscoveryAlgorithm().equals(Miner.SPECPP)) {
+			placeSet.setTauThreshold(parameters.getSpecppParameters().getTau());
+		}
 		return placeSet;
 	}
 
@@ -310,6 +314,7 @@ public class Main {
 		 */
 		TaggedPlaceSet placeSetTrimmed = new TaggedPlaceSet(placeSet);
 		placeSetTrimmed.removeIsomorphic();
+		placeSet.setNumberOfUniquePlaces(placeSetTrimmed.size());
 		messageNormal("LPM discovery will start with "+placeSetTrimmed.size()+" unique place nets.");
 		
 		for (String currentType : labels) {
@@ -356,6 +361,7 @@ public class Main {
 		 */
 		TaggedPlaceSet placeSetTrimmed = new TaggedPlaceSet(placeSet);
 		placeSetTrimmed.removeIsomorphic();
+		placeSet.setNumberOfUniquePlaces(placeSetTrimmed.size());
 		messageNormal("LPM discovery will start with "+placeSetTrimmed.size()+" unique place nets.");
 		
 		switch (parameters.getCaseNotionStrategy()) {

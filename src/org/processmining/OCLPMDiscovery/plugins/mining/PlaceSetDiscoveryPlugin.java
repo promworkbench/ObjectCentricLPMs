@@ -1,8 +1,9 @@
 package org.processmining.OCLPMDiscovery.plugins.mining;
 
-import java.util.Set;
+import java.util.HashSet;
 
 import org.processmining.OCLPMDiscovery.Main;
+import org.processmining.OCLPMDiscovery.model.TaggedPlace;
 import org.processmining.OCLPMDiscovery.model.TaggedPlaceSet;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.OCLPMDiscovery.utils.FlatLogProcessing;
@@ -15,14 +16,12 @@ import org.processmining.framework.util.ui.wizard.ProMWizardDisplay;
 import org.processmining.hybridilpminer.parameters.XLogHybridILPMinerParametersImpl;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
-import org.processmining.placebasedlpmdiscovery.model.Place;
-import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 
 @Plugin(
 		name = "Discovery of Place Set on OCEL", // not shown anywhere anymore because overwritten by uiLabel?
 		parameterLabels = {"OCEL", "Parameters", "Petri Net"},
-		returnLabels = { "Place Set", "Object Type Map"},
-		returnTypes = { PlaceSet.class},
+		returnLabels = { "Place Set"},
+		returnTypes = { TaggedPlaceSet.class},
 		help = "Discovers a Place Set from an object-centric event log (OCEL standard)."
 )
 public class PlaceSetDiscoveryPlugin {
@@ -58,7 +57,16 @@ public class PlaceSetDiscoveryPlugin {
 		}
 		
 		Main.setUp(context, parameters, true, false);
-		return Main.discoverPlaceSet(ocel, parameters);
+		TaggedPlaceSet placeSet = Main.discoverPlaceSet(ocel, parameters);
+		
+		Main.messageNormal("Obtained "+placeSet.size()+" place nets for LPM discovery.");
+		
+		TaggedPlaceSet placeSetTrimmed = new TaggedPlaceSet(placeSet);
+		placeSetTrimmed.removeIsomorphic();
+		placeSet.setNumberOfUniquePlaces(placeSetTrimmed.size());
+		Main.messageNormal("LPM discovery will start with "+placeSetTrimmed.size()+" unique place nets.");
+		
+		return placeSet;
 	}
 	
 	@UITopiaVariant(
@@ -71,12 +79,12 @@ public class PlaceSetDiscoveryPlugin {
 			variantLabel = "Convert Petri Net into Place Set",
 			requiredParameterLabels = {2}
 	)
-	public static Object[] convertToPlaceSet (UIPluginContext context, Petrinet petriNet) {
+	public static TaggedPlaceSet convertToPlaceSet (UIPluginContext context, Petrinet petriNet) {
 		Main.setUp(context);
 		
-		Set<Place> places = FlatLogProcessing.convertPetriNetToPlaceNetsHiddenTagging(context, petriNet, "");
-		PlaceSet placeSet = new PlaceSet(places);
+		HashSet<TaggedPlace> places = FlatLogProcessing.convertPetriNetToTaggedPlaceNets(context, petriNet, "");
+		TaggedPlaceSet placeSet = new TaggedPlaceSet(places);
 
-		return new Object[] {placeSet, null};
+		return placeSet;
 	}
 }
