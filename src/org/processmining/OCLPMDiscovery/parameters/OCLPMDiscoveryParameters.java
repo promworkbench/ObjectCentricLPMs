@@ -42,7 +42,8 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	
 	public OCLPMDiscoveryParameters(OcelEventLog ocel) {
 		this.setOcel(ocel);
-		Set<String> objectTypes = ocel.getObjectTypes();
+		Set<String> objectTypes = new HashSet<>(); 
+		objectTypes.addAll(ocel.objectTypes.keySet());
 		this.objectTypesAll = objectTypes;
 		this.setObjectTypesPlaceNets(objectTypes);
 		this.setObjectTypesLeadingTypes(objectTypes);
