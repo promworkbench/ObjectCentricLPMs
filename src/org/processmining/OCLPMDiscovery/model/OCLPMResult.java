@@ -344,6 +344,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 	}
 	
 	public String getLPMDiscoveryParametersHTMLBody() {
+		if (this.PBLPMDiscoveryParameters == null) return null;
 		String settings = " <br>"+"<b>LPM Discovery Parameters:</b>"+"<br>";
 		settings += "Place Limit: "+this.PBLPMDiscoveryParameters.getPlaceChooserParameters().getPlaceLimit()+"<br>";
 		settings += "Time Limit: "+this.PBLPMDiscoveryParameters.getTimeLimit()/60000+" minutes <br>";
