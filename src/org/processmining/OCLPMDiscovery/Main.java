@@ -408,6 +408,7 @@ public class Main {
 					
 					// flatten ocel
 					log = Main.flattenOCEL(ocel, newTypeLabel, true);
+					FlatLogProcessing.printCaseStatistics(log);
 				
 					// discover LPMs (name of the currentType column needs concept:name, which the flattening does)
 					System.out.println("Starting LPM discovery using leading type "+newTypeLabel+" as case notion.");

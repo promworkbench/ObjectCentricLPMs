@@ -1,9 +1,14 @@
 package org.processmining.OCLPMDiscovery.utils;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.deckfour.xes.model.XLog;
+import org.deckfour.xes.model.XTrace;
 import org.processmining.OCLPMDiscovery.converters.PetriNetTaggedPlaceConverter;
 import org.processmining.OCLPMDiscovery.model.TaggedPlace;
 import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
@@ -111,4 +116,50 @@ public class FlatLogProcessing {
 		PetriNetTaggedPlaceConverter converter = new PetriNetTaggedPlaceConverter(objectType);
 		return converter.convertNoTagging(acceptingPetriNet);
 	}
+	
+	public static void printCaseStatistics(XLog log) {
+		int traces = log.size();
+		
+		// Calculating the average size
+        double sum = 0;
+        Iterator<XTrace> iterator = log.iterator();
+        while (iterator.hasNext()) {
+            sum += iterator.next().size();
+        }
+        double average = sum / log.size();
+        
+        // Calculating the median size
+        List<Integer> sizes = new ArrayList<>();
+        iterator = log.iterator();
+        while (iterator.hasNext()) {
+            sizes.add(iterator.next().size());
+        }
+        Collections.sort(sizes);
+        double median;
+        if (sizes.size() % 2 == 0) {
+            median = (sizes.get(sizes.size() / 2) + sizes.get(sizes.size() / 2 - 1)) / 2.0;
+        } else {
+            median = sizes.get(sizes.size() / 2);
+        }
+        
+        // Calculating min, max, first quartile, and third quartile
+        double min = (double) Collections.min(sizes);
+        double max = (double) Collections.max(sizes);
+
+        int n = sizes.size();
+        double firstQuartile = findQuartile(sizes, 0, n / 2);
+        double thirdQuartile = findQuartile(sizes, n / 2 + 1, n);
+        
+        System.out.println("Number of Cases = "+traces+", Events per Case: Average = "+average+", Median = "+median);
+        System.out.println("Events per Case Statistics: Min="+min+", 1stQ="+firstQuartile+", Median="+median+", 3rdQ="+thirdQuartile+", Max="+max);
+	}
+	
+	private static double findQuartile(List<Integer> sortedList, int start, int end) {
+        int size = end - start;
+        if (size % 2 == 0) {
+            return (sortedList.get(start + size / 4 - 1) + sortedList.get(start + size / 4)) / 2.0;
+        } else {
+            return sortedList.get(start + size / 4);
+        }
+    }
 }
