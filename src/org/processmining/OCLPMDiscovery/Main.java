@@ -490,6 +490,8 @@ public class Main {
 		
 		OCLPMResult oclpmResult = new OCLPMResult(parameters, tlpms, placeSet);
 		
+		oclpmResult.setPBLPMDiscoveryParameters(parameters.getPBLPMDiscoveryParameters());
+		
 		return oclpmResult;
 	}
 	

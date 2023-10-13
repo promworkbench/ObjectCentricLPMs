@@ -66,7 +66,7 @@ public class LPMDiscoveryWizardStep extends OCLPMPropertiesPanel implements ProM
 //            }
 //        });
 
-        placeLimit = new ProMTextField("50",
+        placeLimit = new ProMTextField("1000",
                 "Number of places that will be used for building the LPMs");
         addProperty("Place Limit", placeLimit);
         placeLimit.addKeyListener(new KeyListener() {

@@ -60,6 +60,7 @@ public class OCLPMDiscoveryParameters implements EventLog{
         // setup LPM discovery
         this.PBLPMDiscoveryParameters = new PlaceBasedLPMDiscoveryParameters(this); // null-init leads to problems, needs a log with all activities  
         this.PBLPMDiscoveryParameters.setLpmCount(Integer.MAX_VALUE);
+        this.PBLPMDiscoveryParameters.getPlaceChooserParameters().setPlaceLimit(1000);
 	}
 
 	@Override

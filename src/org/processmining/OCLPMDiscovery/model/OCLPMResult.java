@@ -14,6 +14,7 @@ import org.processmining.OCLPMDiscovery.parameters.VariableArcIdentification;
 import org.processmining.placebasedlpmdiscovery.model.LocalProcessModel;
 import org.processmining.placebasedlpmdiscovery.model.serializable.PlaceSet;
 import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableList;
+import org.processmining.placebasedlpmdiscovery.prom.plugins.mining.PlaceBasedLPMDiscoveryParameters;
 
 public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel> {
     private static final long serialVersionUID = 9159252267279978544L; //?
@@ -24,6 +25,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     private String oclpmDiscoverySettingsHTML; // settings used for the discovery of this result, no html start & end
     private HashMap<String,Color> mapTypeColor; // maps each object type to a color
     private TaggedPlaceSet placeSet; 
+    private PlaceBasedLPMDiscoveryParameters PBLPMDiscoveryParameters;
     private ExternalObjectFlow showExternalObjectFlow = ExternalObjectFlow.NONE;
     private long executionTime = -1; // execution time starting after the place discovery in milliseconds, excluding place completion (which is done in the visualizer)
     private long executionTimePlaceCompletion = 0; // in milliseconds
@@ -340,6 +342,19 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 	public void setOclpmDiscoverySettingsHTML(String oclpmDiscoverySettingsHTML) {
 		this.oclpmDiscoverySettingsHTML = oclpmDiscoverySettingsHTML;
 	}
+	
+	public String getLPMDiscoveryParametersHTMLBody() {
+		String settings = " <br>"+"<b>LPM Discovery Parameters:</b>"+"<br>";
+		settings += "Place Limit: "+this.PBLPMDiscoveryParameters.getPlaceChooserParameters().getPlaceLimit()+"<br>";
+		settings += "Time Limit: "+this.PBLPMDiscoveryParameters.getTimeLimit()/60000+" minutes <br>";
+		settings += "Min Places: "+this.PBLPMDiscoveryParameters.getLpmCombinationParameters().getMinNumPlaces()+"<br>";
+		settings += "Max Places: "+this.PBLPMDiscoveryParameters.getLpmCombinationParameters().getMaxNumPlaces()+"<br>";
+		settings += "Min Transitions: "+this.PBLPMDiscoveryParameters.getLpmCombinationParameters().getMinNumTransitions()+"<br>";
+		settings += "Max Transitions: "+this.PBLPMDiscoveryParameters.getLpmCombinationParameters().getMaxNumTransitions()+"<br>";
+		settings += "Proximity Size: "+this.PBLPMDiscoveryParameters.getLpmCombinationParameters().getLpmProximity()+"<br>";
+		settings += "Concurrent Cardinality: "+this.PBLPMDiscoveryParameters.getLpmCombinationParameters().getConcurrencyCardinality()+"<br>";
+		return settings;
+	}
 
 	public void recalculateEvaluation() {
 		for (ObjectCentricLocalProcessModel oclpm : this.elements) {
@@ -387,6 +402,14 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 	
 	public void setExecutionTimeExternalObjectFlow(long time) {
 		this.executionTimeExternalObjectFlow = time;
+	}
+
+	public PlaceBasedLPMDiscoveryParameters getPBLPMDiscoveryParameters() {
+		return PBLPMDiscoveryParameters;
+	}
+
+	public void setPBLPMDiscoveryParameters(PlaceBasedLPMDiscoveryParameters pBLPMDiscoveryParameters) {
+		PBLPMDiscoveryParameters = pBLPMDiscoveryParameters;
 	}
 
 }

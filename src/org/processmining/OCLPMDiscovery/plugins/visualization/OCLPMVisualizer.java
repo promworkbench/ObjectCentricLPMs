@@ -89,6 +89,8 @@ public class OCLPMVisualizer {
         ta_discoverySettings.setEditorKit(editorKit);
         String settingsHtml = "<html><body>";
         settingsHtml += oclpmResult.getOclpmDiscoverySettingsHTMLBody();
+        String lpmDiscoverySettings = oclpmResult.getLPMDiscoveryParametersHTMLBody(); 
+        if (lpmDiscoverySettings != null) settingsHtml += lpmDiscoverySettings; 
         
         String executionTimesHtml = " <br>"+"<b>Execution Times:</b>"+"<br>";
         executionTimesHtml += "Discovery starting with " + oclpmResult.getTimeStartingVariant() + ": " + oclpmResult.getExecutionTimeMinutes() + " minutes <br>";

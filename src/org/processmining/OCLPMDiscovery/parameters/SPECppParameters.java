@@ -32,7 +32,7 @@ public class SPECppParameters {
 //	private Duration totalTimeLimit = Duration.ofMinutes(3);
 	private Duration totalTimeLimit = Duration.ofSeconds(60);
 	//	tau
-	private double tau = 1;
+	private double tau = 0.9;
 	//	permit negative markings during token replay (more freedom = more possibilities but less pruning = more time)
 	private boolean permitNegativeMarkingsDuringReplay = false;
 	
