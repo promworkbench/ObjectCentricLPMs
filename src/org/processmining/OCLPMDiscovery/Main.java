@@ -364,7 +364,6 @@ public class Main {
 		TaggedPlaceSet placeSetTrimmed = new TaggedPlaceSet(placeSet);
 		placeSetTrimmed.removeIsomorphic();
 		placeSet.setNumberOfUniquePlaces(placeSetTrimmed.size());
-		messageNormal("LPM discovery will start with "+placeSetTrimmed.size()+" unique place nets.");
 		
 		switch (parameters.getCaseNotionStrategy()) {
 				
@@ -376,8 +375,16 @@ public class Main {
 			case PE_LEADING_RELAXED_O2:
 				newTypeLabels = new ArrayList<String>(parameters.getObjectTypesLeadingTypes().size());
 				graph = buildObjectGraph(ocel, parameters);
+				// when having multiple leading types we need to reset the place set everytime because the LPM discovery plugin alters it
+				TaggedPlaceSet originalTrimmedSet = new TaggedPlaceSet();
+				if (parameters.getObjectTypesLeadingTypes().size()>1) {
+					originalTrimmedSet = new TaggedPlaceSet(placeSetTrimmed);
+				}
 				// LPM discovery for each new case notion
 				for (String currentType : parameters.getObjectTypesLeadingTypes()) {
+					if (parameters.getObjectTypesLeadingTypes().size()>1) {
+						placeSetTrimmed = new TaggedPlaceSet(originalTrimmedSet);
+					}
 					messageNormal("Starting ocel enhancement using the \""+parameters.getCaseNotionStrategy().getName()+"\" strategy for type \""+currentType+"\".");
 					// enhance log by process executions as case notions
 					String newTypeLabel = "PE_"+currentType;
@@ -775,6 +782,8 @@ public class Main {
 	}
 	
 	public static Object[] runLPMPlugin(XLog log, TaggedPlaceSet placeSetTrimmed, OCLPMDiscoveryParameters parameters) {
+		messageNormal("LPM discovery will start with "+placeSetTrimmed.size()+" unique place nets.");
+		
 		Object[] lpmResults = new Object[] {};
 		
 		LPMDiscoveryBuilder builder = org.processmining.placebasedlpmdiscovery.Main

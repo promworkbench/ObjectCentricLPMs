@@ -40,7 +40,7 @@ public class TaggedPlaceSet extends SerializableSet<TaggedPlace> implements Expo
     public TaggedPlaceSet(TaggedPlaceSet placeSet) {
     	super();
     	for (TaggedPlace p : placeSet.getElements()) {
-    		this.add(p);
+    		this.add(new TaggedPlace(p));
     	}
     }
 

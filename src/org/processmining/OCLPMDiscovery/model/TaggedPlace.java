@@ -43,6 +43,20 @@ public class TaggedPlace extends Place{
 		this.setAdditionalInfo(place.getAdditionalInfo());
 		this.setFinal(place.isFinal());
 	}
+	
+	public TaggedPlace(TaggedPlace tp) {
+		super(tp.getId());
+		for (Transition t : tp.getInputTransitions()) {
+			this.addInputTransition(t);
+		}
+		for (Transition t : tp.getOutputTransitions()) {
+			this.addOutputTransition(t);
+		}
+		this.setNumTokens(tp.getNumTokens());
+		this.setAdditionalInfo(tp.getAdditionalInfo());
+		this.setFinal(tp.isFinal());
+		this.objectType = new String(tp.getObjectType());
+	}
 
 	/**
 	 * Checks if all the transition are equal (doesn't check object-type or variable arcs)
