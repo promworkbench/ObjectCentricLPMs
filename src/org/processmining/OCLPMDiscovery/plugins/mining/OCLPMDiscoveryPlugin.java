@@ -261,11 +261,11 @@ public class OCLPMDiscoveryPlugin {
 	 */
 	public static OCLPMResult mineOCLPMs (
 			OCLPMDiscoveryParameters parameters, OcelEventLog ocel, TaggedPlaceSet placeSet, Graph<String,DefaultEdge> graph
-			) throws Exception {
+			) {
 		
-		if (!(placeSet.getList().getElement(0) instanceof TaggedPlace)) {
-			throw new Exception("Given places aren't tagged with object types.");
-		}
+//		if (!(placeSet.getList().getElement(0) instanceof TaggedPlace)) {
+//			throw new Exception("Given places aren't tagged with object types.");
+//		}
 
 		Main.setGraph(graph);
 		Object[] result = Main.run(ocel, parameters, placeSet);

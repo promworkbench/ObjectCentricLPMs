@@ -18,7 +18,6 @@ import org.processmining.placebasedlpmdiscovery.prom.plugins.mining.PlaceBasedLP
 
 public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel> {
     private static final long serialVersionUID = 9159252267279978544L; //?
-    
     private Set<String> objectTypes = new HashSet<>(); // all object types from the ocel
     private Set<String> lpmDiscoveryTypes; // types which were used as a case notion for LPM discovery
     private String oclpmDiscoverySettings; // settings used for the discovery of this result
@@ -30,6 +29,7 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
     private long executionTime = -1; // execution time starting after the place discovery in milliseconds, excluding place completion (which is done in the visualizer)
     private long executionTimePlaceCompletion = 0; // in milliseconds
     private long executionTimeExternalObjectFlow = 0; // in milliseconds
+    private HashMap<String,String> extraStats = new HashMap<>();
     private String timeStartingFrom = "";
     
     public OCLPMResult() {
@@ -411,6 +411,14 @@ public class OCLPMResult extends SerializableList<ObjectCentricLocalProcessModel
 
 	public void setPBLPMDiscoveryParameters(PlaceBasedLPMDiscoveryParameters pBLPMDiscoveryParameters) {
 		PBLPMDiscoveryParameters = pBLPMDiscoveryParameters;
+	}
+
+	public HashMap<String,String> getExtraStats() {
+		return extraStats;
+	}
+
+	public void setExtraStats(HashMap<String,String> extraStats) {
+		this.extraStats = extraStats;
 	}
 
 }

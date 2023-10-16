@@ -2,6 +2,7 @@ package org.processmining.OCLPMDiscovery.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -117,7 +118,7 @@ public class FlatLogProcessing {
 		return converter.convertNoTagging(acceptingPetriNet);
 	}
 	
-	public static void printCaseStatistics(XLog log) {
+	public static HashMap<String,String> computeCaseStatistics(XLog log) {
 		int traces = log.size();
 		
 		// Calculating the average size
@@ -150,12 +151,26 @@ public class FlatLogProcessing {
         double firstQuartile = findQuartile(sizes, 0, n / 2);
         double thirdQuartile = findQuartile(sizes, n / 2 + 1, n);
         
+        HashMap<String,String> map = new HashMap<>();
+        map.put("Cases",String.valueOf(traces));
+        map.put("Avg",String.valueOf(average));
+        map.put("Min",String.valueOf(min));
+        map.put("1st Quartile",String.valueOf(firstQuartile));
+        map.put("Median",String.valueOf(median));
+        map.put("3rd Quartile",String.valueOf(thirdQuartile));
+        map.put("Max",String.valueOf(max));
+        
         System.out.println("Number of Cases = "+traces+", Events per Case: Average = "+average+", Median = "+median);
         System.out.println("Events per Case Statistics: Min="+min+", 1stQ="+firstQuartile+", Median="+median+", 3rdQ="+thirdQuartile+", Max="+max);
+        
+        return map;
 	}
 	
 	private static double findQuartile(List<Integer> sortedList, int start, int end) {
         int size = end - start;
+        if (size == 0) {
+        	return sortedList.get(0);
+        }
         if (size % 2 == 0) {
             return (sortedList.get(start + size / 4 - 1) + sortedList.get(start + size / 4)) / 2.0;
         } else {

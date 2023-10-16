@@ -1,6 +1,7 @@
 package org.processmining.OCLPMDiscovery.model;
 
 import java.io.OutputStream;
+import java.util.HashMap;
 
 import org.processmining.placebasedlpmdiscovery.model.exporting.Exportable;
 import org.processmining.placebasedlpmdiscovery.model.exporting.exporters.Exporter;
@@ -13,6 +14,7 @@ import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableS
  *
  */
 public class LPMResultsTagged extends SerializableSet<TaggedLPMResult> implements Exportable<LPMResultsTagged>{
+	private HashMap<String,String> extraStats = new HashMap<>();
 	
 	public LPMResultsTagged () {
 		super();
@@ -42,5 +44,13 @@ public class LPMResultsTagged extends SerializableSet<TaggedLPMResult> implement
 
 	public void add(LPMResult lpmResult, String currentType) {
 		this.add(new TaggedLPMResult(lpmResult,currentType));		
+	}
+
+	public HashMap<String,String> getExtraStats() {
+		return extraStats;
+	}
+
+	public void setExtraStats(HashMap<String,String> extraStats) {
+		this.extraStats = extraStats;
 	}
 }

@@ -1,5 +1,8 @@
 package org.processmining.OCLPMDiscovery.plugins.imports;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 import org.processmining.OCLPMDiscovery.model.TaggedPlaceSet;
@@ -26,6 +29,20 @@ public class TaggedPlaceSetJsonImportPlugin extends AbstractImportPlugin {
 //        // convert from TaggedPlaceSet to PlaceSet in order to be usable with LPM discovery
 //        Set<Place> places = new HashSet<Place>(tps.getElements());
 //        PlaceSet placeSet = new PlaceSet(places);
+        return tps;
+    }
+    
+    public static TaggedPlaceSet importFromPath (String path) {
+    	File file = new File(path);
+		InputStream is = null;
+		try {
+			is = new FileInputStream(file);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	JsonImporter<TaggedPlaceSet> importer = new JsonImporter<>();
+        TaggedPlaceSet tps = importer.read(TaggedPlaceSet.class, is);
         return tps;
     }
 }

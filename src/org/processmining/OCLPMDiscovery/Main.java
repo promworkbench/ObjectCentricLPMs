@@ -352,7 +352,6 @@ public class Main {
 		LPMResult lpmResult;
 		Graph<String,DefaultEdge> graph;
 		ArrayList<String> newTypeLabels;
-		boolean perLPMVarArcs = parameters.getVariableArcIdentification().equals(VariableArcIdentification.PER_LPM);
 		
 		/*Create copy of placeSet and remove all isomorphic
 			We do not need to discover the same model for all combinations of different types in the LPM discovery
@@ -415,7 +414,17 @@ public class Main {
 					
 					// flatten ocel
 					log = Main.flattenOCEL(ocel, newTypeLabel, true);
-					FlatLogProcessing.printCaseStatistics(log);
+					if (parameters.isComputeExtraStats() && parameters.getObjectTypesLeadingTypes().size() == 1) {
+						HashMap<String,String> tmpMap = FlatLogProcessing.computeCaseStatistics(log);
+						int numEventsAfter = 0;
+						Iterator<XTrace> iterator = log.iterator();
+				        while (iterator.hasNext()) {
+				        	numEventsAfter += iterator.next().size();
+				        }
+						double replication =  numEventsAfter / (double)(ocel.getEvents().size());
+						tmpMap.put("Replication Factor",String.valueOf(replication));
+						lpmsTagged.getExtraStats().putAll(tmpMap);
+					}
 				
 					// discover LPMs (name of the currentType column needs concept:name, which the flattening does)
 					System.out.println("Starting LPM discovery using leading type "+newTypeLabel+" as case notion.");
@@ -441,6 +450,11 @@ public class Main {
 				assert(lpmResults[0] instanceof LPMResult);
 				lpmResult = (LPMResult) lpmResults[0];
 				lpmsTagged.add(lpmResult, ot);
+				if (parameters.isComputeExtraStats()) {
+					HashMap<String,String> tmpMap = FlatLogProcessing.computeCaseStatistics(log);
+					tmpMap.put("Replication Factor","1.0");
+					lpmsTagged.getExtraStats().putAll(tmpMap);
+				}
 				break;
 				
 			case DUMMY:
@@ -455,6 +469,18 @@ public class Main {
 				assert(lpmResults[0] instanceof LPMResult);
 				lpmResult = (LPMResult) lpmResults[0];
 				lpmsTagged.add(lpmResult, dummyType);
+				if (parameters.isComputeExtraStats()) {
+					HashMap<String,String> map = lpmsTagged.getExtraStats();
+					map.put("Cases","1");
+					int totalEvents = ocel.getEvents().size();
+			        map.put("Avg",String.valueOf(totalEvents));
+			        map.put("Min",String.valueOf(totalEvents));
+			        map.put("1st Quartile",String.valueOf(totalEvents));
+			        map.put("Median",String.valueOf(totalEvents));
+			        map.put("3rd Quartile",String.valueOf(totalEvents));
+			        map.put("Max",String.valueOf(totalEvents));
+			        map.put("Replication Factor","1.0");
+				}
 		}
 		System.out.println("Finished LPM discovery.");
 		System.out.println("LPMResult stores "+lpmsTagged.size()+" LPMs.");
@@ -499,6 +525,10 @@ public class Main {
 		OCLPMResult oclpmResult = new OCLPMResult(parameters, tlpms, placeSet);
 		
 		oclpmResult.setPBLPMDiscoveryParameters(parameters.getPBLPMDiscoveryParameters());
+		
+		if (parameters.isComputeExtraStats()) {
+			oclpmResult.setExtraStats(tlpms.getExtraStats());
+		}
 		
 		return oclpmResult;
 	}

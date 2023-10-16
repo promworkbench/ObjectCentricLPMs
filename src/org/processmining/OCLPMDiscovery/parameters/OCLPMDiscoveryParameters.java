@@ -1,5 +1,6 @@
 package org.processmining.OCLPMDiscovery.parameters;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -13,6 +14,8 @@ import org.processmining.placebasedlpmdiscovery.model.logs.EventLog;
 import org.processmining.placebasedlpmdiscovery.prom.plugins.mining.PlaceBasedLPMDiscoveryParameters;
 
 public class OCLPMDiscoveryParameters implements EventLog{
+	private boolean computeExtraStats = false; // compute e.g., events per case median
+	
 	private OcelEventLog ocel;
 	private Set<String> activities;
 	private Set<String> objectTypesAll; // object types before enriching ocel with new case notion
@@ -254,6 +257,10 @@ public class OCLPMDiscoveryParameters implements EventLog{
 	public void setObjectTypesLeadingTypes(Set<String> objectTypesLeadingTypes) {
 		this.objectTypesLeadingTypes = objectTypesLeadingTypes;
 	}
+	
+	public void setLeadingType(String type) {
+		this.objectTypesLeadingTypes = Collections.singleton(type);
+	}
 
 	public SPECppParameters getSpecppParameters() {
 		return specppParameters;
@@ -379,5 +386,13 @@ public class OCLPMDiscoveryParameters implements EventLog{
 			this.objectTypesList.removeElement(t);
 		}
 		this.objectTypesPlaceNets.removeAll(removeTypes);
+	}
+
+	public boolean isComputeExtraStats() {
+		return computeExtraStats;
+	}
+
+	public void setComputeExtraStats(boolean computeExtraStats) {
+		this.computeExtraStats = computeExtraStats;
 	}
 }
