@@ -1,5 +1,9 @@
 package org.processmining.OCLPMDiscovery.plugins.imports;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 
@@ -25,6 +29,43 @@ public class OCLPMResultImportPlugin extends AbstractImportPlugin {
         ObjectInputStream ois = new ObjectInputStream(input);
         Object object = ois.readObject();
         ois.close();
+        if (object instanceof OCLPMResult) {
+            return (OCLPMResult) object;
+        } else {
+            System.err.println("File could not be parsed as valid OCLPMResult object");
+        }
+        return null;
+    }
+    
+    public static OCLPMResult importFromPath (String path){
+    	File file = new File(path);
+		InputStream is = null;
+		try {
+			is = new FileInputStream(file);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	ObjectInputStream ois = null;
+		try {
+			ois = new ObjectInputStream(is);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        Object object = null;
+		try {
+			object = ois.readObject();
+		} catch (ClassNotFoundException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        try {
+			ois.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         if (object instanceof OCLPMResult) {
             return (OCLPMResult) object;
         } else {
