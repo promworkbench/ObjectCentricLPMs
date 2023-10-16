@@ -30,7 +30,7 @@ public class Evaluation {
 		
 		try {
 			
-			orderManagementTests();
+			CaseNotionStrategyTest("Evaluation_OrderManagement", "OrderManagementLog.jsonocel");
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -39,10 +39,7 @@ public class Evaluation {
 		System.out.println("Finished evaluation.");
 	}
 		
-	private static void orderManagementTests() throws IOException {
-		
-		String folder = "Evaluation_OrderManagement";
-		String ocelName = "OrderManagementLog.jsonocel";
+	private static void CaseNotionStrategyTest(String folder, String ocelName) throws IOException {
 		
 		String ocelPath = basePath + folder + "\\" + ocelName;
 		String placeSetPath = basePath + folder + "\\" + placeSetName;
@@ -61,15 +58,43 @@ public class Evaluation {
 		parameters.setComputeExtraStats(true);
 		OCLPMResult oclpmResult;		
 		
-		parameters.setCaseNotionStrategy(CaseNotionStrategy.PE_CONNECTED);
-		oclpmResult = OCLPMDiscoveryPlugin.mineOCLPMs(parameters, ocel, placeSet, graph);
-		writeExtraStats(writer, oclpmResult, "Connected Components");
+		CaseNotionStrategy[] strats = {
+				CaseNotionStrategy.DUMMY,
+				CaseNotionStrategy.PE_CONNECTED,
+				CaseNotionStrategy.PE_LEADING_O2,
+				CaseNotionStrategy.PE_LEADING_RELAXED_O2
+				};
 		
+		// testing all strats for all types separately
+		for (CaseNotionStrategy strat : strats) {
+			for (String ot : parameters.getObjectTypesAll()) {
+				parameters.setCaseNotionStrategy(strat);
+				String rowName = strat.getName();
+				if (CaseNotionStrategy.typeSelectionNeeded.contains(strat)) {
+					parameters.setLeadingType(ot);
+					rowName += " ot";
+				}
+				oclpmResult = OCLPMDiscoveryPlugin.mineOCLPMs(parameters, ocel, placeSet, graph);
+				writeExtraStats(writer, oclpmResult, rowName);
+				if (!CaseNotionStrategy.typeSelectionNeeded.contains(strat)) {
+					break;
+				}
+			}			
+		}
+		
+//		parameters.setCaseNotionStrategy(CaseNotionStrategy.DUMMY);
+//		oclpmResult = OCLPMDiscoveryPlugin.mineOCLPMs(parameters, ocel, placeSet, graph);
+//		writeExtraStats(writer, oclpmResult, "Single Case");
+//		
+//		parameters.setCaseNotionStrategy(CaseNotionStrategy.PE_CONNECTED);
+//		oclpmResult = OCLPMDiscoveryPlugin.mineOCLPMs(parameters, ocel, placeSet, graph);
+//		writeExtraStats(writer, oclpmResult, "Connected Components");
+//		
 //		parameters.setCaseNotionStrategy(CaseNotionStrategy.PE_LEADING_O2);
 //		parameters.setLeadingType("customers");
 //		oclpmResult = OCLPMDiscoveryPlugin.mineOCLPMs(parameters, ocel, placeSet, graph);
 //		writeExtraStats(writer, oclpmResult, "LT-O2 customers");
-		
+//		
 		writer.close();
 	}
 	
