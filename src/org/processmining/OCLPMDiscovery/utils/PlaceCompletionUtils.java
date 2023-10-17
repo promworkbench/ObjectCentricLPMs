@@ -47,7 +47,7 @@ public class PlaceCompletionUtils {
 				// add places of other types to model if: 
 				// equal place already is in there
 				oclpmResult = completeAll(oclpmResult);
-				oclpmResult.deleteDuplicates();
+//				oclpmResult.deleteDuplicates();
 				break;
 			
 			case BETTERFLOW:

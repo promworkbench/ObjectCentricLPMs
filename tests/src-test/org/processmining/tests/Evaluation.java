@@ -43,7 +43,7 @@ public class Evaluation {
 			postProcessingTest("Evaluation_Github", "Github", "result_CC.promoclpm", "postProcessingTest.csv");
 //			postProcessingTest("Evaluation_Github", "Github", "result_LTR-O2-CCN.promoclpm", "postProcessingTest.csv");
 			postProcessingTest("Evaluation_P2P", "P2P", "result_CC.promoclpm", "postProcessingTest.csv");
-//			postProcessingTest("Evaluation_O2C", "O2C", "result_CC.promoclpm", "postProcessingTest.csv");
+			postProcessingTest("Evaluation_O2C", "O2C", "result_CC.promoclpm", "postProcessingTest.csv");
 			
 		} catch (IOException e) {
 			e.printStackTrace();
