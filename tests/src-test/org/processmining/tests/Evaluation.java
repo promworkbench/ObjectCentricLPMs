@@ -35,14 +35,15 @@ public class Evaluation {
 			
 //			caseNotionStrategyTest("Evaluation_Github", "github_pm4py.xmlocel", "caseNotionTest.csv");
 //			caseNotionStrategyTest("Evaluation_TransferOrder", "transfer_order.jsonocel", "caseNotionTest.csv");
-			caseNotionStrategyTest("Evaluation_P2P", "p2p.jsonocel", "caseNotionTest.csv");
+//			caseNotionStrategyTest("Evaluation_P2P", "p2p.jsonocel", "caseNotionTest.csv");
 //			caseNotionStrategyTest("Evaluation_Recruiting", "recruiting.xmlocel", "caseNotionTest.csv");
 //			caseNotionStrategyTest("Evaluation_OrderManagement", "OrderManagementLog.jsonocel", "caseNotionTest.csv");
 //			caseNotionStrategyTest("Evaluation_O2C", "o2c.jsonocel", "caseNotionTest.csv");
 			
-//			postProcessingTest("Evaluation_Github", "Github", "result_CC.promoclpm", "postProcessingTest.csv");
+			postProcessingTest("Evaluation_Github", "Github", "result_CC.promoclpm", "postProcessingTest.csv");
 //			postProcessingTest("Evaluation_Github", "Github", "result_LTR-O2-CCN.promoclpm", "postProcessingTest.csv");
-//			postProcessingTest("Evaluation_P2P", "P2P", "result_CC.promoclpm", "postProcessingTest.csv");
+			postProcessingTest("Evaluation_P2P", "P2P", "result_CC.promoclpm", "postProcessingTest.csv");
+//			postProcessingTest("Evaluation_O2C", "O2C", "result_CC.promoclpm", "postProcessingTest.csv");
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -73,7 +74,7 @@ public class Evaluation {
 		CaseNotionStrategy[] strats = {
 				CaseNotionStrategy.DUMMY,
 				CaseNotionStrategy.PE_CONNECTED,
-//				CaseNotionStrategy.PE_LEADING_O2,
+				CaseNotionStrategy.PE_LEADING_O2,
 				CaseNotionStrategy.PE_LEADING_RELAXED_O2
 				};
 		
@@ -151,9 +152,9 @@ public class Evaluation {
 
 		// prepare csv
 		FileWriter writer = new FileWriter(basePath + folder + "\\" + csvName);
-		writer.append("Log, Models, Places, PC:FewVariable, PC:FewVariableBetterFlow, PC:All, EOF:All, EOF:StartEnd, EOF:AllVisible, EOF:StartEndVisible\n");
+		writer.append("Log, Models, Places, PC:FewVariable, PC:FewVariableBetterFlow, PC:All, EOF:All, EOF:StartEnd, EOF:AllVisible, EOF:StartEndVisible, Runs\n");
 		
-		int numRuns = 20;
+		int numRuns = 200;
 		long[] times = new long[numRuns]; 
 		
 		writer.append(logName+", "+oclpmResultOriginal.getElements().size()+", "+oclpmResultOriginal.getPlaceSet().size()+", ");
@@ -196,6 +197,7 @@ public class Evaluation {
 			writer.append(String.valueOf(average)+", ");
 			parameterCounter++;
 		}
+		writer.append(numRuns+"");
 		writer.append("\n");
 		writer.close();
 	}

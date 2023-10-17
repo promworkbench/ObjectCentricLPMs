@@ -530,6 +530,8 @@ public class Main {
 			oclpmResult.setExtraStats(tlpms.getExtraStats());
 		}
 		
+		oclpmResult.deleteIsomorphic(); // make sure that LPM discovery didn't return isomorphic models
+		
 		return oclpmResult;
 	}
 	

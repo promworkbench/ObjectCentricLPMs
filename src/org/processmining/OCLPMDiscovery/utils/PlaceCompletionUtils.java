@@ -61,12 +61,12 @@ public class PlaceCompletionUtils {
 			case FEWVARIABLE:
 				// swaps existing places with the places that have the fewest variable arcs
 				// delete isomorphic models beforehand as they would result in the same net afterwards
-				oclpmResult.deleteIsomorphic();
+//				oclpmResult.deleteIsomorphic(); // not necessary anymore as we do this before
 				oclpmResult = swapToLessThan2VariableArcs(oclpmResult);
 				break;
 			
 			case FEWVARIABLE_BETTERFLOW:
-				oclpmResult.deleteIsomorphic();
+//				oclpmResult.deleteIsomorphic(); // not necessary anymore
 				oclpmResult = swapToLessThan2VariableArcs(oclpmResult);
 				oclpmResult = betterFlow2(oclpmResult);
 				break;
