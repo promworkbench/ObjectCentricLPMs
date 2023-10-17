@@ -17,6 +17,7 @@ import org.processmining.OCLPMDiscovery.plugins.imports.TaggedPlaceSetJsonImport
 import org.processmining.OCLPMDiscovery.plugins.mining.OCLPMDiscoveryPlugin;
 import org.processmining.OCLPMDiscovery.utils.PlaceCompletionUtils;
 import org.processmining.ocel.importers.JSONImporter;
+import org.processmining.ocel.importers.XMLImporter;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
 
 public class Evaluation {
@@ -32,8 +33,16 @@ public class Evaluation {
 		
 		try {
 			
+//			caseNotionStrategyTest("Evaluation_Github", "github_pm4py.xmlocel", "caseNotionTest.csv");
+//			caseNotionStrategyTest("Evaluation_TransferOrder", "transfer_order.jsonocel", "caseNotionTest.csv");
+			caseNotionStrategyTest("Evaluation_P2P", "p2p.jsonocel", "caseNotionTest.csv");
+//			caseNotionStrategyTest("Evaluation_Recruiting", "recruiting.xmlocel", "caseNotionTest.csv");
 //			caseNotionStrategyTest("Evaluation_OrderManagement", "OrderManagementLog.jsonocel", "caseNotionTest.csv");
-			postProcessingTest("Evaluation_Github", "Github", "result_CC.promoclpm", "postProcessingTest.csv");
+//			caseNotionStrategyTest("Evaluation_O2C", "o2c.jsonocel", "caseNotionTest.csv");
+			
+//			postProcessingTest("Evaluation_Github", "Github", "result_CC.promoclpm", "postProcessingTest.csv");
+//			postProcessingTest("Evaluation_Github", "Github", "result_LTR-O2-CCN.promoclpm", "postProcessingTest.csv");
+//			postProcessingTest("Evaluation_P2P", "P2P", "result_CC.promoclpm", "postProcessingTest.csv");
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -49,7 +58,7 @@ public class Evaluation {
 		String graphPath = basePath + folder + "\\" + graphName;
 
 		// imports
-		OcelEventLog ocel = new JSONImporter(ocelPath).doImport();
+		OcelEventLog ocel = importOcel(ocelPath); 
 		TaggedPlaceSet placeSet = TaggedPlaceSetJsonImportPlugin.importFromPath(placeSetPath);
 		Graph<String,DefaultEdge> graph = GraphImportPlugin.importFromPath(graphPath);
 
@@ -64,7 +73,7 @@ public class Evaluation {
 		CaseNotionStrategy[] strats = {
 				CaseNotionStrategy.DUMMY,
 				CaseNotionStrategy.PE_CONNECTED,
-				CaseNotionStrategy.PE_LEADING_O2,
+//				CaseNotionStrategy.PE_LEADING_O2,
 				CaseNotionStrategy.PE_LEADING_RELAXED_O2
 				};
 		
@@ -75,14 +84,14 @@ public class Evaluation {
 				String rowName = strat.getName();
 				if (CaseNotionStrategy.typeSelectionNeeded.contains(strat)) {
 					parameters.setLeadingType(ot);
-					rowName += " ot";
+					rowName += " "+ot;
 				}
 				oclpmResult = OCLPMDiscoveryPlugin.mineOCLPMs(parameters, ocel, placeSet, graph);
 				writeExtraStats(writer, oclpmResult, rowName);
 				if (!CaseNotionStrategy.typeSelectionNeeded.contains(strat)) {
 					break;
 				}
-			}			
+			}
 		}
 		
 //		parameters.setCaseNotionStrategy(CaseNotionStrategy.DUMMY);
@@ -99,6 +108,9 @@ public class Evaluation {
 //		writeExtraStats(writer, oclpmResult, "LT-O2 customers");
 //		
 		writer.close();
+		System.out.println("\n=================================================");
+		System.out.println("Finished Case Notion Strategy Test of "+ocelName);
+		System.out.println("=================================================\n");
 	}
 	
 	private static void writeExtraStats(FileWriter writer, OCLPMResult oclpmResult, String rowName) throws IOException {
@@ -113,6 +125,22 @@ public class Evaluation {
 		writer.append(oclpmResult.getExtraStats().get("Median")+", "); // Median
 		writer.append(oclpmResult.getExtraStats().get("3rd Quartile")+", "); // 3rd Quartile
 		writer.append(oclpmResult.getExtraStats().get("Max")+"\n"); // Max
+	}
+	
+	private static OcelEventLog importOcel (String path) {
+		OcelEventLog ocel;
+		switch (path.split("\\.")[1]) {
+			case "jsonocel" :
+				ocel = new JSONImporter(path).doImport();
+				break;
+			case "xmlocel":
+				ocel = new XMLImporter(path).doImport();
+				break;
+			default :
+				System.out.println("Couldn't recognize ocel file extension.");
+				ocel = new JSONImporter(path).doImport();
+		}
+		return ocel;
 	}
 	
 	private static void postProcessingTest (String folder, String logName, String resultName, String csvName) throws IOException {
@@ -131,12 +159,16 @@ public class Evaluation {
 		writer.append(logName+", "+oclpmResultOriginal.getElements().size()+", "+oclpmResultOriginal.getPlaceSet().size()+", ");
 		
 		PlaceCompletion[] pcList = {PlaceCompletion.FEWVARIABLE, PlaceCompletion.FEWVARIABLE_BETTERFLOW, PlaceCompletion.ALL};
+		ExternalObjectFlow[] eofList = {ExternalObjectFlow.ALL, ExternalObjectFlow.START_END, ExternalObjectFlow.ALL_VISIBLE, ExternalObjectFlow.START_END_VISIBLE};
+		int totalRuns = (pcList.length + eofList.length)*numRuns;
+		int parameterCounter = 0;
 		for (PlaceCompletion pc : pcList) {
 			for (int i = 0; i<numRuns; i++) {
 				OCLPMResult oclpmResult = oclpmResultOriginal.copyForPlaceCompletion();
 				long start = System.currentTimeMillis();
 				PlaceCompletionUtils.completePlaces(oclpmResult, pc);
-				times[i] = System.currentTimeMillis()-start; 
+				times[i] = System.currentTimeMillis()-start;
+				System.out.println("("+(parameterCounter*numRuns+i+1) + "/"+totalRuns+") "+"Run "+(i+1)+" of parameter "+pc.getName()+" took "+times[i]+" ms.");
 			}
 			long sum = 0;
 	        for (long num : times) {
@@ -144,9 +176,9 @@ public class Evaluation {
 	        }
 	        double average = (double) sum / times.length;
 			writer.append(String.valueOf(average)+", ");
+			parameterCounter++;
 		}
 		
-		ExternalObjectFlow[] eofList = {ExternalObjectFlow.ALL, ExternalObjectFlow.START_END, ExternalObjectFlow.ALL_VISIBLE, ExternalObjectFlow.START_END_VISIBLE};
 		for (ExternalObjectFlow eof : eofList) {
 			for (int i = 0; i<numRuns; i++) {
 				OCLPMResult oclpmResult = oclpmResultOriginal.copyForPlaceCompletion();
@@ -154,6 +186,7 @@ public class Evaluation {
 				long start = System.currentTimeMillis();
 				oclpmResult.showExternalObjectFlow(eof, PlaceCompletion.FEWVARIABLE);
 				times[i] = System.currentTimeMillis()-start; 
+				System.out.println("("+(parameterCounter*numRuns+i+1) + "/"+totalRuns+") "+"Run "+(i+1)+" of parameter "+eof.getName()+" took "+times[i]+" ms.");
 			}
 			long sum = 0;
 	        for (long num : times) {
@@ -161,6 +194,7 @@ public class Evaluation {
 	        }
 	        double average = (double) sum / times.length;
 			writer.append(String.valueOf(average)+", ");
+			parameterCounter++;
 		}
 		writer.append("\n");
 		writer.close();

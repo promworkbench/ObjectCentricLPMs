@@ -654,6 +654,9 @@ public class ProcessExecutions {
 			// Optimization 2: otherwise choose the type with the fewest PEs and add only those
 			else {
 				Object[] PeArray = typeToPEs.values().toArray();
+				if (PeArray.length == 0) {
+					continue; // this event will be discarded as it doesn't have any objects assigned to PEs
+				}
 				minTmpSet = -1;
 				int indexMinTmpSet = -1;
 				for (int i = 0; i < PeArray.length; i++) {
@@ -674,7 +677,7 @@ public class ProcessExecutions {
 		
 		int numEventsBefore = ocel.getEvents().size();
 		System.out.println(
-				"Flattening log for the new type \""+newTypeLabel+"\" lead to an increase of events "
+				"Flattening log for the new type \""+newTypeLabel+"\" leads to an increase of events "
 						+ "by a factor of "+(double) numEventsAfter/numEventsBefore+"."
 						);
 //		System.out.println("Finished ocel enhancement for type "+leadingType+".");
@@ -777,6 +780,9 @@ public class ProcessExecutions {
 			// Optimization 2: otherwise choose the type with the fewest PEs and add only those
 			else {
 				Object[] PeArray = typeToPEs.values().toArray();
+				if (PeArray.length == 0) {
+					continue; // this event will be discarded as it doesn't have any objects assigned to PEs
+				}
 				minTmpSet = -1;
 				int indexMinTmpSet = -1;
 				for (int i = 0; i < PeArray.length; i++) {

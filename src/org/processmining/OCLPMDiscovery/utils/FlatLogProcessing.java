@@ -148,8 +148,8 @@ public class FlatLogProcessing {
         double max = (double) Collections.max(sizes);
 
         int n = sizes.size();
-        double firstQuartile = findQuartile(sizes, 0, n / 2);
-        double thirdQuartile = findQuartile(sizes, n / 2 + 1, n);
+        double firstQuartile = findFirstQuartile(sizes);
+        double thirdQuartile = findThirdQuartile(sizes);
         
         HashMap<String,String> map = new HashMap<>();
         map.put("Cases",String.valueOf(traces));
@@ -166,15 +166,37 @@ public class FlatLogProcessing {
         return map;
 	}
 	
-	private static double findQuartile(List<Integer> sortedList, int start, int end) {
-        int size = end - start;
-        if (size == 0) {
-        	return sortedList.get(0);
-        }
-        if (size % 2 == 0) {
-            return (sortedList.get(start + size / 4 - 1) + sortedList.get(start + size / 4)) / 2.0;
+	public static double findFirstQuartile(List<Integer> sortedList) {
+        int n = sortedList.size();
+        if (n == 0) {
+            return 0;
+        } else if (n == 1) {
+            return sortedList.get(0);
+        } else if (n == 2) {
+            return (sortedList.get(0) + sortedList.get(1)) / 2.0;
         } else {
-            return sortedList.get(start + size / 4);
+            if (n % 2 != 0) {
+                return sortedList.get(n / 4);
+            } else {
+                return (sortedList.get(n / 4 - 1) + sortedList.get(n / 4)) / 2.0;
+            }
+        }
+    }
+	
+	public static double findThirdQuartile(List<Integer> sortedList) {
+        int n = sortedList.size();
+        if (n == 0) {
+            return 0;
+        } else if (n == 1) {
+            return sortedList.get(0);
+        } else if (n == 2) {
+            return (sortedList.get(0) + sortedList.get(1)) / 2.0;
+        } else {
+            if (n % 2 != 0) {
+                return sortedList.get((3 * n) / 4);
+            } else {
+                return (sortedList.get((3 * n) / 4 - 1) + sortedList.get((3 * n) / 4)) / 2.0;
+            }
         }
     }
 }

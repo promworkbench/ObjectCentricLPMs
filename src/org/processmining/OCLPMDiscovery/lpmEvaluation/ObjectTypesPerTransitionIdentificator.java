@@ -40,7 +40,11 @@ public class ObjectTypesPerTransitionIdentificator implements WindowLPMEvaluator
     			String activity = event.getAttributes().get("concept:name").toString();
     			for (String type : this.objectTypes) {
     				// get number of objects of type
-    				Long count = ((XAttributeDiscreteImpl) (event.getAttributes().get(type))).getValue();
+    				XAttributeDiscreteImpl countAtt = (XAttributeDiscreteImpl) (event.getAttributes().get(type)); 
+    				Long count = 0l;
+    				if (countAtt != null) {
+    					count = countAtt.getValue();
+    				}
     				// do the counting
     				if (count >= 1) {
     					result.registerType(activity, type);
