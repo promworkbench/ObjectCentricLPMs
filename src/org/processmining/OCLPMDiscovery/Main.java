@@ -532,6 +532,8 @@ public class Main {
 		
 		oclpmResult.deleteIsomorphic(); // make sure that LPM discovery didn't return isomorphic models
 		
+		Main.messageNormal("OCLPMResult stores "+oclpmResult.getElements().size()+" unique models.");
+		
 		return oclpmResult;
 	}
 	
