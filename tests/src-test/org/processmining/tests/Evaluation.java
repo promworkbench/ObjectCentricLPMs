@@ -57,7 +57,7 @@ public class Evaluation {
 //					};
 //			caseNotionStrategyTest("Evaluation_Recruiting", "recruiting.xmlocel", "caseNotionTest.csv");
 //			caseNotionStrategyTest("Evaluation_OrderManagement", "OrderManagementLog.jsonocel", "caseNotionTest.csv");
-			caseNotionStrategyTest("Evaluation_O2C", "o2c.jsonocel", "caseNotionTest.csv");
+//			caseNotionStrategyTest("Evaluation_O2C", "o2c.jsonocel", "caseNotionTest.csv");
 			// P2P log
 //			caseNotionStrats = new CaseNotionStrategy[]{
 //					CaseNotionStrategy.PE_LEADING_RELAXED_O2,
@@ -66,6 +66,7 @@ public class Evaluation {
 //					};
 //			ignoreObjectTypes.add("MBLNR_ZEILE");
 //			caseNotionStrategyTest("Evaluation_P2P", "p2p.jsonocel", "caseNotionTest.csv");
+			caseNotionStrategyTest("Evaluation_BPIC17", "BPIC17.jsonocel", "caseNotionTest.csv");
 			
 //			postProcessingTest("Evaluation_Github", "Github", "result_CC.promoclpm", "postProcessingTest.csv");
 //			postProcessingTest("Evaluation_Github", "Github", "result_LTR-O2-CCN.promoclpm", "postProcessingTest.csv");

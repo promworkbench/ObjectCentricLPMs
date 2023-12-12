@@ -654,6 +654,76 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 		}
 		return true;
 	}
+	
+	/*
+	 * Add special starting or ending place
+	 * returns true if place has been added
+	 */
+	private boolean addStartEndPlace(Set<TaggedPlace> newPlaces, boolean variableArc, boolean start, int newPlaceID, String type, String activity) {
+		boolean singlePlace = true; // true = only add one place per type
+		
+		String placeLabel = "";
+		if (start) {
+			placeLabel = "StartingPlace:";
+		}
+		else {
+			placeLabel = "EndingPlace:";
+		}
+		placeLabel += type;
+		
+		if (singlePlace) { // only add one place per type
+			// if there already is a place "StartingPlace:type" only add the new transitions
+			boolean placeExists = false;
+			for (TaggedPlace tmp_place : newPlaces) {
+				if (tmp_place.getId().equals(placeLabel)) {
+					placeExists = true;
+					if (start) {
+						tmp_place.addOutputTransition(this.transitions.get(activity));						
+					}
+					else {
+						tmp_place.addInputTransition(this.transitions.get(activity));
+					}
+					if (variableArc) {
+						// add this as variable arc if the arc going out of the transition is variable
+						this.addVariableArc(tmp_place.getId(),activity);
+					}
+					break;
+				}
+			}
+			if (!placeExists) {
+				TaggedPlace p = new TaggedPlace(type, placeLabel);
+				if (start) {
+					p.addOutputTransition(this.transitions.get(activity));					
+				}
+				else {
+					p.addInputTransition(this.transitions.get(activity));
+				}
+				if (variableArc) {
+					// add this as variable arc if the arc going out of the transition is variable
+					this.addVariableArc(p.getId(),activity);
+				}
+				newPlaces.add(p);
+				return true;
+			}
+		}
+		else { // add one place per transition and type
+			TaggedPlace p = new TaggedPlace(type, placeLabel+":"+newPlaceID);
+			newPlaceID++;
+			if (start) {
+				p.addOutputTransition(this.transitions.get(activity));					
+			}
+			else {
+				p.addInputTransition(this.transitions.get(activity));
+			}
+			if (variableArc) {
+				// add this as variable arc if the arc going out of the transition is variable
+				this.addVariableArc(p.getId(),activity);
+			}
+			newPlaces.add(p);
+			return true;
+		}
+		return false;
+	}
 
 	/**
 	 * add special places for starting and ending transitions
@@ -712,14 +782,8 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 					// check if arc already connected to the transition is variable
 					Boolean variableArc = this.getVariableArcActivities(transitionMap.get(key).iterator().next()).contains(startingActivity);
 					// then add the special starting place
-					TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type+":"+newPlaceID);
-					newPlaceID++;
-					p.addOutputTransition(this.transitions.get(startingActivity));
-					if (variableArc) {
-						// add this as variable arc if the arc going out of the transition is variable
-						this.addVariableArc(p.getId(),startingActivity);
-					}
-					newPlaces.add(p);
+					boolean addedPlace = addStartEndPlace(newPlaces, variableArc, true, newPlaceID, type, startingActivity);
+					if (addedPlace) newPlaceID++;
 				}
 			}
 			// same for ending activities
@@ -730,14 +794,8 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 					// check if arc already connected to the transition is variable
 					Boolean variableArc = this.getVariableArcActivities(transitionMap.get(key).iterator().next()).contains(endingActivity);
 					// then add the special ending place
-					TaggedPlace p = new TaggedPlace(type, "EndingPlace:"+type+":"+newPlaceID);
-					newPlaceID++;
-					p.addInputTransition(this.transitions.get(endingActivity));
-					if (variableArc) {
-						// add this as variable arc if the arc going in to the transition is variable
-						this.addVariableArc(p.getId(),endingActivity);
-					}
-					newPlaces.add(p);
+					boolean addedPlace = addStartEndPlace(newPlaces, variableArc, false, newPlaceID, type, endingActivity);
+					if (addedPlace) newPlaceID++;
 				}
 			}
 		}
@@ -762,39 +820,23 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 						if (currentPlaceCompletion.equals(PlaceCompletion.ALL)) {
 							// add in and out special places
 							if (startingActivities.get(type).contains(activity)) {
-								TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type+":"+newPlaceID);
-								p.addOutputTransition(this.transitions.get(activity));
-								if (variableArc) {
-									// add this as variable arc if the arc going in to the transition is variable
-									this.addVariableArc(p.getId(),activity);
-								}
-								newPlaceID++;
-								newPlaces.add(p);
+								boolean addedPlace = addStartEndPlace(newPlaces, variableArc, true, newPlaceID, type, activity);
+								if (addedPlace) newPlaceID++;
 							}
 							if (endingActivities.get(type).contains(activity)) {
-								TaggedPlace p = new TaggedPlace(type, "EndingPlace:"+type+":"+newPlaceID);
-								p.addInputTransition(this.transitions.get(activity));
-								if (variableArc) {
-									// add this as variable arc if the arc going in to the transition is variable
-									this.addVariableArc(p.getId(),activity);
-								}
-								newPlaceID++;
-								newPlaces.add(p);
+								boolean addedPlace = addStartEndPlace(newPlaces, variableArc, false, newPlaceID, type, activity);
+								if (addedPlace) newPlaceID++;
 							}
 						}
 						else if (!variableArc){ // in all other place completion modes
 							// add in and out special places if the arcs aren't variable
 							if (startingActivities.get(type).contains(activity)) {
-								TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type+":"+newPlaceID);
-								p.addOutputTransition(this.transitions.get(activity));
-								newPlaceID++;
-								newPlaces.add(p);
+								boolean addedPlace = addStartEndPlace(newPlaces, variableArc, true, newPlaceID, type, activity);
+								if (addedPlace) newPlaceID++;
 							}
 							if (endingActivities.get(type).contains(activity)) {
-								TaggedPlace p = new TaggedPlace(type, "EndingPlace:"+type+":"+newPlaceID);
-								p.addInputTransition(this.transitions.get(activity));
-								newPlaceID++;
-								newPlaces.add(p);
+								boolean addedPlace = addStartEndPlace(newPlaces, variableArc, false, newPlaceID, type, activity);
+								if (addedPlace) newPlaceID++;
 							}
 						}
 					}
@@ -854,14 +896,8 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 					// check if arc already connected to the transition is variable
 					Boolean variableArc = this.getVariableArcActivities(transitionMap.get(keyIn).iterator().next()).contains(activity);
 					// then add the special ending place
-					TaggedPlace p = new TaggedPlace(type, "EndingPlace:"+type+":"+newPlaceID);
-					p.addInputTransition(this.transitions.get(activity));
-					if (variableArc) {
-						// add this as variable arc if the arc going in to the transition is variable
-						this.addVariableArc(p.getId(),activity);
-					}
-					newPlaceID++;
-					newPlaces.add(p);
+					boolean addedPlace = addStartEndPlace(newPlaces, variableArc, false, newPlaceID, type, activity);
+					if (addedPlace) newPlaceID++;
 				}
 				// outgoing but no ingoing arcs
 				if ((!transitionMap.containsKey(keyIn) || transitionMap.get(keyIn).isEmpty())
@@ -869,14 +905,8 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 					// check if arc already connected to the transition is variable
 					Boolean variableArc = this.getVariableArcActivities(transitionMap.get(keyOut).iterator().next()).contains(activity);
 					// then add the special ending place
-					TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type+":"+newPlaceID);
-					p.addOutputTransition(this.transitions.get(activity));
-					if (variableArc) {
-						// add this as variable arc if the arc going in to the transition is variable
-						this.addVariableArc(p.getId(),activity);
-					}
-					newPlaceID++;
-					newPlaces.add(p);
+					boolean addedPlace = addStartEndPlace(newPlaces, variableArc, true, newPlaceID, type, activity);
+					if (addedPlace) newPlaceID++;
 				}
 			}
 		}
@@ -900,33 +930,17 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 						}
 						if (currentPlaceCompletion.equals(PlaceCompletion.ALL)) {
 							// add in and out special places
-							TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type+":"+newPlaceID);
-							p.addOutputTransition(this.transitions.get(activity));
-							if (variableArc) {
-								// add this as variable arc if the arc going in to the transition is variable
-								this.addVariableArc(p.getId(),activity);
-							}
-							newPlaceID++;
-							newPlaces.add(p);
-							p = new TaggedPlace(type, "EndingPlace:"+type+":"+newPlaceID);
-							p.addInputTransition(this.transitions.get(activity));
-							if (variableArc) {
-								// add this as variable arc if the arc going in to the transition is variable
-								this.addVariableArc(p.getId(),activity);
-							}
-							newPlaceID++;
-							newPlaces.add(p);
+							boolean addedPlace = addStartEndPlace(newPlaces, variableArc, true, newPlaceID, type, activity);
+							if (addedPlace) newPlaceID++;
+							addedPlace = addStartEndPlace(newPlaces, variableArc, false, newPlaceID, type, activity);
+							if (addedPlace) newPlaceID++;
 						}
 						else if (!variableArc){ // in all other place completion modes
 							// add in and out special places if the arcs aren't variable
-							TaggedPlace p = new TaggedPlace(type, "StartingPlace:"+type+":"+newPlaceID);
-							p.addOutputTransition(this.transitions.get(activity));
-							newPlaceID++;
-							newPlaces.add(p);
-							p = new TaggedPlace(type, "EndingPlace:"+type+":"+newPlaceID);
-							p.addInputTransition(this.transitions.get(activity));
-							newPlaceID++;
-							newPlaces.add(p);
+							boolean addedPlace = addStartEndPlace(newPlaces, variableArc, true, newPlaceID, type, activity);
+							if (addedPlace) newPlaceID++;
+							addedPlace = addStartEndPlace(newPlaces, variableArc, false, newPlaceID, type, activity);
+							if (addedPlace) newPlaceID++;
 						}
 					}
 				}
