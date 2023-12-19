@@ -47,7 +47,7 @@ public class Evaluation {
 		
 		try {
 			
-//			totalRuntimeTest();
+			totalRuntimeTest();
 			
 //			caseNotionStrategyTest("Evaluation_Github", "github_pm4py.xmlocel", "caseNotionTest.csv");
 //			caseNotionStrategyTest("Evaluation_TransferOrder", "transfer_order.jsonocel", "caseNotionTest.csv", "placeSet_tau09.jsontp");
@@ -66,7 +66,7 @@ public class Evaluation {
 //					};
 //			ignoreObjectTypes.add("MBLNR_ZEILE");
 //			caseNotionStrategyTest("Evaluation_P2P", "p2p.jsonocel", "caseNotionTest.csv");
-			caseNotionStrategyTest("Evaluation_BPIC17", "BPIC17.jsonocel", "caseNotionTest.csv");
+//			caseNotionStrategyTest("Evaluation_BPIC17", "BPIC17.jsonocel", "caseNotionTest.csv");
 			
 //			postProcessingTest("Evaluation_Github", "Github", "result_CC.promoclpm", "postProcessingTest.csv");
 //			postProcessingTest("Evaluation_Github", "Github", "result_LTR-O2-CCN.promoclpm", "postProcessingTest.csv");
@@ -86,23 +86,26 @@ public class Evaluation {
 		BufferedWriter writer = new BufferedWriter(new FileWriter(basePath + "Testresults\\" + "totalRuntimeTest.csv"));
 		writer.append("Log, Models, Place Discovery [s], Graph Construction [s], OCLPM Discovery [s], Post Processing [s]\n");
 		try {
-		// Order Management: tau 0.9, CC
-		runTotalSingleTest("Evaluation_OrderManagement", "OrderManagementLog.jsonocel", "Order Management", writer, 0.9, 
-				CaseNotionStrategy.PE_CONNECTED, PlaceCompletion.FEWVARIABLE, ExternalObjectFlow.START_END);
-		// Github: tau 0.9, CC
-		runTotalSingleTest("Evaluation_Github", "github_pm4py.xmlocel", "Github", writer, 0.9, 
-				CaseNotionStrategy.PE_CONNECTED, PlaceCompletion.FEWVARIABLE, ExternalObjectFlow.START_END);
-		// P2P: tau 0.9, CC
-		runTotalSingleTest("Evaluation_P2P", "p2p.jsonocel", "P2P", writer, 0.9, 
-				CaseNotionStrategy.PE_CONNECTED, PlaceCompletion.FEWVARIABLE, ExternalObjectFlow.START_END);
-		// Recruiting: tau 0.9, CC
-		runTotalSingleTest("Evaluation_Recruiting", "recruiting.xmlocel", "Recruiting", writer, 0.9, 
-				CaseNotionStrategy.PE_CONNECTED, PlaceCompletion.FEWVARIABLE, ExternalObjectFlow.START_END);
-		// Transfer: tau 0.1, CC
-		runTotalSingleTest("Evaluation_TransferOrder", "transfer_order.jsonocel", "Transfer", writer, 0.1, 
-				CaseNotionStrategy.PE_CONNECTED, PlaceCompletion.FEWVARIABLE, ExternalObjectFlow.START_END);
-		// O2C: tau 0.9, CC
-		runTotalSingleTest("Evaluation_O2C", "o2c.jsonocel", "O2C", writer, 0.9, 
+//		// Order Management: tau 0.9, CC
+//		runTotalSingleTest("Evaluation_OrderManagement", "OrderManagementLog.jsonocel", "Order Management", writer, 0.9, 
+//				CaseNotionStrategy.PE_CONNECTED, PlaceCompletion.FEWVARIABLE, ExternalObjectFlow.START_END);
+//		// Github: tau 0.9, CC
+//		runTotalSingleTest("Evaluation_Github", "github_pm4py.xmlocel", "Github", writer, 0.9, 
+//				CaseNotionStrategy.PE_CONNECTED, PlaceCompletion.FEWVARIABLE, ExternalObjectFlow.START_END);
+//		// P2P: tau 0.9, CC
+//		runTotalSingleTest("Evaluation_P2P", "p2p.jsonocel", "P2P", writer, 0.9, 
+//				CaseNotionStrategy.PE_CONNECTED, PlaceCompletion.FEWVARIABLE, ExternalObjectFlow.START_END);
+//		// Recruiting: tau 0.9, CC
+//		runTotalSingleTest("Evaluation_Recruiting", "recruiting.xmlocel", "Recruiting", writer, 0.9, 
+//				CaseNotionStrategy.PE_CONNECTED, PlaceCompletion.FEWVARIABLE, ExternalObjectFlow.START_END);
+//		// Transfer: tau 0.1, CC
+//		runTotalSingleTest("Evaluation_TransferOrder", "transfer_order.jsonocel", "Transfer", writer, 0.1, 
+//				CaseNotionStrategy.PE_CONNECTED, PlaceCompletion.FEWVARIABLE, ExternalObjectFlow.START_END);
+//		// O2C: tau 0.9, CC
+//		runTotalSingleTest("Evaluation_O2C", "o2c.jsonocel", "O2C", writer, 0.9, 
+//				CaseNotionStrategy.PE_CONNECTED, PlaceCompletion.FEWVARIABLE, ExternalObjectFlow.START_END);
+		// BPIC17: tau 0.9, CC
+		runTotalSingleTest("Evaluation_BPIC17", "BPIC17.jsonocel", "BPIC17", writer, 0.9, 
 				CaseNotionStrategy.PE_CONNECTED, PlaceCompletion.FEWVARIABLE, ExternalObjectFlow.START_END);
 		} finally {
 		writer.close();
