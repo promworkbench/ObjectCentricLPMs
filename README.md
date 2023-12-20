@@ -6,7 +6,7 @@ OCLMPs = object-centric local process models
 
 ## Initial thesis description
 
-Discovery of Object-Centric Local Process Models (M.Sc.)
+Discovery of Object-Centric Local Process Models (M.Sc.)\
 Supervisor: Viki Peeva (peeva@pads.rwth-aachen.de)
 
 Process discovery is one of the fundamental tasks in process mining, where one tries to discover a model that explains all traces in the event log from start to end. However, given that the event log contains highly unstructured behavior, process discovery algorithms struggle to model the behavior in a structured and well-understandable process model. There are different strategies to handle these situations, one of which is local process model discovery. In contrast to process discovery, local process model discovery aims to find a set of smaller models that describe what happens locally in the event log. Giving insights for event logs where traditional process discovery techniques failed was the primary purpose of local process models. However, with time, the importance and application of local process models grew and became multi-fold. Currently they are used for event abstraction, trace clustering, outcome prediction, etc.
