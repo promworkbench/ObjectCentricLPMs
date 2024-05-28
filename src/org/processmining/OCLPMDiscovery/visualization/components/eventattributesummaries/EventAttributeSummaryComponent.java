@@ -1,10 +1,10 @@
 package org.processmining.OCLPMDiscovery.visualization.components.eventattributesummaries;
 
-import org.processmining.placebasedlpmdiscovery.utilityandcontext.eventattributesummary.EventAttributeSummary;
+import org.processmining.placebasedlpmdiscovery.utilityandcontext.eventattributesummary.AttributeSummary;
 
 import javax.swing.*;
 
-public abstract class EventAttributeSummaryComponent<T extends EventAttributeSummary<?, ?>> extends JPanel {
+public abstract class EventAttributeSummaryComponent<T extends AttributeSummary<?, ?>> extends JPanel {
 
     protected T model;
 

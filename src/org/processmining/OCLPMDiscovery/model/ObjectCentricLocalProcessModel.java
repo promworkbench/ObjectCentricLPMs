@@ -169,7 +169,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 
     private void storeEvaluations(LocalProcessModel lpm) {
     	// store evaluation score from the lpm into the evaluation map
-        Collection<LPMEvaluationResult> results = lpm.getAdditionalInfo().getEvalResults().values();
+        Collection<LPMEvaluationResult> results = lpm.getAdditionalInfo().getEvaluationResults().values();
         for (LPMEvaluationResult result : results) {
         	
         	String name = result.getId().name();
@@ -730,9 +730,7 @@ public class ObjectCentricLocalProcessModel implements Serializable, TextDescrib
 	 * @param startingActivities
 	 * @param endingActivities
 	 * @param selectedEOF 
-	 * @param currentPlaceCompletion 
-	 * @param typeMap 
-	 * @param variableArcActivities 
+	 * @param currentPlaceCompletion
 	 */
 	public void addExternalObjectFlowStartEnd(
 			Map<String, Set<String>> startingActivities, 

@@ -8,12 +8,10 @@
 	         <url name="prom-svn" checkmodified="true">
 	            <ivy pattern="https://github.com/promworkbench/Releases/raw/main/Packages/[module]/[revision]/ivy.xml" />
 	            <artifact pattern="https://github.com/promworkbench/Releases/raw/main/Packages/[module]/[revision]/[artifact]-[revision].[ext]" />
-	            <artifact pattern="https://github.com/promworkbench/Releases/raw/main/Packages/[module]/[revision]/[artifact]_[revision].[ext]" />
 	        </url>
 	        <url name="prom-libs">
 	            <ivy pattern="https://github.com/promworkbench/Releases/raw/main/Libraries/[module]/[revision]/ivy.xml" />
 	            <artifact pattern="https://github.com/promworkbench/Releases/raw/main/Libraries/[module]/[revision]/[artifact]-[revision].[ext]" />
-	            <artifact pattern="https://github.com/promworkbench/Releases/raw/main/Libraries/[module]/[revision]/[artifact]_[revision].[ext]" />
 	        </url>
 	        <ibiblio name="maven2" m2compatible="true" root="https://repo1.maven.org/maven2/"/>
 	        <chain name="default" returnFirst="true">  

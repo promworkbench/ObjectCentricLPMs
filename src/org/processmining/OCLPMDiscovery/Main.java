@@ -42,6 +42,7 @@ import org.processmining.ocel.ocelobjects.OcelEvent;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
 import org.processmining.ocel.ocelobjects.OcelObject;
 import org.processmining.placebasedlpmdiscovery.main.LPMDiscoveryBuilder;
+import org.processmining.placebasedlpmdiscovery.main.StandardLPMDiscoveryResult;
 import org.processmining.placebasedlpmdiscovery.model.Transition;
 import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
 import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableList;
@@ -448,7 +449,7 @@ public class Main {
 				System.out.println("Starting LPM discovery using connected components as case notion.");
 				lpmResults = runLPMPlugin(log, placeSetTrimmed, parameters);
 				assert(lpmResults[0] instanceof LPMResult);
-				lpmResult = (LPMResult) lpmResults[0];
+				lpmResult = new LPMResult((StandardLPMDiscoveryResult) lpmResults[0]);
 				lpmsTagged.add(lpmResult, ot);
 				if (parameters.isComputeExtraStats()) {
 					HashMap<String,String> tmpMap = FlatLogProcessing.computeCaseStatistics(log);
@@ -825,14 +826,16 @@ public class Main {
 		
 		if (parameters.getVariableArcIdentification() == VariableArcIdentification.PER_LPM) {
 			messageNormal("Starting LPM discovery and variable arc identification.");
-			builder.registerLPMWindowEvaluator(CustomLPMEvaluatorIds.VariableArcIdentificator.name(),new VariableArcIdentificator(parameters.getObjectTypesAll()));
+			builder.registerLPMWindowCollector(CustomLPMEvaluatorIds.VariableArcIdentificator.name(),
+					new VariableArcIdentificator(parameters.getObjectTypesAll()));
 		}
 		else {
 			messageNormal("Starting LPM discovery.");
 		}
 		
 		// store object types replayed by transitions
-		builder.registerLPMWindowEvaluator(CustomLPMEvaluatorIds.ObjectTypesPerTransitionIdentificator.name(),new ObjectTypesPerTransitionIdentificator(parameters.getObjectTypesAll()));
+		builder.registerLPMWindowCollector(CustomLPMEvaluatorIds.ObjectTypesPerTransitionIdentificator.name(),
+				new ObjectTypesPerTransitionIdentificator(parameters.getObjectTypesAll()));
 		
 		lpmResults = new Object[] {builder.build().run()};
 		updateProgress("Finished LPM discovery.");

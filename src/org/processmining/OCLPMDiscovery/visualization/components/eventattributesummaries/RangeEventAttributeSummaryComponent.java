@@ -1,8 +1,7 @@
 package org.processmining.OCLPMDiscovery.visualization.components.eventattributesummaries;
 
 import org.processmining.framework.util.ui.widgets.ProMTextField;
-import org.processmining.placebasedlpmdiscovery.utilityandcontext.eventattributesummary.DiscreteEventAttributeSummary;
-import org.processmining.placebasedlpmdiscovery.utilityandcontext.eventattributesummary.RangeEventAttributeSummary;
+import org.processmining.placebasedlpmdiscovery.utilityandcontext.eventattributesummary.RangeAttributeSummary;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,9 +9,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.text.ParseException;
 
-public class RangeEventAttributeSummaryComponent extends EventAttributeSummaryComponent<RangeEventAttributeSummary<?,?>> {
+public class RangeEventAttributeSummaryComponent extends EventAttributeSummaryComponent<RangeAttributeSummary<?, ?>> {
 
-    public RangeEventAttributeSummaryComponent(RangeEventAttributeSummary<?,?> model) {
+    public RangeEventAttributeSummaryComponent(RangeAttributeSummary<?, ?> model) {
         super(model);
         this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         this.setBackground(new Color(60, 60, 60, 160));

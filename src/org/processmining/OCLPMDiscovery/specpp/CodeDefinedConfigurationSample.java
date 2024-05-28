@@ -8,25 +8,12 @@ import org.processmining.specpp.componenting.evaluation.EvaluatorConfiguration;
 import org.processmining.specpp.composition.BasePlaceComposition;
 import org.processmining.specpp.composition.ConstrainingPlaceCollection;
 import org.processmining.specpp.composition.StatefulPlaceComposition;
+import org.processmining.specpp.composition.composers.AbsoluteFitnessFilter;
 import org.processmining.specpp.composition.composers.PlaceAccepter;
-import org.processmining.specpp.composition.composers.PlaceFitnessFilter;
 import org.processmining.specpp.composition.composers.UniwiredComposer;
-import org.processmining.specpp.config.ComponentConfig;
-import org.processmining.specpp.config.ComponentConfigImpl;
-import org.processmining.specpp.config.ConfigFactory;
-import org.processmining.specpp.config.DataExtractionParameters;
-import org.processmining.specpp.config.PreProcessingParameters;
-import org.processmining.specpp.config.SPECppConfigBundle;
-import org.processmining.specpp.config.components.Configurators;
-import org.processmining.specpp.config.components.HeuristicTreeConfiguration;
-import org.processmining.specpp.config.components.PostProcessingConfiguration;
-import org.processmining.specpp.config.components.ProposerComposerConfiguration;
-import org.processmining.specpp.config.components.SupervisionConfiguration;
-import org.processmining.specpp.config.parameters.DefaultParameters;
-import org.processmining.specpp.config.parameters.ExecutionParameters;
-import org.processmining.specpp.config.parameters.ParameterProvider;
-import org.processmining.specpp.config.parameters.PlaceGeneratorParameters;
-import org.processmining.specpp.config.parameters.SupervisionParameters;
+import org.processmining.specpp.config.*;
+import org.processmining.specpp.config.components.*;
+import org.processmining.specpp.config.parameters.*;
 import org.processmining.specpp.datastructures.petri.CollectionOfPlaces;
 import org.processmining.specpp.datastructures.petri.PetrinetVisualization;
 import org.processmining.specpp.datastructures.petri.Place;
@@ -37,7 +24,7 @@ import org.processmining.specpp.datastructures.tree.heuristic.TreeNodeScore;
 import org.processmining.specpp.datastructures.tree.nodegen.MonotonousPlaceGenerationLogic;
 import org.processmining.specpp.datastructures.tree.nodegen.PlaceNode;
 import org.processmining.specpp.datastructures.tree.nodegen.PlaceState;
-import org.processmining.specpp.evaluation.fitness.AbsolutelyNoFrillsFitnessEvaluator;
+import org.processmining.specpp.evaluation.fitness.BaselineFitnessEvaluator;
 import org.processmining.specpp.evaluation.heuristics.DirectlyFollowsHeuristic;
 import org.processmining.specpp.evaluation.heuristics.EventuallyFollowsTreeHeuristic;
 import org.processmining.specpp.evaluation.implicitness.LPBasedImplicitnessCalculator;
@@ -88,30 +75,30 @@ public class CodeDefinedConfigurationSample {
         // ** Evaluation ** //
 
         EvaluatorConfiguration.Configurator evConfig = Configurators.evaluators()
-                                                                    .addEvaluatorProvider(new AbsolutelyNoFrillsFitnessEvaluator.Builder())
-                                                                    .addEvaluatorProvider(new LPBasedImplicitnessCalculator.Builder())
-                                                                    .addEvaluatorProvider(new LogHistoryMaker.Builder());
+                .addEvaluatorProvider(new BaselineFitnessEvaluator.Builder())
+                .addEvaluatorProvider(new LPBasedImplicitnessCalculator.Builder())
+                .addEvaluatorProvider(new LogHistoryMaker.Builder());
         // delta adaptation function
         // evConfig.addEvaluatorProvider(new SigmoidDelta.Builder());
         // make heuristics available
         evConfig.addEvaluatorProvider(new DirectlyFollowsHeuristic.Builder());
 
         HeuristicTreeConfiguration.Configurator<Place, PlaceState, PlaceNode, TreeNodeScore> htConfig = Configurators.<Place, PlaceState, PlaceNode, TreeNodeScore>heuristicTree()
-                                                                                                                     .heuristicExpansion(HeuristicTreeExpansion::new)
-                                                                                                                     .childGenerationLogic(new MonotonousPlaceGenerationLogic.Builder())
-                                                                                                                     .tree(EnumeratingTree::new);
+                .heuristicExpansion(HeuristicTreeExpansion::new)
+                .childGenerationLogic(new MonotonousPlaceGenerationLogic.Builder())
+                .tree(EnumeratingTree::new);
         // tree node heuristic
         htConfig.heuristic(new EventuallyFollowsTreeHeuristic.Builder());
 
         // ** Proposal & Composition ** //
 
         ProposerComposerConfiguration.Configurator<Place, AdvancedComposition<Place>, CollectionOfPlaces> pcConfig = Configurators.<Place, AdvancedComposition<Place>, CollectionOfPlaces>proposerComposer()
-                                                                                                                                  .terminalComposition(StatefulPlaceComposition::new)
-                                                                                                                                  .recursiveCompositions(ConstrainingPlaceCollection::new)
-                                                                                                                                  .proposer(new ConstrainablePlaceProposer.Builder());
+                .terminalComposition(StatefulPlaceComposition::new)
+                .recursiveCompositions(ConstrainingPlaceCollection::new)
+                .proposer(new ConstrainablePlaceProposer.Builder());
 
         pcConfig.terminalComposer(PlaceAccepter::new)
-                .recursiveComposers(PlaceFitnessFilter::new, UniwiredComposer::new);
+                .recursiveComposers(AbsoluteFitnessFilter::new, UniwiredComposer::new);
         // without concurrent implicit place removal
         // pcConfig.terminalComposer(PlaceAccepter::new);
         // pcConfig.composerChain(PlaceFitnessFilter::new, UniwiredComposer::new);
