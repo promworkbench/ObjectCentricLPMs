@@ -7,17 +7,19 @@ import java.util.Set;
 
 import javax.swing.DefaultListModel;
 
+import org.deckfour.xes.model.XLog;
 import org.processmining.OCLPMDiscovery.utils.OCELUtils;
 import org.processmining.hybridilpminer.parameters.XLogHybridILPMinerParametersImpl;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
+import org.processmining.placebasedlpmdiscovery.lpmdiscovery.algorithms.parameters.PlaceBasedLPMDiscoveryParameters;
 import org.processmining.placebasedlpmdiscovery.model.logs.EventLog;
-import org.processmining.placebasedlpmdiscovery.prom.plugins.mining.PlaceBasedLPMDiscoveryParameters;
+import org.processmining.placebasedlpmdiscovery.model.logs.activities.Activity;
 
-public class OCLPMDiscoveryParameters implements EventLog{
+public class OCLPMDiscoveryParameters implements EventLog {
 	private boolean computeExtraStats = false; // compute e.g., events per case median
 	
 	private OcelEventLog ocel;
-	private Set<String> activities;
+	private Set<Activity> activities;
 	private Set<String> objectTypesAll; // object types before enriching ocel with new case notion
 	private DefaultListModel<String> objectTypesList = new DefaultListModel<String>();
 	private Set<String> objectTypesPlaceNets; // object types for which the log is flattened and place nets are discovered
@@ -66,7 +68,7 @@ public class OCLPMDiscoveryParameters implements EventLog{
         }
         
         // setup LPM discovery
-        this.PBLPMDiscoveryParameters = new PlaceBasedLPMDiscoveryParameters(this); // null-init leads to problems, needs a log with all activities  
+        this.PBLPMDiscoveryParameters = new PlaceBasedLPMDiscoveryParameters(this); // null-init leads to problems, needs a log with all activities
         this.PBLPMDiscoveryParameters.setLpmCount(Integer.MAX_VALUE);
         this.PBLPMDiscoveryParameters.getPlaceChooserParameters().setPlaceLimit(1000);
 	}
@@ -311,11 +313,16 @@ public class OCLPMDiscoveryParameters implements EventLog{
 		PBLPMDiscoveryParameters = pBLPMDiscoveryParameters;
 	}
 
-	public Set<String> getActivities() {
+	public Set<Activity> getActivities() {
 		return activities;
 	}
 
-	public void setActivities(Set<String> activities) {
+	@Override
+	public XLog getOriginalLog() {
+		return null;
+	}
+
+	public void setActivities(Set<Activity> activities) {
 		this.activities = activities;
 	}
 

@@ -41,9 +41,15 @@ import org.processmining.ocel.flattening.Flattening;
 import org.processmining.ocel.ocelobjects.OcelEvent;
 import org.processmining.ocel.ocelobjects.OcelEventLog;
 import org.processmining.ocel.ocelobjects.OcelObject;
-import org.processmining.placebasedlpmdiscovery.main.LPMDiscoveryBuilder;
-import org.processmining.placebasedlpmdiscovery.main.StandardLPMDiscoveryResult;
+import org.processmining.placebasedlpmdiscovery.lpmbuilding.inputs.FPGrowthForPlacesLPMBuildingInput;
+import org.processmining.placebasedlpmdiscovery.lpmdiscovery.LPMDiscovery;
+import org.processmining.placebasedlpmdiscovery.lpmdiscovery.algbuilder.LPMDiscoveryAlgBuilder;
+import org.processmining.placebasedlpmdiscovery.lpmdiscovery.algorithms.LPMDiscoveryAlg;
+import org.processmining.placebasedlpmdiscovery.lpmdiscovery.algorithms.inputs.StandardLPMDiscoveryInput;
 import org.processmining.placebasedlpmdiscovery.model.Transition;
+import org.processmining.placebasedlpmdiscovery.model.discovery.StandardLPMDiscoveryResult;
+import org.processmining.placebasedlpmdiscovery.model.logs.EventLog;
+import org.processmining.placebasedlpmdiscovery.model.logs.XLogWrapper;
 import org.processmining.placebasedlpmdiscovery.model.serializable.LPMResult;
 import org.processmining.placebasedlpmdiscovery.model.serializable.SerializableList;
 
@@ -430,8 +436,9 @@ public class Main {
 					// discover LPMs (name of the currentType column needs concept:name, which the flattening does)
 					System.out.println("Starting LPM discovery using leading type "+newTypeLabel+" as case notion.");
 					lpmResults = runLPMPlugin(log, placeSetTrimmed, parameters);
-					assert(lpmResults[0] instanceof LPMResult);
-					lpmResult = (LPMResult) lpmResults[0];
+//					assert(lpmResults[0] instanceof LPMResult);
+					lpmResult = new LPMResult((StandardLPMDiscoveryResult) lpmResults[0]);
+//					lpmResult = (LPMResult) lpmResults[0];
 					lpmsTagged.add(lpmResult, currentType);
 					
 					updateProgress("Finished ocel enhancement using the \""+parameters.getCaseNotionStrategy().getName()+"\" strategy for type \""+currentType+"\".");
@@ -586,7 +593,7 @@ public class Main {
 					OcelEventLog filtered = ocel.cloneEmpty();
 					for (OcelEvent eve : ocel.events.values()) {
 						if (outputActivities.contains(eve.activity)) {
-							for (OcelObject object : eve.relatedObjects) {
+							for (OcelObject object : eve.relatedObjects.keySet()) {
 								if (	object.objectType.name.equals(type) // same type
 										&& inputObjects.contains(object.id)) { 
 									filtered.cloneEvent(eve);
@@ -602,7 +609,7 @@ public class Main {
 					// get all events of input activities with objects from the filtered output events
 					for (OcelEvent eve : ocel.events.values()) {
 						if (inputActivities.contains(eve.activity)) {
-							for (OcelObject object : eve.relatedObjects) {
+							for (OcelObject object : eve.relatedObjects.keySet()) {
 								if (	object.objectType.name.equals(type) // same type
 										&& outputObjects.contains(object.id)) { 
 									filtered.cloneEvent(eve);
@@ -818,11 +825,13 @@ public class Main {
 	
 	public static Object[] runLPMPlugin(XLog log, TaggedPlaceSet placeSetTrimmed, OCLPMDiscoveryParameters parameters) {
 		messageNormal("LPM discovery will start with "+placeSetTrimmed.size()+" unique place nets.");
-		
+
+		EventLog eventLog = new XLogWrapper(log);
 		Object[] lpmResults = new Object[] {};
-		
-		LPMDiscoveryBuilder builder = org.processmining.placebasedlpmdiscovery.Main
-				.createDefaultBuilder(log, placeSetTrimmed.asPlaceSet(), parameters.getPBLPMDiscoveryParameters());
+
+
+		LPMDiscoveryAlgBuilder builder = org.processmining.placebasedlpmdiscovery.Main
+				.createDefaultBuilder(log, parameters.getPBLPMDiscoveryParameters());
 		
 		if (parameters.getVariableArcIdentification() == VariableArcIdentification.PER_LPM) {
 			messageNormal("Starting LPM discovery and variable arc identification.");
@@ -836,8 +845,9 @@ public class Main {
 		// store object types replayed by transitions
 		builder.registerLPMWindowCollector(CustomLPMEvaluatorIds.ObjectTypesPerTransitionIdentificator.name(),
 				new ObjectTypesPerTransitionIdentificator(parameters.getObjectTypesAll()));
-		
-		lpmResults = new Object[] {builder.build().run()};
+		lpmResults = new Object[] {builder.build().run(new StandardLPMDiscoveryInput(eventLog,
+				new FPGrowthForPlacesLPMBuildingInput(eventLog, placeSetTrimmed.asPlaceSet().getPlaces().getPlaces())),
+				parameters.getPBLPMDiscoveryParameters())};
 		updateProgress("Finished LPM discovery.");
 		return lpmResults;
 	}

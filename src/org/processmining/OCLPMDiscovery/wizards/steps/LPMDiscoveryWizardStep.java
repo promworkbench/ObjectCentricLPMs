@@ -10,11 +10,12 @@ import org.processmining.OCLPMDiscovery.parameters.OCLPMDiscoveryParameters;
 import org.processmining.framework.util.ui.widgets.ProMComboCheckBox;
 import org.processmining.framework.util.ui.widgets.ProMTextField;
 import org.processmining.framework.util.ui.wizard.ProMWizardStep;
-import org.processmining.placebasedlpmdiscovery.prom.plugins.mining.PlaceBasedLPMDiscoveryParameters;
 
 import com.fluxicon.slickerbox.components.NiceIntegerSlider;
 import com.fluxicon.slickerbox.components.NiceSlider;
 import com.fluxicon.slickerbox.factory.SlickerFactory;
+import org.processmining.placebasedlpmdiscovery.lpmdiscovery.algorithms.parameters.PlaceBasedLPMDiscoveryParameters;
+import org.processmining.placebasedlpmdiscovery.model.logs.activities.Activity;
 
 // copy from placebasedlpmdiscovery wizard steps
 public class LPMDiscoveryWizardStep extends OCLPMPropertiesPanel implements ProMWizardStep<OCLPMDiscoveryParameters> {
@@ -168,7 +169,9 @@ public class LPMDiscoveryWizardStep extends OCLPMPropertiesPanel implements ProM
 //        filteringComponent = new ProMComboCheckBox(LPMFilterId.values(), true);
 //        addProperty("Filtering Strategies", filteringComponent);
 
-        activitiesComponent = new ProMComboCheckBox(parameters.getActivities().toArray(new String[0]), true);
+        activitiesComponent =
+                new ProMComboCheckBox(parameters.getActivities().stream().map(Activity::getName).toArray(),
+                        true);
         addProperty("Activity Selection", activitiesComponent);
     }
 

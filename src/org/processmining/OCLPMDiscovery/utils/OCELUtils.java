@@ -22,6 +22,9 @@ import org.processmining.ocel.ocelobjects.OcelEventLog;
 import org.processmining.ocel.ocelobjects.OcelObject;
 import org.processmining.ocel.ocelobjects.OcelObjectType;
 import org.processmining.ocel.utils.TypeFromValue;
+import org.processmining.placebasedlpmdiscovery.model.logs.activities.Activity;
+import org.processmining.placebasedlpmdiscovery.model.logs.activities.ActivityCache;
+import org.processmining.placebasedlpmdiscovery.model.logs.activities.SimpleActivity;
 
 public class OCELUtils {
 	
@@ -93,7 +96,7 @@ public class OCELUtils {
 		
 		// enter object id into every event
 		for (String eve : modifiedOcel.events.keySet()) {
-			modifiedOcel.events.get(eve).relatedObjectsIdentifiers.add(dummyObject.id);
+			modifiedOcel.events.get(eve).relatedObjectsIdentifiers.put(dummyObject.id, "default");
 		}
 		
 		// OcelEventLog.register does:
@@ -116,10 +119,10 @@ public class OCELUtils {
 		return modifiedOcel;
 	}
 	
-	public static Set<String> getActivities(OcelEventLog ocel) {
-		Set<String> activities = new HashSet<String>();
+	public static Set<Activity> getActivities(OcelEventLog ocel) {
+		Set<Activity> activities = new HashSet<>();
 		for (OcelEvent eve : ocel.events.values()) {
-			activities.add(eve.activity);
+			activities.add(ActivityCache.getInstance().getActivity(eve.activity));
 		}
 		return activities;
 	}
@@ -139,7 +142,7 @@ public class OCELUtils {
 		for (OcelEvent event : ocel.getEvents().values()) {
 			curAct = event.activity;
 			// count objects present in event
-			for (OcelObject object : event.relatedObjects) {
+			for (OcelObject object : event.relatedObjects.keySet()) {
 				curOT = object.objectType.name;
 				scoreCountingTmp.merge(curOT, 1, Integer::sum); // puts 1 if curOT not present, else adds 1 to it
 			}
@@ -206,7 +209,7 @@ public class OCELUtils {
 				}
 				
 				// Count objects
-				for (OcelObject object : ocelEvent.relatedObjects) {
+				for (OcelObject object : ocelEvent.relatedObjects.keySet()) {
 					if (object == null) continue;
 					if (object.objectType.name.equals(caseNotion)) {
 						continue;

@@ -1,12 +1,9 @@
 package org.processmining.OCLPMDiscovery.utils;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections.keyvalue.DefaultMapEntry;
 import org.jgrapht.Graph;
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.alg.ConnectivityInspector;
@@ -62,12 +59,12 @@ public class ProcessExecutions {
 		// assign each event an object corresponding to the connected component it is in
 		String currentComponent;
 		for (OcelEvent event : ocel.getEvents().values()) {
-			for (OcelObject o : event.relatedObjects) {
+			for (OcelObject o : event.relatedObjects.keySet()) {
 				if (o == null) continue;
 				// get one of the considered objects
 				if (objectTypesCaseNotion.contains(o.objectType.name)) {
 					currentComponent = mapComponent.get(o.id);
-					event.relatedObjectsIdentifiers.add(currentComponent);
+					event.relatedObjectsIdentifiers.put(currentComponent, "default");
 					break;
 				}
 			}
@@ -108,11 +105,11 @@ public class ProcessExecutions {
 		
 		// breadth first search on each object 
 		// to build a hashmap mapping each object to its closest objects of type leading type
-		HashMap<String,Set<String>> map = new HashMap<>(); // maps object identifier to
+		HashMap<String,Map<String, String>> map = new HashMap<>(); // maps object identifier to
 		for (String currentObject : graph.vertexSet()) {
 			// current object already leading type?
 			if (ocel.getObjects().get(currentObject).objectType.name.equals(leadingType)) {
-				map.put(currentObject, Collections.singleton(idMap.get(currentObject)));
+				map.put(currentObject, Collections.singletonMap(idMap.get(currentObject), "default"));
 			}
 			else {
 				//! bfIterator.getDepth(v) isn't supported in the JGraphT version which ProM uses...
@@ -120,7 +117,7 @@ public class ProcessExecutions {
 				String v;
 				boolean foundOne = false; // set true if a vertex of leading type has been found
 				int foundAt = 0; // level where it has been found
-				HashSet<String> foundSet = new HashSet<String>();
+				Map<String, String> foundSet = new HashMap<>();
 				while (bfIterator.hasNext()) {
 					v = bfIterator.next();
 					// there might be more vertices with the same distance
@@ -132,7 +129,7 @@ public class ProcessExecutions {
 							foundOne = true;
 							foundAt = bfIterator.getDepth(v);							
 						}
-						foundSet.add(idMap.get(v));
+						foundSet.put(idMap.get(v), "default");
 					}
 				}
 				map.put(currentObject,foundSet);
@@ -141,22 +138,23 @@ public class ProcessExecutions {
 		
 		// assign each event the objects which result from putting all the objects 
 		// from all the types of the event into the hashmap
-		HashSet<String> tmpSet = new HashSet<String>();
+		Map<String, String> tmpMap = new HashMap<>();
 		int numEventsAfter = 0;
 		for (OcelEvent event : ocel.getEvents().values()) {
 			// for each event have to check each object of each type
-			for (OcelObject obj : event.relatedObjects) {
+			for (OcelObject obj : event.relatedObjects.keySet()) {
 				if (!objectTypesCaseNotion.contains(obj.objectType.name)) { // object is of ignored type
 					continue;
 				}
-				Set<String> mapGet = map.get(obj.id);
+				Map<String, String> mapGet = map.get(obj.id);
 				if (mapGet != null) {
-					tmpSet.addAll(map.get(obj.id)); // doesn't work without tmpSet because of concurrent modifications						
+					tmpMap.putAll(map.get(obj.id)); // doesn't work without tmpSet because of concurrent modifications
+
 				}
 			}
-			event.relatedObjectsIdentifiers.addAll(tmpSet);
-			numEventsAfter += tmpSet.size();
-			tmpSet.clear();
+			event.relatedObjectsIdentifiers.putAll(tmpMap);
+			numEventsAfter += tmpMap.size();
+			tmpMap.clear();
 		}
 		
 		ocel.register();
@@ -233,7 +231,7 @@ public class ProcessExecutions {
 					// object of this type already found but this has the same distance
 					else if (foundMap.containsKey(vType)) {
 						if (map.containsKey(v)) { // object is also closest to another of leading type
-							HashSet<String> tmpSet = new HashSet<String>(); 
+							HashSet<String> tmpSet = new HashSet<String>();
 							tmpSet.addAll(map.get(v));
 							tmpSet.add(idMap.get(currentObject));
 							map.put(v,tmpSet);
@@ -268,16 +266,16 @@ public class ProcessExecutions {
 		int numEventsAfter = 0;
 		for (OcelEvent event : ocel.getEvents().values()) {
 			// for each event have to check each object of each type
-			for (OcelObject obj : event.relatedObjects) {
+			for (OcelObject obj : event.relatedObjects.keySet()) {
 				if (!objectTypesCaseNotion.contains(obj.objectType.name)) { // object is of ignored type
 					continue;
 				}
 				Set<String> mapGet = map.get(obj.id);
 				if (mapGet != null) {
-					tmpSet.addAll(map.get(obj.id)); // doesn't work without tmpSet because of concurrent modifications						
+					tmpSet.addAll(map.get(obj.id)); // doesn't work without tmpSet because of concurrent modifications
 				}
 			}
-			event.relatedObjectsIdentifiers.addAll(tmpSet); 
+			event.relatedObjectsIdentifiers.putAll(tmpSet.stream().collect(Collectors.toMap(x -> x, x -> "default")));
 			numEventsAfter += tmpSet.size();
 			tmpSet.clear();
 		}
@@ -394,7 +392,7 @@ public class ProcessExecutions {
 		for (OcelEvent event : ocel.getEvents().values()) {
 			discoveredLeadingObject = false;
 			// for each event have to check each object of each type
-			for (OcelObject obj : event.relatedObjects) {
+			for (OcelObject obj : event.relatedObjects.keySet()) {
 				if (!objectTypesCaseNotion.contains(obj.objectType.name)) { // object is of ignored type
 					continue;
 				}
@@ -414,7 +412,7 @@ public class ProcessExecutions {
 					}
 				}
 			}
-			event.relatedObjectsIdentifiers.addAll(tmpSet); 
+			event.relatedObjectsIdentifiers.putAll(tmpSet.stream().collect(Collectors.toMap(x -> x, x -> "default")));
 			numEventsAfter += tmpSet.size();
 			tmpSet.clear();
 		}
@@ -490,7 +488,7 @@ public class ProcessExecutions {
 		for (OcelEvent event : ocel.getEvents().values()) {
 			discoveredLeadingObject = false;
 			// for each event have to check each object of each type
-			for (OcelObject obj : event.relatedObjects) {
+			for (OcelObject obj : event.relatedObjects.keySet()) {
 				if (!objectTypesCaseNotion.contains(obj.objectType.name)) { // object is of ignored type
 					continue;
 				}
@@ -510,7 +508,7 @@ public class ProcessExecutions {
 					}
 				}
 			}
-			event.relatedObjectsIdentifiers.addAll(tmpSet);
+			event.relatedObjectsIdentifiers.putAll(tmpSet.stream().collect(Collectors.toMap(x -> x, x -> "default")));
 			numEventsAfter += tmpSet.size();
 			tmpSet.clear();
 		}
@@ -630,7 +628,7 @@ public class ProcessExecutions {
 		for (OcelEvent event : ocel.getEvents().values()) {
 			// construct map which maps each object type to the process executions of all the objects of that type occurring in this event
 			typeToPEs.clear();
-			for (OcelObject obj : event.relatedObjects) {
+			for (OcelObject obj : event.relatedObjects.keySet()) {
 				if (!objectTypesCaseNotion.contains(obj.objectType.name)) { // object is of ignored type
 					continue;
 				}
@@ -668,7 +666,7 @@ public class ProcessExecutions {
 				tmpSet.addAll((Set<String>)PeArray[indexMinTmpSet]);
 			}
 			
-			event.relatedObjectsIdentifiers.addAll(tmpSet); 
+			event.relatedObjectsIdentifiers.putAll(tmpSet.stream().collect(Collectors.toMap(x -> x, x -> "default")));
 			numEventsAfter += tmpSet.size();
 			tmpSet.clear();
 		}
@@ -756,7 +754,7 @@ public class ProcessExecutions {
 		for (OcelEvent event : ocel.getEvents().values()) {
 			// construct map which maps each object type to the process executions of all the objects of that type occurring in this event
 			typeToPEs.clear();
-			for (OcelObject obj : event.relatedObjects) {
+			for (OcelObject obj : event.relatedObjects.keySet()) {
 				if (!objectTypesCaseNotion.contains(obj.objectType.name)) { // object is of ignored type
 					continue;
 				}
@@ -794,7 +792,7 @@ public class ProcessExecutions {
 				tmpSet.addAll((Set<String>)PeArray[indexMinTmpSet]);
 			}
 			
-			event.relatedObjectsIdentifiers.addAll(tmpSet); 
+			event.relatedObjectsIdentifiers.putAll(tmpSet.stream().collect(Collectors.toMap(x -> x, x -> "default")));
 			numEventsAfter += tmpSet.size();
 			tmpSet.clear();
 		}
@@ -823,12 +821,12 @@ public class ProcessExecutions {
 		}
 		
 		for (OcelEvent event : ocel.getEvents().values()) {
-			for (OcelObject o1 : event.relatedObjects) {
+			for (OcelObject o1 : event.relatedObjects.keySet()) {
 				// check if type should be ignored
 				if (!parameters.getObjectTypesCaseNotion().contains(o1.objectType.name)) {
 					continue;
 				}
-				for (OcelObject o2 : event.relatedObjects) {
+				for (OcelObject o2 : event.relatedObjects.keySet()) {
 					// check if type should be ignored
 					if (!parameters.getObjectTypesCaseNotion().contains(o2.objectType.name)) {
 						continue;
